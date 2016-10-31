@@ -8,7 +8,7 @@
     <link type="text/css" href="[% c.uri_for('/css/jquery.multiselect.css') %]" rel="stylesheet" />
     <link type="text/css" href="[% c.uri_for('/css/style.css') %]?v=[% vstr %]" rel="stylesheet" />
 [% IF applicationstyle -%]
-	<link type="text/css" href="[% applicationstyle %]?v=[% vstr %]" rel="stylesheet" />
+	  <link type="text/css" href="[% applicationstyle %]?v=[% vstr %]" rel="stylesheet" />
 [% END -%]
     <script type="text/javascript" src="[% c.uri_for('/js/common.js') %]"></script>
     <script type="text/javascript" src="[% c.uri_for('/js/path-data-polyfill.js') %]"></script>

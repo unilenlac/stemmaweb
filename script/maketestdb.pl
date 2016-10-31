@@ -23,22 +23,22 @@ if( -l "$DBDIR/$DBNAME" ) {
 	unlink( "$DBDIR/$DBNAME" );
 } elsif( -e "$DBDIR/$DBNAME" ) {
 	unlink( "$DBDIR/$DBNAME.bak" ) if -f "$DBDIR/$DBNAME.bak";
-	rename( "$DBDIR/$DBNAME", "$DBDIR/$DBNAME.bak" ) 
+	rename( "$DBDIR/$DBNAME", "$DBDIR/$DBNAME.bak" )
 		or die "Could not rename existing $DBNAME";
-} 
+}
 # Set up the test directory
 symlink( "$DBDIR/$DBNAME.$DBEXT", "$DBDIR/$DBNAME" ) or die "Could not set up testing db symlink";
 
 my $dir = Text::Tradition::Directory->new(
 	dsn => "dbi:SQLite:dbname=$DBDIR/$DBNAME",
-	extra_args => { create => 1 } 
+	extra_args => { create => 1 }
 	);
 my $scope = $dir->new_scope();
 say "Created test database";
 
 # Create users
 my $user = $dir->add_user({ username => 'user@example.org', password => 'UserPass' });
-my $admin = $dir->add_user({ username => 'admin@example.org', 
+my $admin = $dir->add_user({ username => 'admin@example.org',
 	password => 'AdminPass', role => 'admin' });
 my $openid_user = $dir->create_user({
         url      => 'https://www.google.com/accounts/o8/id?id=AItOawlFTlpuHGcI67tqahtw7xOod9VNWffB-Qg',
@@ -58,7 +58,7 @@ $dir->store( $user );
 $dir->store( $openid_user );
 say "Created test user tradition";
 
-my $t2 = Text::Tradition->new( input => 'Tabular', sep_char => ',', 
+my $t2 = Text::Tradition->new( input => 'Tabular', sep_char => ',',
 	file => 't/data/florilegium.csv', language => 'Greek' );
 $t2->add_stemma( dotfile => 't/data/florilegium.dot' );
 die "Failed to create test tradition #2" unless $t2;
@@ -80,4 +80,3 @@ $dir->store( $t5 );
 $dir->store( $user );
 
 say "Created test public traditions";
-
