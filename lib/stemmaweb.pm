@@ -95,29 +95,29 @@ __PACKAGE__->config(
                 realm      => 'default',
             },
         },
-        openid => {
-            credential => {
-                class      => 'OpenID',
-                extensions => [
-                    'http://openid.net/srv/ax/1.0' => {
-                        ns           => 'ax',
-                        uri          => 'http://openid.net/srv/ax/1.0',
-                        mode         => 'fetch_request',
-                        required     => 'email',
-                        'type.email' => 'http://axschema.org/contact/email',
-
-                        # type        => {
-                        #     email => 'http://axschema.org/contact/email'
-                        # }
-                    }
-                ],
-            },
-            store => {
-                class      => 'Neo4p',
-                model_name => 'Directory',
-            },
-            auto_create_user => 1,
-        },
+        # openid => {
+        #     credential => {
+        #         class      => 'OpenID',
+        #         extensions => [
+        #             'http://openid.net/srv/ax/1.0' => {
+        #                 ns           => 'ax',
+        #                 uri          => 'http://openid.net/srv/ax/1.0',
+        #                 mode         => 'fetch_request',
+        #                 required     => 'email',
+        #                 'type.email' => 'http://axschema.org/contact/email',
+        #
+        #                 # type        => {
+        #                 #     email => 'http://axschema.org/contact/email'
+        #                 # }
+        #             }
+        #         ],
+        #     },
+        #     store => {
+        #         class      => 'Neo4p',
+        #         model_name => 'Directory',
+        #     },
+        #     auto_create_user => 1,
+        # },
         google => {
             credential => {
                 class => '+stemmaweb::Authentication::Credential::Google',
