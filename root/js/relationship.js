@@ -604,6 +604,30 @@ function svgEnlargementLoaded() {
       $('#loading_overlay').hide();
     });
   });
+
+  // VS: add marker for relation arrow as last child of graph_svg
+  // markerStr = '<marker id="triangle" markerUnits="strokeWidth" markerWidth="4" markerHeight="3" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" /></marker>';
+  // graph_svg.append(markerStr); // problem: lowercase attribute names (viewBox, refX, refY). Solution: use createElementNS
+  // (for each color)
+  $.each(relationship_types, function(index, typedef) {
+    var rColor = relation_manager.relation_colors[index];
+    var markerElemCS = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    markerElemCS.setAttribute('id', 'triangle' + rColor.substr(1));
+    markerElemCS.setAttribute('markerUnits', 'strokeWidth');
+    markerElemCS.setAttribute('viewBox', '0 0 10 10');
+    markerElemCS.setAttribute('refX', '0');
+    markerElemCS.setAttribute('refY', '5');
+    markerElemCS.setAttribute('fill', rColor);
+    markerElemCS.setAttribute('stroke', rColor);
+    markerElemCS.setAttribute('opacity', '0.8');
+    markerElemCS.setAttribute('markerWidth', '4');
+    markerElemCS.setAttribute('markerHeight', '3');
+    markerElemCS.setAttribute('orient', 'auto');
+    var markerPathElemCS = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    markerPathElemCS.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+    markerElemCS.appendChild(markerPathElemCS);
+    svg_root.append(markerElemCS);
+  });
 }
 
 // JMB: d3 zoom function
@@ -1248,6 +1272,7 @@ function draw_relation(source_id, target_id, opts) {
   var rx = parseInt(source_ellipse.attr('rx'));
   var sy = parseInt(source_ellipse.attr('cy'));
   var ex = parseInt(target_ellipse.attr('cx'));
+  var trx = parseInt(target_ellipse.attr('rx'));
   var ey = parseInt(target_ellipse.attr('cy'));
   var relation = svg.group($("#svgenlargement svg g"), {
     'class': cssclass,
@@ -1255,13 +1280,15 @@ function draw_relation(source_id, target_id, opts) {
   });
   svg.title(relation, source_id + '->' + target_id);
   var stroke_width = opts.emphasis === "yes" ? 6 : opts.emphasis === "maybe" ? 4 : 2;
-  svg.path(relation, path.move(sx, sy).curveC(sx + (2 * rx), sy, ex + (2 * rx), ey, ex, ey), {
+  svg.path(relation, path.move(sx + rx, sy).curveC(sx + 2*rx, sy, ex + 2*trx, ey, ex + trx + 15, ey), {
     fill: 'none',
     stroke: opts.color,
-    strokeWidth: stroke_width
+    strokeOpacity: 0.8,
+    strokeWidth: stroke_width,
+    'marker-end': 'url(#triangle' + opts.color.substr(1) + ')'
   });
   var relation_element = $('#svgenlargement .relation').filter(':last');
-  relation_element.insertBefore($('#svgenlargement g g').filter(':first'));
+  relation_element.insertAfter($('#svgenlargement g g').filter(':last')); // at the end, to have it drawn last, to see the arrow
   return relation_element;
 }
 
