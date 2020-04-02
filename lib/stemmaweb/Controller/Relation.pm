@@ -99,16 +99,48 @@ sub main :Chained('section') :PathPart('') :Args(0) {
     # Set some defaults for backwards compatibility
     my $reltypeinfo = [
         {
-            name => 'polarisation',
+            name => 'orthographic',
             description =>
-            'Primary->secondary reading (directed relationship).'
+              'These are the same reading, neither unusually spelled.'
+        },
+        {
+            name        => 'punctuation',
+            description => 'These are the same reading apart from punctuation.'
+        },
+        {
+            name        => 'spelling',
+            description => 'These are the same reading, spelled differently.'
+        },
+        {
+            name => 'grammatical',
+            description =>
+'These readings share a root (lemma), but have different parts of speech (morphologies).'
+        },
+        {
+            name => 'lexical',
+            description =>
+'These readings share a part of speech (morphology), but have different roots (lemmata).'
+        },
+        {
+            name => 'uncertain',
+            description =>
+'These readings are related, but a clear category cannot be assigned.'
+        },
+        {
+            name => 'other',
+            description =>
+'These readings are related in a way not covered by the existing types.'
         },
         {
             name => 'transposition',
             description =>
-            'This is the same (or nearly the same) reading in a different location.'
+'This is the same (or nearly the same) reading in a different location.'
         },
-
+        {
+            name => 'repetition',
+            description =>
+              'This is a reading that was repeated in one or more witnesses.'
+        },
     ];
     # Add / override the types associated with this tradition
     my $textid = $c->stash->{textid};
