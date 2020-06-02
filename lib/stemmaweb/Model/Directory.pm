@@ -84,6 +84,7 @@ sub tradition_as_svg {
       ? sprintf("/tradition/$textid/section/%s/dot", $opts->{'section'})
       : "/tradition/$textid/dot";
     $location .= '?show_normal=true';
+    $location .= '&expand_sigla=true';
     $location .= '&include_relations=true' if $opts->{'include_relations'};
     $location .= '&normalise=' . $opts->{'normalise'} if $opts->{'normalise'};
     my $dotstr = $self->ajax('get', $location);
