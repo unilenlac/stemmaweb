@@ -2977,6 +2977,28 @@ function loadSVG(normalised) {
     // Reload the SVG
     $('#svgenlargement').empty().append(svgData.documentElement)
     svgEnlargementLoaded();
+    $('#svgenlargement .edge').each(function(){
+        // Sigils
+        var sigilText = $(this).children('text').text();
+        // Edge label
+        var edgeText = $(this).children('title').text();
+        // Source and target text
+        var source_node_id = edgeText.substring(0, edgeText.indexOf("->"));
+        var target_node_id = edgeText.substring(edgeText.indexOf("->") + 2);
+        var sourceText = "";
+        var targetText = "";
+
+        var node = $('#svgenlargement .node title:contains(' + source_node_id + ')');
+        if ( node && node.siblings('text') ) {
+            sourceText = node.siblings('text').first().text();
+        }
+        var node = $('#svgenlargement .node title:contains(' + target_node_id + ')');
+        if ( node && node.siblings('text') ) {
+            targetText = node.siblings('text').first().text();
+        }
+        
+        $(this).children('title').text(sigilText + ":\n" + edgeText + "\n\n" + sourceText + "\n->\n" + targetText);
+    });
   });
 }
 
