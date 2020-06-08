@@ -43,7 +43,7 @@
   </div>
   <div id="topbanner">
     <h1>Relationship mapper</h1>
-    <h2 id="text_title">[% section.name %]</h2>
+    <h2 id="text_title">[% text_title %]</h2>
     <div id="segmentation">
       <span class="section">
         <select id="section_select" name="section_select" onchange="window.location.href=this.value">
