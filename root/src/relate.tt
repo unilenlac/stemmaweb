@@ -75,7 +75,7 @@
       <div id="loading_message"><span>Loading, please wait...</span></div>
     </div>
     <div id="dialog_overlay"></div>
-    <div id="enlargement" style="" title="Test title">
+    <div id="enlargement" style="">
       <div id="svgenlargement" class="fillPage"></div>
     </div>
   </div>
