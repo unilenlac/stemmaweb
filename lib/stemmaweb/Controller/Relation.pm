@@ -212,7 +212,7 @@ Returns the help window HTML.
 
 =cut
 
-sub help :Local :Args(1) {
+sub help :Local :Args(0) {
     my ($self, $c, $lang) = @_;
     $c->stash->{'template'} = 'relatehelp.tt';
 }

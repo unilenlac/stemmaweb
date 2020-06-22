@@ -77,7 +77,7 @@
     <img src="[% c.uri_for( '/images/08_merged_reloaded.png' ) %]">
 
     <!--
-[% IF language != 'NONE' %-]
+[% IF language != 'NONE' %]
    <h3>Adding [% language %] morphological information to readings</h3>
 
    <p>It is also possible to add morphological information to the readings in this text (that is, lemma and morphological tagging).  Double click on any reading to bring up the morphology info.  The options therein are:</p>
