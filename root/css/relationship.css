@@ -257,12 +257,14 @@ span.apimore {
 
 #witness_list_container {
   position: absolute;
-  top: 126.5px;
+  top: 126px;
   left: 95%;
+  bottom: 16.5px;
   width: 4%;
   border: 2px solid #B0C6F7;
   background-color: #F2F5F7;
   font-size: 80%;
+  overflow-y: auto;
 }
 
 #witness_list_container ul {
