@@ -76,9 +76,13 @@ span.apimore {
   max-width: 500px;
 }
 
+#segmentation, #topbanner {
+   white-space: nowrap;
+}
+
 #enlargement_container {
   height: 504px;
-  width: 90%;
+  width: 95%;
   margin-top: 5px;
   border: 2px solid #B0C6F7;
   background: #fff;
@@ -207,8 +211,8 @@ span.apimore {
 
 #keymap {
   position: absolute;
-  left: 90%;
-  top: 127px;
+  left: 30px;
+  top: 200px;
   border: 2px solid #B0C6F7;
   background: #fff;
   background: url("cupertino/images/ui-bg_highlight-hard_100_f2f5f7_1x100.png");
@@ -216,6 +220,7 @@ span.apimore {
   background-scroll: scroll;
   background-position: 50% top;
   background-color: #F2F5F7;
+  padding-bottom: 14px;
 }
 
 #keymap ul {
@@ -244,6 +249,25 @@ span.apimore {
 #keymap p {
   padding: 14px;
   font-size: 80%;
+}
+
+#edit_relations_button {
+  padding-left: 14px;
+}
+
+#witness_list_container {
+  position: absolute;
+  top: 126.5px;
+  left: 95%;
+  width: 4%;
+  border: 2px solid #B0C6F7;
+  background-color: #F2F5F7;
+  font-size: 80%;
+}
+
+#witness_list_container ul {
+  list-style-type:none;
+  padding-left:10px;
 }
 
 .draggable {
@@ -282,7 +306,7 @@ span.apimore {
 
 #keystroke_menu_button {
   position: absolute;
-  left: 40px;
+  left: 30px;
   top: 126px;
   height: 44px;
   width: 46px;
@@ -332,10 +356,10 @@ span.apimore {
 
 #slider {
   position: absolute;
-  left: 91%;
-  bottom: 10px;
-  -webkit-appearance: slider-vertical;
-  /* for Chrome */
+  left: 50%;
+  bottom: 50px;
+  /* -webkit-appearance: slider-vertical;
+  /* for Chrome */ */
 }
 
 .error {

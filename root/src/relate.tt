@@ -283,7 +283,6 @@
     <ul id="keymaplist">
       <li></li>
     </ul>
-    <br/>
     [% IF permission == 'full' %]
       <div class="button textcontrol editcontrol" id="edit_relations_button" onClick="$('#relation-edit-dialog').dialog('open')">
         <span>Edit</span>
@@ -292,4 +291,7 @@
   </div>
   <div id="keystroke_menu">
   </div>
+
+  <div id="witness_list_container"><span id="witness_list_content"></span></div>
+
 [% PROCESS footer.tt %]

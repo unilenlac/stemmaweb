@@ -751,6 +751,34 @@ sub witnesstext :Chained('section') :PathPart :Args(1) {
     $c->forward('View::JSON');
 }
 
+=head2 witnesses
+
+  GET relation/$textid/$sectionid/witnesses
+
+Returns the witnesses for this section.
+
+=cut
+
+sub witnesses :Chained('section') :PathPart :Args(0) {
+    my ($self, $c) = @_;
+    my $textid = $c->stash->{'textid'};
+    my $sectid = $c->stash->{'sectid'};
+    my $m = $c->model('Directory');
+    if ($c->request->method eq 'GET') {
+        try {
+            my $url = "/tradition/$textid/section/$sectid/witnesses";
+            my $resp = $m->ajax('get', $url);
+            $c->stash->{result} = $resp;
+        } catch (stemmaweb::Error $e) {
+            return json_error($c, $e->status, $e->message);
+        }
+    } else {
+        json_error($c, 405, "Use GET instead");
+    }
+    $c->forward('View::JSON');
+}
+
+
 =head2 copynormal
 
   POST relation/$textid/$sectionid/copynormal/$reading/$reltype

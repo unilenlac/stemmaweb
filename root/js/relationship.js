@@ -524,7 +524,6 @@ function svgEnlargementLoaded() {
     .attr("min", zoomBehavior.scaleExtent()[0])
     .attr("max", zoomBehavior.scaleExtent()[1])
     .attr("step", (zoomBehavior.scaleExtent()[1] - zoomBehavior.scaleExtent()[0]) / 100)
-    .attr("orient", "vertical") // for Firefox
     .on("input", function(d) {
       zoomBehavior.scaleTo(d3svg, d3.select(this).property("value"));
     });
@@ -603,6 +602,15 @@ function svgEnlargementLoaded() {
 
       $('#loading_overlay').hide();
     });
+  });
+
+  $.getJSON(getTextURL('witnesses'), function(witnessdata) {
+      var witnessList = "<ul>";
+      $.each(witnessdata, function(index, w) {
+          witnessList += "<li>" + w.sigil + "</li>";
+      });
+      witnessList += "</ul>";
+      $('#witness_list_content').html(witnessList);
   });
 
   // VS: add marker for relation arrow as last child of graph_svg
