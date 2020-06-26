@@ -455,6 +455,7 @@ function svgEnlargementLoaded() {
     // Show the update toggle button.
     $('#update_workspace_button').data('locked', false);
     $('#update_workspace_button').css('background-position', '0px 44px');
+    $('#update_workspace_button').attr('title', "Edit");
   }
   // Set our SVG root elements
   var svg_container = document.getElementById('svgenlargement');
@@ -2878,6 +2879,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       });
       $(this).data('locked', false);
       $(this).css('background-position', '0px 44px');
+      $(this).attr('title', "Edit");
     } else {
       d3svg.on(".zoom", null); // JMB turn zoom function off
       d3svg.call(dragBehavior);
@@ -2910,6 +2912,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             }*/
       });
       $(this).css('background-position', '0px 0px');
+      $(this).attr('title', "View");
       $(this).data('locked', true);
     }
     $(this).show();
