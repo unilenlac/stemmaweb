@@ -1198,6 +1198,13 @@ function relation_factory() {
       $('#delete_target_node_id').val(target_node_id);
       self.showinfo(relation);
     });
+    relation.children('path').mouseover(function(event) {
+      var edgeLabel = $(this).prev('title').text();
+      var relTitle = relation.data('type');
+      if ( ! /\r|\n/.exec(edgeLabel) ) {
+        $(this).prev('title').text(edgeLabel + "\n" + relTitle);
+      }
+    });
     return relation;
   }
   this.showinfo = function(relation) {
