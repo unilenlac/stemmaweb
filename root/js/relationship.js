@@ -614,6 +614,13 @@ function svgEnlargementLoaded() {
       $('#witness_list_content').html(witnessList);
   });
 
+  $('#a_derivable_from_b').click(function() {
+      $('#b_derivable_from_a').prop( "checked", false );
+  });
+  $('#b_derivable_from_a').click(function() {
+      $('#a_derivable_from_b').prop( "checked", false );
+  });
+
   // VS: add marker for relation arrow as last child of graph_svg
   // markerStr = '<marker id="triangle" markerUnits="strokeWidth" markerWidth="4" markerHeight="3" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" /></marker>';
   // graph_svg.append(markerStr); // problem: lowercase attribute names (viewBox, refX, refY). Solution: use createElementNS
