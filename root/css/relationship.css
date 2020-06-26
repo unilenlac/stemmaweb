@@ -340,13 +340,12 @@ span.apimore {
 .key .key_tip_container {
   visibility: hidden;
   position: absolute;
-  left: -150px;
+  left: 140px;
   width: 140px;
 }
 
 .key:hover .key_tip {
   padding: 4px;
-  font-size: 60%;
   position: relative;
   top: -18px;
   visibility: visible;
