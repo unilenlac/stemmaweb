@@ -193,14 +193,14 @@
           <label for="reading_text">Reading base text: </label>
         </div>
         <div class="inputs">
-          <input type="text" name="reading_text" id="reading_text">
+          <textarea rows="2" style="width:100%;" class=".ui-widget input" name="reading_text" id="reading_text"></textarea>
         </div>
         <br>
         <div class="labels">
           <label for="reading_display">Reading display form: </label>
         </div>
         <div class="inputs">
-          <input type="text" name="reading_display" id="reading_display">
+          <textarea rows="2" style="width:100%;" class=".ui-widget input" name="reading_display" id="reading_display"></textarea>
         </div>
       </div>
     </form>
