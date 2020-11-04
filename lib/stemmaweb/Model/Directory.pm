@@ -86,7 +86,16 @@ sub tradition_as_svg {
     $location .= '?show_normal=true';
     $location .= '&expand_sigla=true';
     $location .= '&include_relations=true' if $opts->{'include_relations'};
-    $location .= '&normalise=' . $opts->{'normalise'} if $opts->{'normalise'};
+    if ($opts->{'normalise'}) {
+      if (ref($opts->{'normalise'}) eq 'ARRAY') {
+        foreach my $relname ( @{ $opts->{'normalise'} } ) {
+          $location .= '&normalise=' . $relname;
+        }
+      }
+      else {
+        $location .= '&normalise=' . $opts->{'normalise'};
+      }
+    }
     my $dotstr = $self->ajax('get', $location);
     unless ($dotstr =~ /^digraph/) {
         stemmaweb::Error->throw(

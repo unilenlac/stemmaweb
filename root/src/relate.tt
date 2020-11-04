@@ -66,7 +66,7 @@
            onclick="showLoadingScreen(); loadSVG(!$('#svgenlargement').data('display_normalised'))">
         <span>Normalise for</span>
       </div>
-      <select id="normalize-for-type" class="relation-type-list" name="normalise"></select>
+      <select multiple="multiple" id="normalize-for-type" class="relation-type-list" name="normalise"></select>
       <div class="button button-inline" onclick=window.open("[% c.uri_for( 'help' ) %]")>
         <span>Help / About</span>
       </div>
