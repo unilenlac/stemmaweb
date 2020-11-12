@@ -7,6 +7,7 @@ var reltypes = {};
 var readingdata = {};
 var rid2node = {};
 var readings_selected = [];
+var ridToCompress = [];
 
 jQuery.removeFromArray = function(value, arr) {
   return jQuery.grep(arr, function(elem, index) {
@@ -78,6 +79,22 @@ function update_reading(rdata) {
 function sortByRank(a, b) {
   if (readingdata[a]["rank"] === readingdata[b]["rank"]) return 0;
   return readingdata[a]["rank"] < readingdata[b]["rank"] ? -1 : 1;
+}
+
+// Utility function to generate combinations of multiple sets.
+let buildCombo = (input) => {
+    if (input.length == 1) {
+        return input[0];
+    } else {
+        let result = [];
+        let remainingCombo = buildCombo(input.slice(1));
+        for (let leftItem of remainingCombo) {
+            for (let rightItem of input[0]) {
+                result.push([rightItem].concat(leftItem));
+            }
+        }
+        return result;
+    }
 }
 
 function update_reading_display(node_id) {
@@ -1852,35 +1869,61 @@ var keyCommands = {
     'description': 'Concatenate a sequence of readings into a single reading',
     'function': function() {
       // C for Compress
-      if ($('#svgenlargement').data('display_normalised')) {
-        $('#error-display').append('<p class="caution">The graph topology cannot be altered in normalized view.</p>');
-        $('#error-display').dialog('open');
-      } else if (readings_selected.length > 0) {
+      if (readings_selected.length > 0) {
+        ridToCompress = [];
+        readings_selected.sort(sortByRank);
+        $.each(readings_selected, function(i, nid) {
+            ridToCompress[i] = [];
+            ridToCompress[i].push(readingdata[nid].id);
+        });
+
+        if ($('#svgenlargement').data('display_normalised')) {
+          // grow ridToCompress: add shaddowed readings in the original as well
+          $.each(readings_selected, function(j, nid) {
+            var ncpath = getTextURL('related/');
+            var rid = readingdata[nid].id;
+            ncpath += rid + "/" + $('#normalize-for-type').serialize().replaceAll("normalise=", "types=");
+            $.ajax({
+              url: ncpath,
+              success: function(data) {
+                $.each(data, function(index, reading) {
+                  ridToCompress[j].push(reading.id);
+                });
+              },
+              async: false,
+              type: 'GET'
+            });
+          });
+        }
+
+        var readingPaths = buildCombo(ridToCompress);
+        if (readingPaths.length > 1) {
+          alert('Concatenation failed due to collapsed readings.');
+          return;
+        }
+
+        // Compress
         // TODO prevent further keyCommands until finished.
         dialog_background('#error-display')
         var ncpath = getTextURL('compress');
         // We need to gin up a form to serialize.
-        readings_selected.sort(sortByRank);
-        var cform = $('<form>')
-        $.each(readings_selected, function(index, value) {
-          cform.append($('<input>').attr(
-            "type", "hidden").attr(
-            "name", "readings[]").attr(
-            "value", readingdata[value]['id']));
+        $.each(readingPaths, function(k, compressSet) {
+          var cform = $('<form>')
+          $.each(compressSet, function(index, value) {
+            cform.append($('<input>').attr(
+              "type", "hidden").attr(
+              "name", "readings[]").attr(
+              "value", value));
+          });
+          var form_values = cform.serialize();
+          $.post(ncpath, form_values, function(data) {
+            if (data.nodes) {
+              compress_nodes(data.nodes);
+            }
+          });
         });
-        var form_values = cform.serialize();
-        $.post(ncpath, form_values, function(data) {
-          if (data.nodes) {
-            compress_nodes(data.nodes);
-          }
-          if (data.status === 'warn') {
-            var dataerror = $('<p>').attr('class', 'caution').text(data.warning);
-            $('#error-display').empty().append(dataerror);
-          } else {
-            unselect_all_readings();
-          }
-          $("#dialog_overlay").hide();
-        });
+        unselect_all_readings();
+        $("#dialog_overlay").hide();
       }
     }
   },
@@ -3046,7 +3089,7 @@ function loadSVG(normalised) {
         if ( node && node.siblings('text') ) {
             targetText = node.siblings('text').first().text();
         }
-        
+
         $(this).children('title').text(sigilText + ":\n" + edgeText + "\n\n" + sourceText + "\n->\n" + targetText);
     });
   });
