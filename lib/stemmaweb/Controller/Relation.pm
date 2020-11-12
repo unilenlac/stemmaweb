@@ -812,6 +812,33 @@ sub copynormal :Chained('section') :PathPart :Args(2) {
     $c->forward('View::JSON');
 }
 
+=head2 related
+
+  GET relation/$textid/$sectionid/related/$reading/$reltypes
+
+Returns a list of related readings filtered according to reltypes.
+
+=cut
+
+sub related :Chained('section') :PathPart :Args(2) {
+    my ($self, $c, $reading, $reltypes) = @_;
+    my $m = $c->model('Directory');
+    if ($c->request->method eq 'GET') {
+        my $url = "/reading/$reading/related";
+        if ($reltypes) {
+            $url .= "?" . $reltypes;
+        }
+        try {
+            $c->stash->{result} = $m->ajax('get', $url);
+        } catch (stemmaweb::Error $e) {
+            return json_error($c, $e->status, $e->message);
+        }
+    } else {
+        json_error($c, 405, "Use GET instead");
+    }
+    $c->forward('View::JSON');
+}
+
 =head2 emendations
 
   GET relation/$textid/$sectionid/emendations
