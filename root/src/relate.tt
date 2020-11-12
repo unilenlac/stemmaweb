@@ -62,11 +62,11 @@
       <div class="button button-inline" id="section_download_button" onclick="$('#download-dialog').dialog('open');">
         <span>Download section</span>
       </div>
-      <div class="button button-inline" id="select_normalised"
+      <div class="button button-inline" id="select_normalised" style="display:none;"
            onclick="showLoadingScreen(); loadSVG(!$('#svgenlargement').data('display_normalised'))">
         <span>Normalise for</span>
       </div>
-      <select multiple="multiple" id="normalize-for-type" class="relation-type-list" name="normalise"></select>
+      <select multiple="multiple" id="normalize-for-type" class="relation-type-list" name="normalise" style="display:none;"></select>
       <div class="button button-inline" onclick=window.open("[% c.uri_for( 'help' ) %]")>
         <span>Help / About</span>
       </div>
@@ -288,6 +288,9 @@
         <span>Edit</span>
       </div>
     [% END %]
+    <div class="button textcontrol editcontrol" id="normalise_button" onClick="normalise()">
+      <span>Normalise</span>
+    </div>
   </div>
   <div id="keystroke_menu">
   </div>

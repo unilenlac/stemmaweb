@@ -600,7 +600,11 @@ function svgEnlargementLoaded() {
       $.getJSON(getTextURL('emendations'), function(data) {
         add_emendation(data);
       });
-
+      // Restore keymap selection
+      $('#normalize-for-type option:selected').each(function() {
+        $(this).prop("selected", false); // fake it was not selected to enable toggle
+        toggle_normalise_for($('#keymaplist').children().eq($(this).index()));
+      });
       $('#loading_overlay').hide();
     });
   });
@@ -715,7 +719,7 @@ function add_relations(callback_fn) {
   // Add the relationship types to the keymap list
   $('#keymaplist').empty();
   $.each(relationship_types, function(index, typedef) {
-    li_elm = $('<li class="key">').css("border-color",
+    li_elm = $('<li class="key" onClick="toggle_normalise_for($(this))">').css("border-color",
       relation_manager.relation_colors[index]).text(typedef.name);
     li_elm.append($('<div>').attr('class', 'key_tip_container').append(
       $('<div>').attr('class', 'key_tip').text(typedef.description)));
@@ -2062,6 +2066,33 @@ function setDeleteButtonDisabled() {
     $('#relationtype_delete_button').button(action);
 }
 
+function toggle_normalise_for(relObj) {
+    // Toggle selected
+    $('#normalize-for-type').children().eq(relObj.index()).prop("selected",
+      !$('#normalize-for-type').children().eq(relObj.index()).prop("selected"));
+    // Set appearance
+    if ($('#normalize-for-type').children().eq(relObj.index()).prop("selected")) {
+      relObj.addClass('tonormalise');
+    } else {
+      relObj.removeClass('tonormalise');
+    }
+    // Change button text if no selection
+    if ($('#normalize-for-type').children('option:selected').length > 0) {
+      $('#normalise_button > span').text("Collapse");
+    } else {
+      $('#normalise_button > span').text("Expand");
+    }
+}
+
+function normalise() {
+    if (($('#normalise_button > span').text() == "Collapse") &&
+        ($('#normalize-for-type option:selected').length == 0)) {
+        alert("Click on relation names to normalise graph according to these relations.");
+    } else {
+      showLoadingScreen();
+      loadSVG($('#normalize-for-type option:selected').length > 0);
+    }
+}
 
 // Now get to work on the document.
 // First error handling...
@@ -2993,12 +3024,6 @@ function loadSVG(normalised) {
     // Change the button text and re-enable the button
     $('#select_normalised span').text(buttonText);
     $('#select_normalised').removeClass('disable');
-    // Show or hide the select box as appropriate
-    if (normalised) {
-      $('#normalize-for-type').hide();
-    } else {
-      $('#normalize-for-type').show();
-    }
     // Reload the SVG
     $('#svgenlargement').empty().append(svgData.documentElement)
     svgEnlargementLoaded();

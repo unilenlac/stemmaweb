@@ -237,6 +237,10 @@ span.apimore {
   margin-bottom: 3px;
 }
 
+#keymap li.tonormalise {
+  text-decoration: line-through;
+}
+
 #keymap hr {
   border: 0;
   height: 0;
