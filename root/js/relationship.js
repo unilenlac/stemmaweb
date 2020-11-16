@@ -1898,7 +1898,8 @@ var keyCommands = {
 
         var readingPaths = buildCombo(ridToCompress);
         if (readingPaths.length > 1) {
-          alert('Concatenation failed due to collapsed readings.');
+          $('#error-display').append('<p class="caution">These readings cannot be concatenated in normalised view because there are hidded readings. Please expand the graph first.</p>');
+          $('#error-display').dialog('open');
           return;
         }
 
@@ -1933,7 +1934,7 @@ var keyCommands = {
     'function': function() {
       // D for Detach
       if ($('#svgenlargement').data('display_normalised')) {
-        $('#error-display').append('<p class="caution">The graph topology cannot be altered in normalized view.</p>');
+        $('#error-display').append('<p class="caution">Cannot detach readings in normalised view. Please expand the graph first.</p>');
         $('#error-display').dialog('open');
       } else if (readings_selected.length > 0) {
         $('#action-detach').val('on');
@@ -2121,16 +2122,16 @@ function toggle_normalise_for(relObj) {
     }
     // Change button text if no selection
     if ($('#normalize-for-type').children('option:selected').length > 0) {
-      $('#normalise_button > span').text("Collapse");
+      $('#normalise_button > span').text("Normalise");
     } else {
       $('#normalise_button > span').text("Expand");
     }
 }
 
 function normalise() {
-    if (($('#normalise_button > span').text() == "Collapse") &&
+    if (($('#normalise_button > span').text() == "Normalise") &&
         ($('#normalize-for-type option:selected').length == 0)) {
-        alert("Click on relation names to normalise graph according to these relations.");
+        alert("Click on the relation names above to select the graph normalisation criteria.");
     } else {
       showLoadingScreen();
       loadSVG($('#normalize-for-type option:selected').length > 0);
