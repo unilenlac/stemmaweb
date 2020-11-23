@@ -1859,9 +1859,47 @@ var keyCommands = {
   // TODO maybe also 'c' for compress and/or 's' for split...
   '104': {
     'key': 'h',
-    'description': 'Show / hide this menu',
+    'description': 'View/Set hypernodes for the selected reading(s)',
     'function': function() {
-      $('#keystroke_menu').toggle();
+      $('#complex-reading-list option').remove();
+      $('#complex-reading-for input[name="rid"]').remove();
+      $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+      if (readings_selected.length > 0) {
+        var displayText = "";
+        readings_selected.sort(sortByRank);
+        console.log("reading selected: ", readings_selected);
+        $.each(readings_selected, function(i, reading_id) {
+          // set text
+          displayText += readingdata[reading_id]['text'] + " ";
+          $('#complex-reading-text').val(displayText.trim());
+          // get complex readings and populate the list
+          var myString = 'rid=' + readingdata[reading_id].id;
+          console.log("Getting complex readings for: " + myString);
+          $.ajax({
+            url: 'complex',
+            data: myString,
+            success: function(data) {
+              $.each(data, function(index, cReading) { // Add each complex reading as list element
+                var myText = cReading.readings.sort(function(a, b) { // sort component readings by rank and collect text
+                    var keyA = a.rank, keyB = b.rank;
+                    if (keyA < keyB) return -1;
+                    if (keyA > keyB) return 1;
+                    return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
+                var myCID = cReading.id;
+                // if not already added
+                if (! $('#complex-reading-list option[value=' + myCID + ']').length ) {
+                  $('#complex-reading-list').append($('<option />').attr("name", "cid").attr("value", myCID).text(myText));
+                  $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+                  $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                }
+              });
+            },
+            dataType: 'json',
+            type: 'GET'
+          });
+        });
+        $('#complex-reading-dialog').dialog('open');
+      }
     }
   },
   '99': {
@@ -2802,6 +2840,130 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     open: function() {
       // Clear any prior error messages
       $('#relation_edit_status').empty();
+    },
+  });
+
+  // Set up the complex reading dialog
+  $('#complex-reading-dialog').dialog({
+    autoOpen: false,
+    modal: true,
+    width: 600,
+    height: 400,
+    buttons: {
+      add: {
+        text: 'Add new',
+        id: 'complexreading_add_button',
+        click: function(evt) {
+          if ($('#complex-reading-text').val()) {
+            // prepare form items (rids) for complex reading creation
+            $.each(readings_selected, function(i, reading_id) {
+              $('#complex-reading-form').append($('<input style="display:none"/>')
+                .attr('id', "complex-reading-id")
+                .attr('name', "rid")
+                .attr('value', readingdata[reading_id].id));
+            });
+            if ($('#complex-reading-form input[name="rid"]').length > 1) {
+              var form_values = $('#complex-reading-form').serialize();
+              console.log("Creating complex reading from: " + form_values);
+              console.log("In my form, there are n inputs, n=", $('#complex-reading-form input[name="rid"]').length);
+              $.ajax({
+                url: 'complex',
+                data: form_values,
+                success: function(data) {
+                    // add to list and select
+                    var myText = data.readings.sort(function(a, b) { // sort component readings by rank and collect text
+                        var keyA = a.rank, keyB = b.rank;
+                        if (keyA < keyB) return -1;
+                        if (keyA > keyB) return 1;
+                        return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
+                    var myCID = data.id;
+                    $('#complex-reading-list').append($('<option />').attr("name", "cid").attr("value", myCID).text(myText));
+                    $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+                    $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                    $('#complex-reading-list option:last').attr("selected", "selected");
+                    $('#complex-reading-list').focus();
+                },
+                dataType: 'json',
+                type: 'POST'
+              });
+            }
+            // reset form
+            $('#complex-reading-text').val("").text("");
+            $('#complex-reading-form input[name="rid"]').remove();
+          }
+        }
+      },
+      delete: {
+        text: 'Delete',
+        id: 'complexreading_delete_button',
+        click: function(evt) {
+          $("#complex-reading-status").empty();
+          var selectedCR = $('#complex-reading-list').val()
+          if (selectedCR) {
+            var mybuttons = $(evt.target).closest('button').parent().find('button');
+            mybuttons.button('disable');
+            if (confirm("This operation cannot be undone. Continue?")) {
+              var myString = 'rid=3196&cid=' + selectedCR;
+              console.log(myString);
+              $.ajax({
+                url: 'complex',
+                data: myString,
+                success: function() {
+                    // Remove the affected list element
+                    $('#complex-reading-list option[value = ' + selectedCR + ']').remove();
+                    $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+                    $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                },
+                dataType: 'json',
+                type: 'DELETE'
+              });
+            }
+            mybuttons.button("enable");
+          }
+        }
+      },
+      deleteAll: {
+        text: 'Delete All',
+        id: 'complexreading_deleteAll_button',
+        click: function(evt) {
+          $("#complex-reading-status").empty();
+          if (confirm("This operation cannot be undone. Continue?")) {
+            var mybuttons = $(evt.target).closest('button').parent().find('button');
+            mybuttons.button('disable');
+            $('#complex-reading-list option').each(function() {
+              var selectedCR = $(this).val();
+              if (selectedCR) {
+                var myString = 'rid=3196&cid=' + selectedCR;
+                console.log(myString);
+                $.ajax({
+                  url: 'complex',
+                  data: myString,
+                  success: function() {
+                      // Remove the affected list element
+                      $('#complex-reading-list option[value = ' + selectedCR + ']').remove();
+                  },
+                  async: false,
+                  dataType: 'json',
+                  type: 'DELETE'
+                });
+              }
+            });
+            $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+            $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+            mybuttons.button("enable");
+          }
+        }
+      },
+      close: {
+        text: 'Close',
+        click: function() {
+          $('#complex-reading-dialog').dialog('close');
+        }
+      },
+    },
+    open: function() {
+      // Clear any prior error messages
+      $('#complex-reading-status').empty();
     },
   });
 

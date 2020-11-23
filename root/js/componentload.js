@@ -603,7 +603,10 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     }
   } else if ($('#relation-edit-dialog').dialog('isOpen')) {
     error += '<br>The relation type cannot be modified.</p>';
-    errordiv = '#relation_edit_status';     
+    errordiv = '#relation_edit_status';
+  } else if ($('#complex-reading-dialog').dialog('isOpen')) {
+    error += '<br>The complex reading cannot be modified.</p>';
+    errordiv = '#complex-reading-status';       
   } else if (ajaxSettings.url.indexOf('textinfo') > -1 && ajaxSettings.type == 'GET') {
     $('#textinfo_waitbox').hide();
     $('#textinfo_container').show();

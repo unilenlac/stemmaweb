@@ -33,7 +33,7 @@
       });
       window.setTimeout(function() {
         $('#keystroke_menu').hide();
-      }, 10000);
+      }, 0);
     });
   </script>
 [% END -%]
@@ -271,6 +271,17 @@
             </td>
           </tr>
         </table>
+      </form>
+  </div>
+
+  <!-- Complex readings -->
+  <div id="complex-reading-dialog" title="Manage hypernodes">
+    <div id="complex-reading-status"></div>
+      <form id="complex-reading-form">
+        <h4><span class="texttitle">Selected reading(s)</span></h4>
+        <input id="complex-reading-text" name="displaytext" type="text" autocomplete="off" style="width:90%" disabled />
+        <h4><span id="hypernodes-title" class="texttitle">Hypernodes</span></h4>
+        <select id="complex-reading-list" class="complex-reading-list" style="width:95%;" onchange="display_complex_reading(this);"></select>
       </form>
   </div>
 
