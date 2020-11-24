@@ -1893,6 +1893,12 @@ var keyCommands = {
                   $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
                 }
               });
+              // Sort complex reading list alphabetically
+              $("#complex-reading-list").append($("#complex-reading-list option").remove().sort(function(a, b) {
+                  var at = $(a).text(), bt = $(b).text();
+                  return (at > bt)?1:((at < bt)?-1:0);
+              }));
+              $('#complex-reading-list option:first').attr("selected", "selected");
             },
             dataType: 'json',
             type: 'GET'
