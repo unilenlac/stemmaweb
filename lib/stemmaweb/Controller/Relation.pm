@@ -334,14 +334,14 @@ sub complex :Chained('text') :PathPart :Args(0) {
           json_error($c, 403,
               'You do not have permission to modify this tradition.');
       } elsif ($c->request->method eq 'POST') {
-        # Create complex reading for the list of readings
-        my $readings = [];
+        # Create complex reading skeleton from the list of readings
+        my $components = [];
         foreach my $rid (@rids) {
-          push(@$readings, { id => $rid } );
+          my $reading = { id => $rid };
+          push(@$components, { reading => $reading } );
         }
         my $options = {
-            'id'   => ' ',
-            'readings' => $readings
+            'components' => $components
         };
         $c->log->warn("Creating complex reading for:");
         $c->log->warn(encode_json($options));

@@ -279,7 +279,7 @@
     <div id="complex-reading-status"></div>
       <form id="complex-reading-form">
         <h4><span class="texttitle">Selected reading(s)</span></h4>
-        <input id="complex-reading-text" name="displaytext" type="text" autocomplete="off" style="width:90%" disabled />
+        <textarea id="complex-reading-text" name="displaytext" type="text" autocomplete="off" style="width:90%" disabled></textarea>
         <h4><span id="hypernodes-title" class="texttitle">Hypernodes</span></h4>
         <select id="complex-reading-list" class="complex-reading-list" style="width:95%;" onchange="display_complex_reading(this);"></select>
       </form>

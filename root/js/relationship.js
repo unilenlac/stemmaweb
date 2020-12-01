@@ -97,6 +97,21 @@ let buildCombo = (input) => {
     }
 }
 
+// Utility function to collect readings in hyperreading.
+let collectReadings = (input) => {
+  if (input.reading) {
+    return input.reading;
+  } else {
+    let result = [];
+    if (input.components) {
+      for (c of input.components) {
+        result = result.concat(collectReadings(c));
+      }
+    }
+    return result;
+  }
+}
+
 function update_reading_display(node_id) {
   // Grab the reading data from which we update
   var rdata = readingdata[node_id];
@@ -1869,42 +1884,50 @@ var keyCommands = {
         readings_selected.sort(sortByRank);
         console.log("reading selected: ", readings_selected);
         $.each(readings_selected, function(i, reading_id) {
-          // set text
-          displayText += readingdata[reading_id]['text'] + " ";
-          $('#complex-reading-text').val(displayText.trim());
-          // get complex readings and populate the list
-          var myString = 'rid=' + readingdata[reading_id].id;
-          console.log("Getting complex readings for: " + myString);
-          $.ajax({
-            url: 'complex',
-            data: myString,
-            success: function(data) {
-              $.each(data, function(index, cReading) { // Add each complex reading as list element
-                var myText = cReading.readings.sort(function(a, b) { // sort component readings by rank and collect text
+          if (! isNaN(readingdata[reading_id].id)) {// numeric
+            // set text
+            displayText += readingdata[reading_id]['text'] + " ";
+            // get complex readings and populate the list
+            var myString = 'rid=' + readingdata[reading_id].id;
+            console.log("Getting complex readings for: " + myString);
+            $.ajax({
+              url: 'complex',
+              data: myString,
+              success: function(data) {
+                $.each(data, function(index, cReading) { // Add each complex reading as list element
+                  var myText = "";
+                  var collectedReadings = collectReadings(cReading);
+                  if (collectedReadings) {
+                    myText = collectedReadings.sort(function(a, b) { // sort component readings by rank and collect text
                     var keyA = a.rank, keyB = b.rank;
                     if (keyA < keyB) return -1;
                     if (keyA > keyB) return 1;
                     return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
-                var myCID = cReading.id;
-                // if not already added
-                if (! $('#complex-reading-list option[value=' + myCID + ']').length ) {
-                  $('#complex-reading-list').append($('<option />').attr("name", "cid").attr("value", myCID).text(myText));
-                  $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
-                  $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
-                }
-              });
-              // Sort complex reading list alphabetically
-              $("#complex-reading-list").append($("#complex-reading-list option").remove().sort(function(a, b) {
-                  var at = $(a).text(), bt = $(b).text();
-                  return (at > bt)?1:((at < bt)?-1:0);
-              }));
-              $('#complex-reading-list option:first').attr("selected", "selected");
-            },
-            dataType: 'json',
-            type: 'GET'
-          });
+                  }
+                  var myCID = cReading.id;
+                  // if not already added
+                  if (! $('#complex-reading-list option[value=' + myCID + ']').length ) {
+                    $('#complex-reading-list').append($('<option />').attr("name", "cid").attr("value", myCID).text(myText));
+                    $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+                    $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                  }
+                });
+                // Sort complex reading list alphabetically
+                $("#complex-reading-list").append($("#complex-reading-list option").remove().sort(function(a, b) {
+                    var at = $(a).text(), bt = $(b).text();
+                    return (at > bt)?1:((at < bt)?-1:0);
+                }));
+                $('#complex-reading-list option:first').attr("selected", "selected");
+              },
+              dataType: 'json',
+              type: 'GET'
+            });
+          }
         });
-        $('#complex-reading-dialog').dialog('open');
+        if (displayText) {
+          $('#complex-reading-text').val(displayText.trim());
+          $('#complex-reading-dialog').dialog('open');
+        }
       }
     }
   },
@@ -2863,10 +2886,12 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           if ($('#complex-reading-text').val()) {
             // prepare form items (rids) for complex reading creation
             $.each(readings_selected, function(i, reading_id) {
-              $('#complex-reading-form').append($('<input style="display:none"/>')
-                .attr('id', "complex-reading-id")
-                .attr('name', "rid")
-                .attr('value', readingdata[reading_id].id));
+              if (! isNaN(readingdata[reading_id].id)) {//numeric : exclude START and END
+                $('#complex-reading-form').append($('<input style="display:none"/>')
+                  .attr('id', "complex-reading-id")
+                  .attr('name', "rid")
+                  .attr('value', readingdata[reading_id].id));
+              }
             });
             if ($('#complex-reading-form input[name="rid"]').length > 1) {
               var form_values = $('#complex-reading-form').serialize();
@@ -2876,12 +2901,16 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                 url: 'complex',
                 data: form_values,
                 success: function(data) {
+                    var myText = "";
                     // add to list and select
-                    var myText = data.readings.sort(function(a, b) { // sort component readings by rank and collect text
-                        var keyA = a.rank, keyB = b.rank;
-                        if (keyA < keyB) return -1;
-                        if (keyA > keyB) return 1;
-                        return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
+                    var collectedReadings = collectReadings(data);
+                    if (collectedReadings) {
+                      myText = collectedReadings.sort(function(a, b) { // sort component readings by rank and collect text
+                      var keyA = a.rank, keyB = b.rank;
+                      if (keyA < keyB) return -1;
+                      if (keyA > keyB) return 1;
+                      return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
+                    }
                     var myCID = data.id;
                     $('#complex-reading-list').append($('<option />').attr("name", "cid").attr("value", myCID).text(myText));
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
