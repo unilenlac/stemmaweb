@@ -131,7 +131,7 @@ span.apimore {
 
 #update_workspace_button {
   position: absolute;
-  left: 100px;
+  left: 140px;
   top: 126px;
   height: 44px;
   width: 46px;
@@ -307,6 +307,21 @@ span.apimore {
 #morphology {
   text-align: right;
   margin: 10px;
+}
+
+#relation_hider_button {
+  position: absolute;
+  left: 85px;
+  top: 126px;
+  height: 44px;
+  width: 46px;
+  margin-top: 17px;
+  border: none;
+  background-image: url('../images/rel_icon.png');
+  background-position: 0px 0px;
+  background-color: none;
+  background-repeat: none;
+  z-index: 50;
 }
 
 #keystroke_menu_button {

@@ -3208,6 +3208,10 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     $('#keystroke_menu').toggle();
   });
 
+  $('#relation_hider_button').click(function() {
+    $('#keymap').toggle();
+  });  
+
   $('.helptag').popupWindow({
     height: 500,
     width: 800,
