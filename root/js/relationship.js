@@ -1907,7 +1907,11 @@ var keyCommands = {
                   var myCID = cReading.id;
                   // if not already added
                   if (! $('#complex-reading-list option[value=' + myCID + ']').length ) {
-                    $('#complex-reading-list').append($('<option />').attr("name", "cid").attr("value", myCID).text(myText));
+                    // store id of readings
+                    var rids = $.map(collectedReadings, function(t) {
+                      return t.id
+                    });
+                    $('#complex-reading-list').append($('<option />').attr("rids", rids).attr("name", "cid").attr("value", myCID).text(myText));
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
                   }
@@ -2176,6 +2180,25 @@ function setDeleteButtonDisabled() {
     var action = mydisable ? 'disable' : 'enable';
     $('#relationtype_delete_button').button(action);
 }
+
+// Complex readings dialog functions
+function display_complex_reading(){
+    unselect_all_readings();
+    $.each($('#complex-reading-list option:selected').attr('rids').split(','), function(i, rid) {
+      readings_selected.push(rid2node[rid]);
+      color_active(get_ellipse(rid));
+    });
+    readings_selected.sort(sortByRank);
+    // set text
+    var displayText = "";
+    $.each(readings_selected, function(i, reading_id) {
+      if (! isNaN(readingdata[reading_id].id)) {// numeric
+        displayText += readingdata[reading_id]['text'] + " ";
+      }
+    });
+    $('#complex-reading-text').val(displayText.trim());
+}
+
 
 function toggle_normalise_for(relObj) {
     // Toggle selected
