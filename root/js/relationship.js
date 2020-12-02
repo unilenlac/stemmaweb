@@ -919,6 +919,8 @@ function node_obj(ellipse) {
       $('.rel_rdg_a').text("'" + source_node_text + "'");
       $('#target_node_id').val(readingdata[target_node_id]['id']);
       $('.rel_rdg_b').text("'" + target_node_text + "'");
+      setAlternatives('#source_node_id', '#source_node_selection');
+      setAlternatives('#target_node_id', '#target_node_selection');
       // This is a binary relation
       $('#dialog-form').data('binary', true);
       $('#dialog-form').dialog('open');
@@ -1882,46 +1884,20 @@ var keyCommands = {
       if (readings_selected.length > 0) {
         var displayText = "";
         readings_selected.sort(sortByRank);
-        console.log("reading selected: ", readings_selected);
         $.each(readings_selected, function(i, reading_id) {
           if (! isNaN(readingdata[reading_id].id)) {// numeric
             // set text
             displayText += readingdata[reading_id]['text'] + " ";
             // get complex readings and populate the list
             var myString = 'rid=' + readingdata[reading_id].id;
-            console.log("Getting complex readings for: " + myString);
             $.ajax({
               url: 'complex',
               data: myString,
               success: function(data) {
-                $.each(data, function(index, cReading) { // Add each complex reading as list element
-                  var myText = "";
-                  var collectedReadings = collectReadings(cReading);
-                  if (collectedReadings) {
-                    myText = collectedReadings.sort(function(a, b) { // sort component readings by rank and collect text
-                    var keyA = a.rank, keyB = b.rank;
-                    if (keyA < keyB) return -1;
-                    if (keyA > keyB) return 1;
-                    return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
-                  }
-                  var myCID = cReading.id;
-                  // if not already added
-                  if (! $('#complex-reading-list option[value=' + myCID + ']').length ) {
-                    // store id of readings
-                    var rids = $.map(collectedReadings, function(t) {
-                      return t.id
-                    });
-                    $('#complex-reading-list').append($('<option />').attr("rids", rids).attr("name", "cid").attr("value", myCID).text(myText));
-                    $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
-                    $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
-                  }
-                });
-                // Sort complex reading list alphabetically
-                $("#complex-reading-list").append($("#complex-reading-list option").remove().sort(function(a, b) {
-                    var at = $(a).text(), bt = $(b).text();
-                    return (at > bt)?1:((at < bt)?-1:0);
-                }));
+                setListOptions(data, "#complex-reading-list");
+                $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                 $('#complex-reading-list option:first').attr("selected", "selected");
+                $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
               },
               dataType: 'json',
               type: 'GET'
@@ -2200,6 +2176,61 @@ function display_complex_reading(){
     $('#complex-reading-text').val(displayText.trim());
 }
 
+function setListOptions(data, listIdString) {
+  $.each(data, function(index, cReading) { // Add each complex reading as list element
+    var myText = "";
+    var collectedReadings = collectReadings(cReading);
+    if (collectedReadings) {
+      myText = collectedReadings.sort(function(a, b) { // sort component readings by rank and collect text
+      var keyA = a.rank, keyB = b.rank;
+      if (keyA < keyB) return -1;
+      if (keyA > keyB) return 1;
+      return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
+    }
+    var myCID = cReading.id;
+    // if not already added
+    if (! $(listIdString + ' option[value=' + myCID + ']').length ) {
+      // store id of readings
+      var rids = $.map(collectedReadings, function(t) {
+        return t.id
+      });
+      $(listIdString).append($('<option />').attr("rids", rids).attr("name", "cid").attr("value", myCID).text(myText));
+    }
+  });
+  // Sort complex reading list alphabetically
+  $(listIdString).append($(listIdString + ' option').remove().sort(function(a, b) {
+      var at = $(a).text(), bt = $(b).text();
+      return (at > bt)?1:((at < bt)?-1:0);
+  }));
+}
+
+function setAlternatives(nodeIdString, listIdString){
+  $(listIdString).empty();
+  var myValue = $(nodeIdString).val();
+  // get and add hyperreadings
+  var myString = 'rid=' + myValue;
+  $.ajax({
+    url: 'complex',
+    data: myString,
+    success: function(data) {
+      setListOptions(data, listIdString);
+    },
+    dataType: 'json',
+    type: 'GET'
+  });
+  // add reading as first option
+  $(listIdString).prepend($('<option />').attr("value", myValue).text(readingdata[rid2node[myValue]].text));
+}
+
+function setSource(){
+  $('#source_node_id').val($('#source_node_selection').val());
+  console.log("source node set: ", $('#source_node_id').val());
+}
+
+function setTarget(){
+  $('#target_node_id').val($('#target_node_selection').val());
+  console.log("target node set: ", $('#target_node_id').val());
+}
 
 function toggle_normalise_for(relObj) {
     // Toggle selected
@@ -2925,21 +2956,11 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                 url: 'complex',
                 data: form_values,
                 success: function(data) {
-                    var myText = "";
-                    // add to list and select
-                    var collectedReadings = collectReadings(data);
-                    if (collectedReadings) {
-                      myText = collectedReadings.sort(function(a, b) { // sort component readings by rank and collect text
-                      var keyA = a.rank, keyB = b.rank;
-                      if (keyA < keyB) return -1;
-                      if (keyA > keyB) return 1;
-                      return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
-                    }
-                    var myCID = data.id;
-                    $('#complex-reading-list').append($('<option />').attr("name", "cid").attr("value", myCID).text(myText));
-                    $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+                    setListOptions([ data ], "#complex-reading-list");
                     $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
-                    $('#complex-reading-list option:last').attr("selected", "selected");
+                    $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+                    $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
+                    // select the newly-added option (value is data.id)
                     $('#complex-reading-list').focus();
                 },
                 dataType: 'json',
@@ -3234,7 +3255,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 
   $('#relation_hider_button').click(function() {
     $('#keymap').toggle();
-  });  
+  });
 
   $('.helptag').popupWindow({
     height: 500,
