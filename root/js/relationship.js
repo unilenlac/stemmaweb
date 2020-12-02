@@ -1931,6 +1931,7 @@ var keyCommands = {
         if (displayText) {
           $('#complex-reading-text').val(displayText.trim());
           $('#complex-reading-dialog').dialog('open');
+          $(".ui-widget-overlay").css("background", "none");
         }
       }
     }
