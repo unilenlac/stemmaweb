@@ -2038,16 +2038,6 @@ var keyCommands = {
       $('#normal-form-propagate').dialog('open');
     }
   },
-  '114': {
-    'key': 'r',
-    'description': 'Relate the selected readings',
-    'function': function() {
-      if (readings_selected.length > 0) {
-        $('#dialog-form').data('binary', false);
-        $('#dialog-form').dialog('open');
-      }
-    }
-  },
   // '115': {
   // 	'key': 's',
   // 	'description': 'Split the selected reading according to given criteria',
