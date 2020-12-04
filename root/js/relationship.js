@@ -1891,7 +1891,7 @@ var keyCommands = {
             // get complex readings and populate the list
             var myString = 'rid=' + readingdata[reading_id].id;
             $.ajax({
-              url: 'complex',
+              url: getTextURL('complex/'),
               data: myString,
               success: function(data) {
                 setListOptions(data, "#complex-reading-list");
@@ -2200,7 +2200,7 @@ function setAlternatives(nodeIdString, listIdString){
   // get and add hyperreadings
   var myString = 'rid=' + myValue;
   $.ajax({
-    url: 'complex',
+    url: getTextURL('complex/'),
     data: myString,
     success: function(data) {
       setListOptions(data, listIdString);
@@ -2943,7 +2943,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
               console.log("Creating complex reading from: " + form_values);
               console.log("In my form, there are n inputs, n=", $('#complex-reading-form input[name="rid"]').length);
               $.ajax({
-                url: 'complex',
+                url: getTextURL('complex/'),
                 data: form_values,
                 success: function(data) {
                     setListOptions([ data ], "#complex-reading-list");
@@ -2951,7 +2951,6 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
                     // select the newly-added option (value is data.id)
-                    $('#complex-reading-list').focus();
                 },
                 dataType: 'json',
                 type: 'POST'
@@ -2973,10 +2972,10 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             var mybuttons = $(evt.target).closest('button').parent().find('button');
             mybuttons.button('disable');
             if (confirm("This operation cannot be undone. Continue?")) {
-              var myString = 'rid=3196&cid=' + selectedCR;
+              var myString = 'cid=' + selectedCR;
               console.log(myString);
               $.ajax({
-                url: 'complex',
+                url: getTextURL('complex/'),
                 data: myString,
                 success: function() {
                     // Remove the affected list element
@@ -3003,10 +3002,10 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             $('#complex-reading-list option').each(function() {
               var selectedCR = $(this).val();
               if (selectedCR) {
-                var myString = 'rid=3196&cid=' + selectedCR;
+                var myString = 'cid=' + selectedCR;
                 console.log(myString);
                 $.ajax({
-                  url: 'complex',
+                  url: getTextURL('complex/'),
                   data: myString,
                   success: function() {
                       // Remove the affected list element

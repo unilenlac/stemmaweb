@@ -315,56 +315,60 @@ sub relationtype :Chained('text') :PathPart :Args(0) {
 
 =head2 complex
 =cut
-sub complex :Chained('text') :PathPart :Args(0) {
+sub complex :Chained('section') :PathPart :Args(0) {
   my ($self, $c) = @_;
   my $m = $c->model('Directory');
+  my $sectid = $c->stash->{sectid};
 
   my $cid  = $c->request->param('cid');
   my @rids  = $c->request->param('rid');
 
   my $first = shift @rids;
 
-  if ($first ne "") {
-    try {
-      if ($c->request->method eq 'GET') {
-        # Get all complex reading containing the first reading
-        $c->stash->{'result'} = $m->ajax('get', "/reading/$first/complex/");
-        $c->forward('View::JSON');
-      } elsif ($c->stash->{permission} ne 'full') {
-          json_error($c, 403,
-              'You do not have permission to modify this tradition.');
-      } elsif ($c->request->method eq 'POST') {
-        # Create complex reading skeleton from the list of readings
-        my $components = [];
-        foreach my $rid (@rids) {
-          my $reading = { id => $rid };
-          push(@$components, { reading => $reading } );
-        }
-        my $options = {
-            'components' => $components
-        };
-        $c->log->warn("Creating complex reading for:");
-        $c->log->warn(encode_json($options));
-        $c->stash->{result} = $m->ajax(
-          'put', "/reading/$first/complex/",
-          'Content-Type' => 'application/json',
-          Content        => encode_json($options)
-        );
-        $c->forward('View::JSON');
-      } elsif ($c->request->method eq 'DELETE') {
-        # Delete the specified complex reading containing the first reading
-        $c->log->warn("About to delete: /reading/$first/complex/$cid");
-        $m->ajax('delete', "/reading/$first/complex/$cid");
-        $c->stash->{result} = { 'status' => 'ok' };
-        $c->forward('View::JSON');
-      } else {
-          json_error($c, 405, "You can GET, POST, or DELETE");
+  try {
+    if ($c->request->method eq 'GET') {
+      # Get all complex readings in the section
+      my $location = "/section/$sectid/complex/";
+      # Unless a reading is specified. In that case, get complex reading containing the reading
+      if (defined $first) { $location = "/reading/$first/complex/" };
+      $c->stash->{'result'} = $m->ajax('get', $location);
+      $c->forward('View::JSON');
+    } elsif ($c->stash->{permission} ne 'full') {
+        json_error($c, 403,
+            'You do not have permission to modify this tradition.');
+    } elsif ($c->request->method eq 'POST') {
+      # Create complex reading skeleton from the list of readings
+      my $components = [];
+      foreach my $rid (@rids) {
+        my $reading = { id => $rid };
+        push(@$components, { reading => $reading } );
       }
-    } catch (stemmaweb::Error $e) {
-      return json_error($c, $e->status, $e->message);
+      my $options = {
+          'components' => $components
+      };
+      $c->log->warn("Creating complex reading for:");
+      $c->log->warn(encode_json($options));
+      my $location = "/complex/";
+      if (defined $first) { $location = "/reading/$first" . $location };
+      $c->stash->{result} = $m->ajax(
+        'put', $location,
+        'Content-Type' => 'application/json',
+        Content        => encode_json($options)
+      );
+      $c->forward('View::JSON');
+    } elsif ($c->request->method eq 'DELETE') {
+      # Delete the specified complex reading containing the first reading
+      my $location = "/complexreading/$cid";
+      if (defined $first) { $location = "/reading/$first/complex/$cid" };
+      $c->log->warn("About to delete: $location");
+      $m->ajax('delete', $location);
+      $c->stash->{result} = { 'status' => 'ok' };
+      $c->forward('View::JSON');
+    } else {
+        json_error($c, 405, "You can GET, POST, or DELETE");
     }
-  } else {
-    json_error($c, 405, "Missing reading id");
+  } catch (stemmaweb::Error $e) {
+    return json_error($c, $e->status, $e->message);
   }
 }
 
