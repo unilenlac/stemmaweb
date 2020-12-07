@@ -8,6 +8,7 @@ var readingdata = {};
 var rid2node = {};
 var readings_selected = [];
 var ridToCompress = [];
+var oldComplexReadings = [];
 
 jQuery.removeFromArray = function(value, arr) {
   return jQuery.grep(arr, function(elem, index) {
@@ -817,6 +818,18 @@ function unselect_all_readings() {
         rdgnode.set_draggable(false);
       }
     });
+  }
+}
+
+function unselect_reading(id) {
+  // Unselect a given reading
+  var idx = readings_selected.indexOf(id);
+  if (idx > -1) {
+    readings_selected.splice(idx, 1);
+    var rdgnode = get_node_obj(id);
+    if (rdgnode) {
+      rdgnode.set_draggable(false);
+    }
   }
 }
 
@@ -1896,7 +1909,10 @@ var keyCommands = {
               success: function(data) {
                 setListOptions(data, "#complex-reading-list");
                 $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
-                $('#complex-reading-list option:first').attr("selected", "selected");
+                if ($('#complex-reading-list option').length > 0) {
+                  $('#complex-reading-list option:first').attr("selected", "selected");
+                  oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
+                }
                 $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
               },
               dataType: 'json',
@@ -2150,9 +2166,16 @@ function setDeleteButtonDisabled() {
 
 // Complex readings dialog functions
 function display_complex_reading(){
-    unselect_all_readings();
-    $.each($('#complex-reading-list option:selected').attr('rids').split(','), function(i, rid) {
-      readings_selected.push(rid2node[rid]);
+    // unselect old reading
+    $.each(oldComplexReadings, function(i, rid) {
+      unselect_reading(rid2node[rid]);
+    });
+    // set old
+    oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
+    $.each(oldComplexReadings, function(i, rid) {
+      if (! readings_selected.includes(rid2node[rid])) { // avoid including twice
+        readings_selected.push(rid2node[rid]);
+      };
       color_active(get_ellipse(rid));
     });
     readings_selected.sort(sortByRank);
@@ -2951,6 +2974,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
                     // select the newly-added option (value is data.id)
+                    oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
                 },
                 dataType: 'json',
                 type: 'POST'
@@ -2959,6 +2983,48 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             // reset form
             $('#complex-reading-text').val("").text("");
             $('#complex-reading-form input[name="rid"]').remove();
+          }
+        }
+      },
+      merge: {
+        text: 'Merge',
+        click: function() {
+          // Create a new hyperreading by merging the selected complex reading and the selected (simple) readings
+          if ($('#complex-reading-text').val()) {
+            var myCid = $('#complex-reading-list').val();
+            // prepare form items: first member (cid)
+            $('#complex-reading-form').append($('<input style="display:none"/>').attr('name', "cid").attr('value', myCid));
+            var myRids = $('#complex-reading-list option:selected').attr('rids').split(',')
+            // prepare form items: additional members (rids)
+            $.each(readings_selected, function(i, reading_id) {
+              var myRid = readingdata[reading_id].id;
+              if (! isNaN(myRid)) {//numeric : exclude START and END
+                if (! myRids.includes(myRid)) { // exclude the members of the complex reading
+                  $('#complex-reading-form').append($('<input style="display:none"/>').attr('name', "rid").attr('value', myRid));
+                }
+              }
+            });
+            if ($('#complex-reading-form input[name="rid"]').length > 0) { // at least one reading to add
+              var form_values = $('#complex-reading-form').serialize();
+              console.log("Merging complex reading based on: " + form_values);
+              $.ajax({
+                url: getTextURL('complex/'),
+                data: form_values,
+                success: function(data) {
+                    setListOptions([ data ], "#complex-reading-list");
+                    $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                    $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+                    $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
+                    // select the newly-added option (value is data.id)
+                },
+                dataType: 'json',
+                type: 'POST'
+              });
+            }
+            // reset form
+            $('#complex-reading-text').val("").text("");
+            $('#complex-reading-form input[name="rid"]').remove();
+            $('#complex-reading-form input[name="cid"]').remove();
           }
         }
       },
@@ -2982,6 +3048,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     $('#complex-reading-list option[value = ' + selectedCR + ']').remove();
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                    oldComplexReadings = [];
                 },
                 dataType: 'json',
                 type: 'DELETE'
@@ -3019,6 +3086,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             });
             $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
             $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+            oldComplexReadings = [];
             mybuttons.button("enable");
           }
         }

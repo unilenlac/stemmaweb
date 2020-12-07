@@ -343,6 +343,12 @@ sub complex :Chained('section') :PathPart :Args(0) {
         my $reading = { id => $rid };
         push(@$components, { reading => $reading } );
       }
+
+      # add the cid, if any
+      if (defined $cid) {
+        push(@$components, { id => $cid } );
+      }
+
       my $options = {
           'components' => $components
       };
