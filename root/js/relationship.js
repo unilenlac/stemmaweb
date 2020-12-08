@@ -932,8 +932,8 @@ function node_obj(ellipse) {
       $('.rel_rdg_a').text("'" + source_node_text + "'");
       $('#target_node_id').val(readingdata[target_node_id]['id']);
       $('.rel_rdg_b').text("'" + target_node_text + "'");
-      setAlternatives('#source_node_id', '#source_node_selection');
-      setAlternatives('#target_node_id', '#target_node_selection');
+      setAlternatives('#source_node_id', '#source_hypernode_selection');
+      setAlternatives('#target_node_id', '#target_hypernode_selection');
       // This is a binary relation
       $('#dialog-form').data('binary', true);
       $('#dialog-form').dialog('open');
@@ -1270,6 +1270,9 @@ function relation_factory() {
     }
     $('#delete_relation_attributes').append(
       "This relationship" + significance + "stemmatically significant<br/>");
+    if (relation.data('is_hyperrelation') ) {
+      $('#delete_relation_attributes').append("This is a hyperrelation<br/>");
+    }
     if (relation.data('a_derivable_from_b')) {
       $('#delete_relation_attributes').append(
         "'" + relation.data('source_text') + "' derivable from '" + relation.data('target_text') + "'<br/>");
@@ -2105,7 +2108,14 @@ function dialog_background(status_el) {
 function get_relation_querystring() {
   // A cheesy hack - if we used the keystroke menu, add on the rest of the
   // source nodes to our form data.
+  // default values for source and target hypernodes
+  if (! $('#source_hypernode_id').val()) {$('#source_hypernode_id').val($('#source_node_id').val())}
+  if (! $('#target_hypernode_id').val()) {$('#target_hypernode_id').val($('#target_node_id').val())}
   var form_values = $('#merge_node_form').serialize();
+  if ( ($('#source_hypernode_id').val() && $('#source_hypernode_id').val() != $('#source_node_id').val()) || 
+    ( $('#target_hypernode_id').val() && $('#target_hypernode_id').val() != $('#target_node_id').val()) ) {
+      form_values = 'is_hyperrelation=true' + '&' + form_values;
+  }
   if (!$('#dialog-form').data('binary')) {
     var formsource = $('#source_node_id').val();
     var formtarget = $('#target_node_id').val();
@@ -2235,14 +2245,14 @@ function setAlternatives(nodeIdString, listIdString){
   $(listIdString).prepend($('<option />').attr("value", myValue).text(readingdata[rid2node[myValue]].text));
 }
 
-function setSource(){
-  $('#source_node_id').val($('#source_node_selection').val());
-  console.log("source node set: ", $('#source_node_id').val());
+function setHyperSource(){
+  $('#source_hypernode_id').val($('#source_hypernode_selection').val());
+  console.log("source hypernode set: ", $('#source_hypernode_id').val());
 }
 
-function setTarget(){
-  $('#target_node_id').val($('#target_node_selection').val());
-  console.log("target node set: ", $('#target_node_id').val());
+function setHyperTarget(){
+  $('#target_hypernode_id').val($('#target_hypernode_selection').val());
+  console.log("target hypernode set: ", $('#target_hypernode_id').val());
 }
 
 function toggle_normalise_for(relObj) {

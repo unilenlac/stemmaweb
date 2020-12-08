@@ -93,9 +93,11 @@
       <fieldset>
         <input type="hidden" name="source" id="source_node_id" />
         <input type="hidden" name="target" id="target_node_id" />
-        Source&nbsp;<select id="source_node_selection" class=".ui-widget select" onchange="setSource()"></select>
+        <input type="hidden" name="hsource" id="source_hypernode_id" />
+        <input type="hidden" name="htarget" id="target_hypernode_id" />
+        Source&nbsp;<select id="source_hypernode_selection" class=".ui-widget select" onchange="setHyperSource()"></select>
         <br><br>
-        Target&nbsp;<select id="target_node_selection" class=".ui-widget select" onchange="setTarget()"></select>
+        Target&nbsp;<select id="target_hypernode_selection" class=".ui-widget select" onchange="setHyperTarget()"></select>
         <br><br>
         <label for="rel_type">Relation type&nbsp;</label>
         <select name="type" id="rel_type" class=".ui-widget select relation-type-list">
