@@ -209,6 +209,22 @@ span.apimore {
   overflow: hidden;
 }
 
+#complex-reading-div {
+  position: absolute;
+  left: 30px;
+  top: 600px;
+  border: 2px solid #B0C6F7;
+  overflow-y: auto;
+  max-height: 600px;
+  z-index: 10;
+}
+
+#complex-reading-divheader {
+  padding: 10px;
+  cursor: move;
+  background-color: #F2F5F7;
+}
+
 #keymap {
   position: absolute;
   left: 30px;

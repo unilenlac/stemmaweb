@@ -1272,6 +1272,9 @@ function relation_factory() {
       "This relationship" + significance + "stemmatically significant<br/>");
     if (relation.data('is_hyperrelation') ) {
       $('#delete_relation_attributes').append("This is a hyperrelation<br/>");
+      show_hyperrelation_ends(relation.data('hsource'), relation.data('htarget'));
+    } else {
+      show_relation_ends(relation.data('source'), relation.data('target'));
     }
     if (relation.data('a_derivable_from_b')) {
       $('#delete_relation_attributes').append(
@@ -1917,6 +1920,7 @@ var keyCommands = {
                   oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
                 }
                 $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                getComplexReadings();
               },
               dataType: 'json',
               type: 'GET'
@@ -2094,6 +2098,48 @@ function keystroke_menu() {
 
 
 // Some utility functions for the dialogs
+
+function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  if (document.getElementById(elmnt.id + "header")) {
+    /* if present, the header is where you move the DIV from:*/
+    document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+  } else {
+    /* otherwise, move the DIV from anywhere inside the DIV:*/
+    elmnt.onmousedown = dragMouseDown;
+  }
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    /* stop moving when mouse button is released:*/
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+
 function dialog_background(status_el) {
   $(".ui-widget-overlay").css("background", "none");
   if (status_el) {
@@ -2128,6 +2174,43 @@ function get_relation_querystring() {
     })
   }
   return form_values;
+}
+
+function show_relation_ends(start_id, target_id) {
+  if ($('#update_workspace_button').data('locked')) {
+    unselect_all_readings();
+    readings_selected.push(rid2node[start_id]);
+    readings_selected.push(rid2node[target_id]);
+    color_active(get_ellipse(start_id));
+    color_active(get_ellipse(target_id));
+  }
+}
+
+function show_hyperrelation_ends(start_id, target_id) {
+  if ($('#update_workspace_button').data('locked')) {
+    unselect_all_readings();
+    var mySourceNodes = [];
+    var myTargetNodes = [];
+    // get all source and target nodes
+    var mySourceHyperreading = $('#complex-reading-full-list option[value=' + start_id + ']');
+    var myTargetHyperreading = $('#complex-reading-full-list option[value=' + target_id + ']');
+
+    if (mySourceHyperreading && mySourceHyperreading.attr('rids')) { mySourceNodes = mySourceHyperreading.attr('rids').split(','); }
+    if (myTargetHyperreading && myTargetHyperreading.attr('rids')) { myTargetNodes = myTargetHyperreading.attr('rids').split(','); }
+
+    if (! mySourceNodes.length) { mySourceNodes.push(start_id) }
+    if (! myTargetNodes.length) { myTargetNodes.push(target_id) }
+
+    // select them
+    $.each(mySourceNodes, function(i, rid) {
+      readings_selected.push(rid2node[rid]);
+      color_active(get_ellipse(rid));
+    });
+    $.each(myTargetNodes, function(i, rid) {
+      readings_selected.push(rid2node[rid]);
+      color_active(get_ellipse(rid));
+    });
+  }
 }
 
 function display_relation_type(el) {
@@ -2175,33 +2258,36 @@ function setDeleteButtonDisabled() {
 }
 
 // Complex readings dialog functions
-function display_complex_reading(){
-    // unselect old reading
-    $.each(oldComplexReadings, function(i, rid) {
-      unselect_reading(rid2node[rid]);
-    });
-    // set old
-    oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
-    $.each(oldComplexReadings, function(i, rid) {
-      if (! readings_selected.includes(rid2node[rid])) { // avoid including twice
-        readings_selected.push(rid2node[rid]);
-      };
-      color_active(get_ellipse(rid));
-    });
-    readings_selected.sort(sortByRank);
-    // set text
-    var displayText = "";
-    $.each(readings_selected, function(i, reading_id) {
-      if (! isNaN(readingdata[reading_id].id)) {// numeric
-        displayText += readingdata[reading_id]['text'] + " ";
-      }
-    });
-    $('#complex-reading-text').val(displayText.trim());
+function display_complex_reading(obj){
+    if ($('#update_workspace_button').data('locked')) {
+      // unselect old reading
+      $.each(oldComplexReadings, function(i, rid) {
+        unselect_reading(rid2node[rid]);
+      });
+      // set old
+      oldComplexReadings = $(obj).find('option[value = ' + obj.value + ']').attr('rids').split(',');
+      $.each(oldComplexReadings, function(i, rid) {
+        if (! readings_selected.includes(rid2node[rid])) { // avoid including twice
+          readings_selected.push(rid2node[rid]);
+        };
+        color_active(get_ellipse(rid));
+      });
+      readings_selected.sort(sortByRank);
+      // set text
+      var displayText = "";
+      $.each(readings_selected, function(i, reading_id) {
+        if (! isNaN(readingdata[reading_id].id)) {// numeric
+          displayText += readingdata[reading_id]['text'] + " ";
+        }
+      });
+      $('#complex-reading-text').val(displayText.trim());
+    }
 }
 
 function setListOptions(data, listIdString) {
   $.each(data, function(index, cReading) { // Add each complex reading as list element
     var myText = "";
+    var myRank = "";
     var collectedReadings = collectReadings(cReading);
     if (collectedReadings) {
       myText = collectedReadings.sort(function(a, b) { // sort component readings by rank and collect text
@@ -2209,6 +2295,7 @@ function setListOptions(data, listIdString) {
       if (keyA < keyB) return -1;
       if (keyA > keyB) return 1;
       return 0;}).reduce((collectedText, item) => collectedText + item.text + " ", "").trim();
+      myRank = collectedReadings[0].rank; // set the complex reading rank as the rank of the first component
     }
     var myCID = cReading.id;
     // if not already added
@@ -2217,7 +2304,12 @@ function setListOptions(data, listIdString) {
       var rids = $.map(collectedReadings, function(t) {
         return t.id
       });
-      $(listIdString).append($('<option />').attr("rids", rids).attr("name", "cid").attr("value", myCID).text(myText));
+      $(listIdString).append($('<option />')
+        .attr("rids", rids)
+        .attr("rank", myRank)
+        .attr("name", "cid")
+        .attr("value", myCID)
+        .text(myText));
     }
   });
   // Sort complex reading list alphabetically
@@ -2254,6 +2346,30 @@ function setHyperTarget(){
   $('#target_hypernode_id').val($('#target_hypernode_selection').val());
   console.log("target hypernode set: ", $('#target_hypernode_id').val());
 }
+
+function getComplexReadings(){
+  $('#complex-reading-full-list').empty();
+  $.ajax({
+    url: getTextURL('complex/'),
+    data: "",
+    success: function(data) {
+        setListOptions(data, "#complex-reading-full-list");
+        if ( $('#complex-reading-full-list option').length ) {
+          $('#complex-reading-full-list').attr('size', $('#complex-reading-full-list option').length);
+          // Sort list according to rank
+          $('#complex-reading-full-list').append($('#complex-reading-full-list option').remove().sort(function(a, b) {
+              var at = parseInt($(a).attr('rank')), bt = parseInt($(b).attr('rank'));
+              return (at > bt)?1:((at < bt)?-1:0);
+          }));
+          $('#complex-reading-div').show();
+        } else {
+          $('#complex-reading-div').hide();
+        }
+    },
+    dataType: 'json',
+    type: 'GET'
+  });
+};
 
 function toggle_normalise_for(relObj) {
     // Toggle selected
@@ -2366,6 +2482,9 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
   relation_manager = new relation_factory();
 
   $('#update_workspace_button').data('locked', false);
+
+  getComplexReadings();
+  dragElement(document.getElementById("complex-reading-div"));
 
   // Set up the mouse events on the SVG enlargement
   $('#enlargement').mousedown(function(event) {
@@ -2985,6 +3104,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
                     // select the newly-added option (value is data.id)
                     oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
+                    getComplexReadings();
                 },
                 dataType: 'json',
                 type: 'POST'
@@ -3026,6 +3146,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
                     // select the newly-added option (value is data.id)
+                    getComplexReadings();
                 },
                 dataType: 'json',
                 type: 'POST'
@@ -3059,6 +3180,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
                     oldComplexReadings = [];
+                    getComplexReadings();
                 },
                 dataType: 'json',
                 type: 'DELETE'
@@ -3087,6 +3209,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                   success: function() {
                       // Remove the affected list element
                       $('#complex-reading-list option[value = ' + selectedCR + ']').remove();
+                      getComplexReadings();
                   },
                   async: false,
                   dataType: 'json',
@@ -3341,11 +3464,17 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 
   // Enable the keyboard shortcuts.
 }).bind('keypress', function(event) {
+  console.log(event.which);
   if (!$(".ui-dialog").is(":visible") && editable) {
     if (event.which in keyCommands) {
       var fn = keyCommands[event.which]['function'];
       fn();
     }
+  }
+
+  if (event.which == 27) {
+    console.log("Unselecting");
+    unselect_all_readings();
   }
 });
 
