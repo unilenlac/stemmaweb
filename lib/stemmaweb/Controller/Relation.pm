@@ -318,6 +318,7 @@ sub relationtype :Chained('text') :PathPart :Args(0) {
 sub complex :Chained('section') :PathPart :Args(0) {
   my ($self, $c) = @_;
   my $m = $c->model('Directory');
+  my $textid = $c->stash->{textid};
   my $sectid = $c->stash->{sectid};
 
   my $cid  = $c->request->param('cid');
@@ -328,7 +329,7 @@ sub complex :Chained('section') :PathPart :Args(0) {
   try {
     if ($c->request->method eq 'GET') {
       # Get all complex readings in the section
-      my $location = "/section/$sectid/complex/";
+      my $location = "/tradition/$textid/section/$sectid/complex/";
       # Unless a reading is specified. In that case, get complex reading containing the reading
       if (defined $first) { $location = "/reading/$first/complex/" };
       $c->stash->{'result'} = $m->ajax('get', $location);
