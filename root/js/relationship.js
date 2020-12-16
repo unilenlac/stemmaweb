@@ -1892,7 +1892,6 @@ function requestRunningText() {
 // Set up keypress commands:
 
 var keyCommands = {
-  // TODO maybe also 'c' for compress and/or 's' for split...
   '104': {
     'key': 'h',
     'description': 'View/Set hypernodes for the selected reading(s)',
@@ -1989,9 +1988,10 @@ var keyCommands = {
           });
           var form_values = cform.serialize();
           $.post(ncpath, form_values, function(data) {
-            if (data.nodes) {
-              compress_nodes(data.nodes);
-            }
+            // if (data.nodes) {
+            //   compress_nodes(data.nodes);
+            // }
+            location.reload();
           });
         });
         unselect_all_readings();
@@ -2061,15 +2061,34 @@ var keyCommands = {
       $('#normal-form-propagate').dialog('open');
     }
   },
-  // '115': {
-  // 	'key': 's',
-  // 	'description': 'Split the selected reading according to given criteria',
-  // 	'function': function () {
-  // 		// S for Split reading
-  // 		if( readings_selected.length == 1 ) {
-  // 			$('#split-form').dialog( 'open' );
-  // 		}
-  // 	} },
+  '115': {
+  	'key': 's',
+  	'description': 'Split the selected reading according to given criteria',
+  	'function': function () {
+  		// S for Split reading
+  		if( readings_selected.length == 1 && readingdata[readings_selected[0]].text ) {
+        $('#split_reading_form').show();
+        $('#split-form-description').text("Split a reading:");
+  			$('#split-form').dialog("option","title","Split a reading").dialog( 'open' );
+        var buttonset = $('#split-form').parent().find('.ui-dialog-buttonset');
+        buttonset.find("button:contains('Split')").show();
+        buttonset.find("button:contains('Append')").hide();
+  		}
+  	} },
+  '97': {
+  	'key': 'a',
+  	'description': 'Append an empty node after the selected reading',
+  	'function': function () {
+  		// A for Append new reading
+  		if( readings_selected.length == 1 && readingdata[readings_selected[0]].text ) {
+        $('#split_reading_form').hide();
+        $('#split-form-description').text("Append an empty node after the selected reading");
+  			$('#split-form').dialog("option","title","Append empty node").dialog( 'open' );
+        var buttonset = $('#split-form').parent().find('.ui-dialog-buttonset');
+        buttonset.find("button:contains('Split')").hide();
+        buttonset.find("button:contains('Append')").show();
+  		}
+  	} },
   '120': {
     'key': 'x',
     'description': 'Expunge all relationships on the selected reading(s)',
@@ -2437,10 +2456,10 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     // reading box
     error += '<br>The reading cannot be altered.</p>';
     errordiv = '#reading-status';
-    // } else if ( $('#split-form').dialog('isOpen') ) {
-    // 	// the split-reading box
-    // 	error += '<br>The reading cannot be split.</p>';
-    // 	errordiv = '#split-form-status';
+    } else if ( $('#split-form').dialog('isOpen') ) {
+    	// the split-reading box
+    	error += '<br>The reading cannot be split.</p>';
+    	errordiv = '#split-form-status';
   } else if ($('#section-info').dialog('isOpen')) {
     // section box
     error += '<br>The section cannot be updated.</p>';
@@ -2739,33 +2758,49 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
   }
 
   // Set up the reading split dialog.
-  //   $( '#split-form').dialog({
-  // 	  autoOpen: false,
-  // 	  modal: true,
-  // 	  buttons: {
-  // 		  Cancel: function() {
-  // 			  $('#split-form-status').empty();
-  // 			  $(this).dialog("close");
-  // 		  },
-  // 		  Split: function() {
-  // 			  form_values = $('#split-form').serialize();
-  // 			  split_readings( form_values );
-  // 		  }
-  // 	  },
-  //   /* create: function() {
-  // 	  var buttonset = $(this).parent().find( '.ui-dialog-buttonset' ).css( 'width', '100%' );
-  // 	  buttonset.find( "button:contains('Cancel')" ).css( 'float', 'right' );
-  //   } */
-  // 	  open: function() {
-  // 	  // Set up the hidden form values. There should be only one reading selected.
-  // 	  var rdg = readings_selected[0];
-  // 	  $('#split_reading_id').empty().append(rdg);
-  // 	  $('#split_reading_text').empty().append(readingdata[rdg]["text"]);
-  // 	  },
-  //   close: function() {
-  // 	  $("#dialog_overlay").hide();
-  //   }
-  // });
+    $( '#split-form').dialog({
+  	  autoOpen: false,
+  	  modal: true,
+  	  buttons: {
+  		  Cancel: function() {
+  			  $('#split-form-status').empty();
+  			  $(this).dialog("close");
+  		  },
+  		  Split: function() {
+  			  var form_values = $('#split_reading_form').serialize();
+          console.log("Reading split parameters", form_values);
+          $.post(getTextURL('split'), form_values, function(data) {
+            location.reload();
+          });
+  		  },
+        Append: function() {
+          if ($('#split_reading_text').val()) {
+            $('#split_reading_index').val($('#split_reading_text').val().length);
+            var form_values = $('#split_reading_form').serialize();
+            console.log("Append empty node query  parameters:", form_values);
+            $.post(getTextURL('split'), form_values, function(data) {
+              location.reload();
+            });
+          } else {
+            alert("Cannot append after an empty node");
+          }
+  		  }
+  	  },
+    /* create: function() {
+  	  var buttonset = $(this).parent().find( '.ui-dialog-buttonset' ).css( 'width', '100%' );
+  	  buttonset.find( "button:contains('Cancel')" ).css( 'float', 'right' );
+    } */
+  	  open: function() {
+    	  // Set up the hidden form values. There should be only one reading selected.
+    	  var rdgId = readingdata[readings_selected[0]].id;
+        var rdgText = readingdata[readings_selected[0]].text;
+    	  $('#split_reading_id').val(rdgId);
+    	  $('#split_reading_text').val(rdgText);
+  	  },
+    close: function() {
+  	  $("#dialog_overlay").hide();
+    }
+  });
 
   // Set up the relationship info display and deletion dialog.
   $("#delete-form").dialog({
