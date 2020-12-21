@@ -171,7 +171,12 @@
 
   <div id="reading-form" title="Reading information">
     <form id="reading_data_form" action="#">
-      <input type="hidden" name="reading_id" id="reading_id" />
+      <div id="reading-select-div">
+        <br />
+        <span id="reading_select_form-desc">Reading to display: &nbsp;</span><p />
+        <select id="reading_select_form" onchange="display_reading_info(this.value);"></select><p />
+        <input type="hidden" name="reading_id" id="reading_id" />
+      </div>
       <div id="reading-status"></div>
       <div class="morph">
         <input type="checkbox" name="reading_is_lemma" id="reading_is_lemma" />

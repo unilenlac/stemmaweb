@@ -82,6 +82,36 @@ function sortByRank(a, b) {
   return readingdata[a]["rank"] < readingdata[b]["rank"] ? -1 : 1;
 }
 
+// Get all nodes behind these representative nodes (aka shaddowed nodes) when in normalised view.
+function populateReadingsFamily(ridList) {
+  myList = [];
+  ridList.sort(sortByRank);
+  $.each(ridList, function(i, nid) {
+      myList[i] = [];
+      myList[i].push(readingdata[nid].id);
+  });
+
+  if ($('#svgenlargement').data('display_normalised')) {
+    // grow list: add shaddowed readings
+    $.each(ridList, function(j, nid) {
+      var ncpath = getTextURL('related/');
+      var rid = readingdata[nid].id;
+      ncpath += rid + "/" + $('#normalize-for-type').serialize().replaceAll("normalise=", "types=");
+      $.ajax({
+        url: ncpath,
+        success: function(data) {
+          $.each(data, function(index, reading) {
+            myList[j].push(reading.id);
+          });
+        },
+        async: false,
+        type: 'GET'
+      });
+    });
+  }
+  return myList;
+}
+
 // Utility function to generate combinations of multiple sets.
 let buildCombo = (input) => {
     if (input.length == 1) {
@@ -113,11 +143,34 @@ let collectReadings = (input) => {
   }
 }
 
+function display_reading_info(rid) {
+  var inReading = readingdata[rid2node[rid]];
+  if ( inReading ) {
+    // Set the easy properties first
+    var opt = {
+      title: 'Reading information for "' + inReading['text'] + '"'
+    };
+    $('#reading_id').val(inReading['id']);
+    toggle_checkbox($('#reading_is_lemma'), inReading['is_lemma']);
+    toggle_checkbox($('#reading_is_nonsense'), inReading['is_nonsense']);
+    toggle_checkbox($('#reading_grammar_invalid'), inReading['grammar_invalid']);
+
+    // Now set the text properties
+    setup_readingbox('normal_form', inReading);
+    setup_readingbox('text', inReading);
+    setup_readingbox('display', inReading);
+
+    // and then open the dialog.
+    $('#reading-form').dialog(opt).dialog("open");
+  }
+}
+
 function update_reading_display(node_id) {
   // Grab the reading data from which we update
   var rdata = readingdata[node_id];
   // Get the elements of the node. These are JQuery objects
   var ellipse = get_ellipse(node_id);
+  if (! ellipse.length ) {return;} // shaddowed reading; do nothing
   var g = ellipse.parent();
   // ...but this is a DOM object
   var text = g.find('text').get(0);
@@ -181,24 +234,23 @@ function node_dblclick_listener(evt) {
   // Open the reading dialogue for the given node.
   // First get the reading info
   var svg_id = $(this).attr('id');
-  var reading_info = readingdata[svg_id];
+  var myRid = readingdata[svg_id].id;
+  var allReadings = populateReadingsFamily([svg_id])[0].sort();
+  $('#reading-select-div').hide();
+  $('#reading_select_form').empty();
+  if (allReadings.length > 1) {
+    $('#reading-select-div').show();
+    $.each(allReadings, function(i, reading) {
+      var myReading = readingdata[rid2node[reading]];
+      var myWitText = myReading.witnesses.length > 5 ?
+        myReading.witnesses.slice(0, 3).join(', ') + " and other " + (myReading.witnesses.length - 3).toString() + " other witnesses" :
+        myReading.witnesses.join(', ');
+      var myText = myReading.text + " (id: " + myReading.id + "; in " + myWitText + ")";
+      $('#reading_select_form').append($('<option>').attr('value', reading).text(myText));
+    });
+  }
   // and then populate the dialog box with it.
-  // Set the easy properties first
-  var opt = {
-    title: 'Reading information for "' + reading_info['text'] + '"'
-  };
-  $('#reading_id').val(reading_info['id']);
-  toggle_checkbox($('#reading_is_lemma'), reading_info['is_lemma']);
-  toggle_checkbox($('#reading_is_nonsense'), reading_info['is_nonsense']);
-  toggle_checkbox($('#reading_grammar_invalid'), reading_info['grammar_invalid']);
-
-  // Now set the text properties
-  setup_readingbox('normal_form', reading_info);
-  setup_readingbox('text', reading_info);
-  setup_readingbox('display', reading_info);
-
-  // and then open the dialog.
-  $('#reading-form').dialog(opt).dialog("open");
+  display_reading_info(myRid);
   return false;
 }
 
@@ -1940,31 +1992,7 @@ var keyCommands = {
     'function': function() {
       // C for Compress
       if (readings_selected.length > 0) {
-        ridToCompress = [];
-        readings_selected.sort(sortByRank);
-        $.each(readings_selected, function(i, nid) {
-            ridToCompress[i] = [];
-            ridToCompress[i].push(readingdata[nid].id);
-        });
-
-        if ($('#svgenlargement').data('display_normalised')) {
-          // grow ridToCompress: add shaddowed readings in the original as well
-          $.each(readings_selected, function(j, nid) {
-            var ncpath = getTextURL('related/');
-            var rid = readingdata[nid].id;
-            ncpath += rid + "/" + $('#normalize-for-type').serialize().replaceAll("normalise=", "types=");
-            $.ajax({
-              url: ncpath,
-              success: function(data) {
-                $.each(data, function(index, reading) {
-                  ridToCompress[j].push(reading.id);
-                });
-              },
-              async: false,
-              type: 'GET'
-            });
-          });
-        }
+        ridToCompress = populateReadingsFamily(readings_selected);
 
         var readingPaths = buildCombo(ridToCompress);
         if (readingPaths.length > 1) {
