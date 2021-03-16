@@ -2082,13 +2082,13 @@ var keyCommands = {
       });
     }
   },
-  '110': {
-    'key': 'n',
-    'description': 'Propagate the normal form of the selected reading(s) along specified relations',
-    'function': function() {
-      $('#normal-form-propagate').dialog('open');
-    }
-  },
+  // '110': {
+  //   'key': 'n',
+  //   'description': 'Propagate the normal form of the selected reading(s) along specified relations',
+  //   'function': function() {
+  //     $('#normal-form-propagate').dialog('open');
+  //   }
+  // },
   '115': {
   	'key': 's',
   	'description': 'Split the selected reading according to given criteria',
