@@ -2316,10 +2316,7 @@ function setDeleteButtonDisabled() {
 // Complex readings dialog functions
 function display_complex_reading(obj){
     if ($('#update_workspace_button').data('locked')) {
-      // unselect old reading
-      $.each(oldComplexReadings, function(i, rid) {
-        unselect_reading(rid2node[rid]);
-      });
+      unselect_all_readings();
       // set old
       oldComplexReadings = $(obj).find('option[value = ' + obj.value + ']').attr('rids').split(',');
       $.each(oldComplexReadings, function(i, rid) {
