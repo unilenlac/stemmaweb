@@ -984,10 +984,9 @@ function node_obj(ellipse) {
       $('.rel_rdg_a').text("'" + source_node_text + "'");
       $('#target_node_id').val(readingdata[target_node_id]['id']);
       $('.rel_rdg_b').text("'" + target_node_text + "'");
-      setAlternatives('#source_node_id', '#source_hypernode_selection');
-      setAlternatives('#target_node_id', '#target_hypernode_selection');
       // This is a binary relation
       $('#dialog-form').data('binary', true);
+      $('#dialog-form').data('dragdrop', true);
       $('#dialog-form').dialog('open');
     };
     $('body').unbind('mousemove');
@@ -2219,7 +2218,7 @@ function get_relation_querystring() {
     ( $('#target_hypernode_id').val() && $('#target_hypernode_id').val() != $('#target_node_id').val()) ) {
       form_values = 'is_hyperrelation=true' + '&' + form_values;
   }
-  if (!$('#dialog-form').data('binary')) {
+  if (!$('#dialog-form').data('dragdrop')) {
     var formsource = $('#source_node_id').val();
     var formtarget = $('#target_node_id').val();
     $.each(readings_selected, function(i, nid) {
@@ -2609,6 +2608,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           mybuttons.button('disable');
           var form_values = get_relation_querystring();
           var ncpath = getTextURL('relationships');
+          console.log("About to post: ", ncpath, form_values);
           var jqjson = $.post(ncpath, form_values, function(data) {
             // If we were handed a 304 response, there won't be data.
             if (data) {
@@ -2663,20 +2663,18 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         });
       },
       open: function() {
+        $('#source_hypernode_div').hide();
+        $('#target_hypernode_div').hide();
         // Don't allow merge (or split) if we are in normalised view mode
         var show_merge = !$('#svgenlargement').data('display_normalised');
-        if ($('#dialog-form').data('binary')) {
+        if ($('#dialog-form').data('dragdrop')) {
           // Form values are already set from the mouseup event
           // Should the merge button be shown?
           show_merge = readings_equivalent(rid2node[$('#source_node_id').val()],
             rid2node[$('#target_node_id').val()]);
-            $('#source_hypernode_div').show();
-            $('#target_hypernode_div').show();
         } else {
           // Hide the parts of the form that aren't applicable
           $('#binary_relation_only').hide();
-          $('#source_hypernode_div').hide();
-          $('#target_hypernode_div').hide();
           // We need to set the form values from readings_selected
           var numrdgs = readings_selected.length;
           var target = readings_selected[numrdgs - 1];
@@ -2686,6 +2684,19 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           $.each(readings_selected, function(i, nid) {
             show_merge = show_merge && readings_equivalent(nid, target);
           });
+        }
+        if ($('#dialog-form').data('binary')) {
+          var mySourceReading = $('#source_node_id').val();
+          var mySourceReadingHasHypernodes = $('#complex-reading-full-list option[rids*="' + mySourceReading + '"]').length > 0;
+          var myTargetReading = $('#target_node_id').val();
+          var myTargetReadingHasHypernodes = $('#complex-reading-full-list option[rids*="' + myTargetReading + '"]').length > 0;
+
+          if ( mySourceReadingHasHypernodes || myTargetReadingHasHypernodes ) { // only show source and target selection lists if there are hypernodes containing these nodes
+            setAlternatives('#source_node_id', '#source_hypernode_selection');
+            setAlternatives('#target_node_id', '#target_hypernode_selection');
+            $('#source_hypernode_div').show();
+            $('#target_hypernode_div').show();
+          }
         }
         // In the case of a drag-and-drop relation, the source node is in readings_selected;
         // otherwise, all nodes are. Make our temporary relations
