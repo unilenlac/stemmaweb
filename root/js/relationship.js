@@ -2600,7 +2600,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             }
           });
         },
-        OK: function(evt) {
+        'Create': function(evt) {
           var mybuttons = $(evt.target).closest('button').parent().find('button');
           mybuttons.button('disable');
           var form_values = get_relation_querystring();
@@ -2707,7 +2707,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         // Show the merge button if applicable
         var buttonset = $(this).parent().find('.ui-dialog-buttonset')
         if (show_merge) {
-          buttonset.find("button:contains('Merge readings')").show();
+          buttonset.find("button:contains('Merge readings')").hide();
         } else {
           buttonset.find("button:contains('Merge readings')").hide();
         }
