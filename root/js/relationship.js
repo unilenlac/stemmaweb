@@ -2670,9 +2670,13 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           // Should the merge button be shown?
           show_merge = readings_equivalent(rid2node[$('#source_node_id').val()],
             rid2node[$('#target_node_id').val()]);
+            $('#source_hypernode_div').show();
+            $('#target_hypernode_div').show();
         } else {
           // Hide the parts of the form that aren't applicable
           $('#binary_relation_only').hide();
+          $('#source_hypernode_div').hide();
+          $('#target_hypernode_div').hide();
           // We need to set the form values from readings_selected
           var numrdgs = readings_selected.length;
           var target = readings_selected[numrdgs - 1];
