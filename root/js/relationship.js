@@ -2429,11 +2429,28 @@ function getComplexReadings(){
         } else {
           $('#complex-reading-div').hide();
         }
+        setComplexReadingBorder();
     },
     dataType: 'json',
     type: 'GET'
   });
 };
+
+function setComplexReadingBorder(){
+    // reset bolders of all nodes
+    $('#svgenlargement .node ellipse').removeAttr("stroke-width");
+
+    // Collect individual readings from the Hypernodes list and increase border width for each
+    var readings = [];
+    $('#complex-reading-full-list option').each(function(){ // for each complex reading
+        for (let reading of $(this).attr('rids').split(',')) { // for each individual reading
+            if ( readings.indexOf(reading) < 0 ) { // make sure it is treated only once
+                readings.push(reading);
+                $('#svgenlargement .node title:contains(' + reading + ')').next('ellipse').attr("stroke-width", "2.5");
+            }
+        }
+    });
+}
 
 function toggle_normalise_for(relObj) {
     // Toggle selected
@@ -2546,9 +2563,6 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
   relation_manager = new relation_factory();
 
   $('#update_workspace_button').data('locked', false);
-
-  getComplexReadings();
-  dragElement(document.getElementById("complex-reading-div"));
 
   // Set up the mouse events on the SVG enlargement
   $('#enlargement').mousedown(function(event) {
@@ -3632,6 +3646,9 @@ function loadSVG(normalised) {
         $(this).children('title').text(sigilText + ":\n" + edgeText + "\n\n" + sourceText + "\n->\n" + targetText);
     });
   });
+
+  getComplexReadings();
+  dragElement(document.getElementById("complex-reading-div"));
 }
 
 
