@@ -2315,7 +2315,7 @@ function setDeleteButtonDisabled() {
 
 // Complex readings dialog functions
 function display_complex_reading(obj){
-    if ($('#update_workspace_button').data('locked')) {
+    if ($('#update_workspace_button').data('locked')) { // edit mode
       unselect_all_readings();
       // set old
       oldComplexReadings = $(obj).find('option[value = ' + obj.value + ']').attr('rids').split(',');
@@ -2334,6 +2334,17 @@ function display_complex_reading(obj){
         }
       });
       $('#complex-reading-text').val(displayText.trim());
+    }
+    else { // view mode
+      // alternate between inactive and active
+      $('#svgenlargement .node ellipse').each(function(){
+        color_inactive($(this));
+      });
+
+      // current selection is active
+      $(obj).find('option[value = ' + obj.value + ']').attr('rids').split(',').forEach(function(rid){
+          get_ellipse(rid).attr("fill", "#9999ff");
+      });
     }
 }
 
