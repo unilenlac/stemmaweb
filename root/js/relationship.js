@@ -2628,6 +2628,14 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         'Create': function(evt) {
           var mybuttons = $(evt.target).closest('button').parent().find('button');
           mybuttons.button('disable');
+          // ENLAC form customisation follow-up
+          $('#non_independent').prop('checked', ! $('#dependent').prop('checked'));
+          var myPolarisation = $('input[type=radio][name=polarisation]:checked').val();
+          $('#b_derivable_from_a').prop('checked', myPolarisation == "b_from_a");
+          $('#a_derivable_from_b').prop('checked', myPolarisation == "a_from_b");
+          // exclude polarisation from submission
+          $('input[type=radio][name=polarisation]').prop('disabled', true);
+
           var form_values = get_relation_querystring();
           var ncpath = getTextURL('relationships');
           console.log("About to post: ", ncpath, form_values);
@@ -2685,6 +2693,13 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         });
       },
       open: function() {
+        // ENLAC form customisation
+        $('#scope').hide(); $('#scope').prevUntil('select').hide();
+        $('#non_independent').hide(); $('#non_independent').next('label').hide();
+        $('#b_derivable_from_a').hide(); $('#b_derivable_from_a').nextAll().hide();
+        $('input[type=radio][name=polarisation]').prop('disabled', false);
+        $('input[type=radio][name=polarisation]').prop('checked', false); // reset
+
         $('#source_hypernode_div').hide();
         $('#target_hypernode_div').hide();
         // Don't allow merge (or split) if we are in normalised view mode

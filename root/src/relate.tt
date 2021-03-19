@@ -87,7 +87,7 @@
   <div id="relation_hider_button" title="Show/hide relation types"></div>
   <div id="update_workspace_button"></div>
 
-  <div id="dialog-form" title="Create relation between two nodes...">
+  <div id="dialog-form" title="Create relation between readings...">
     <div id="dialog-form-status"></div>
     <form id="merge_node_form" action="#">
       <fieldset>
@@ -115,6 +115,14 @@
         <select name="is_significant" id="is_significant" class=".ui-widget select"></select>
         <br><br>
         <div id="binary_relation_only">
+          Polarisation
+          <br>
+          <input style="margin-left: 30px;" type="radio" id="b_derivable_from_a_radio" name="polarisation" value="b_from_a" >
+          <label for="b_derivable_from_a_radio"><span class="rel_rdg_b"></span> is preferable to <span class="rel_rdg_a"></span></label>
+          <br>
+          <input style="margin-left: 30px;" type="radio" id="a_derivable_from_b_radio" name="polarisation" value="a_from_b" >
+          <label for="a_derivable_from_b_radio"><span class="rel_rdg_a"></span> is preferable to <span class="rel_rdg_b"></span></label>
+          <br><br>
           <input type="checkbox" name="b_derivable_from_a" id="b_derivable_from_a" />
           <label for="b_derivable_from_a"><span class="rel_rdg_a"></span> would be corrected to <span class="rel_rdg_b"></span>&nbsp;</label>
           <br>
@@ -122,10 +130,12 @@
           <label for="a_derivable_from_b"><span class="rel_rdg_b"></span> would be corrected to <span class="rel_rdg_a"></span>&nbsp;</label>
           <br>
         </div>
+        <input type="checkbox" id="dependent" />
+        <label for="dependent">Variants could arise coincidentally&nbsp;</label>
         <input type="checkbox" name="non_independent" id="non_independent" />
         <label for="non_independent">Variants unlikely to arise coincidentally&nbsp;</label>
         <br><br>
-        <label for="note">Annotation or note&nbsp;</label>
+        <label for="note">Annotation (ie. philological note)&nbsp;</label>
         <textarea rows="3" style="width:100%;" name="annotation" id="note" class=".ui-widget input"></textarea>
       </fieldset>
     </form>
