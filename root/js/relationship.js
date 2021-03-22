@@ -9,6 +9,7 @@ var rid2node = {};
 var readings_selected = [];
 var ridToCompress = [];
 var oldComplexReadings = [];
+var reading_clicked = null;
 
 jQuery.removeFromArray = function(value, arr) {
   return jQuery.grep(arr, function(elem, index) {
@@ -160,6 +161,8 @@ function display_reading_info(rid) {
     setup_readingbox('text', inReading);
     setup_readingbox('display', inReading);
 
+    lock_unlock_edited_form();
+
     // and then open the dialog.
     $('#reading-form').dialog(opt).dialog("open");
   }
@@ -235,11 +238,14 @@ function node_dblclick_listener(evt) {
   // First get the reading info
   var svg_id = $(this).attr('id');
   var myRid = readingdata[svg_id].id;
+  reading_clicked = myRid;
   var allReadings = populateReadingsFamily([svg_id])[0].sort();
   $('#reading-select-div').hide();
+  $('#reading_is_representative').hide(); $('#reading_is_representative').nextUntil('input').hide();
   $('#reading_select_form').empty();
   if (allReadings.length > 1) {
     $('#reading-select-div').show();
+    $('#reading_is_representative').show(); $('#reading_is_representative').nextUntil('input').show();
     $.each(allReadings, function(i, reading) {
       var myReading = readingdata[rid2node[reading]];
       var myWitText = myReading.witnesses.length > 5 ?
@@ -250,6 +256,8 @@ function node_dblclick_listener(evt) {
     });
   }
   // and then populate the dialog box with it.
+  // auto-select the clicked reading
+  $('#reading_select_form option[value=' + myRid +']').attr('selected',true);
   display_reading_info(myRid);
   return false;
 }
@@ -272,7 +280,7 @@ function toggle_checkbox(box, value) {
   if (value == null) {
     value = false;
   }
-  box.attr('checked', value);
+  box.prop('checked', value);
 }
 
 function stringify_wordform(tag) {
@@ -2452,6 +2460,38 @@ function setComplexReadingBorder(){
     });
 }
 
+function lock_unlock_changes(ask){
+    if ( $('#unlock').prop('checked') ) {
+        if (ask && ! confirm("I confirm I want to modify the reading forms from the collation.")) {
+            $('#unlock').prop('checked', false)
+        }
+    }
+    $('#correction .inputs .input').prop('disabled', ! $('#unlock').prop('checked'));
+}
+
+function lock_unlock_edited_form(){
+    // Edited form is accessible iff reading is lemma
+    if ( $('#reading_is_lemma').prop('checked') ) {
+        $('#editedform').show();
+    } else {
+        $('#editedform').hide();
+    }
+}
+
+function update_representative_node(){
+    if ( $('#reading_is_representative').prop('checked') ) {
+        if ($('#reading_id').val() != reading_clicked) {
+            var myNode = $('#svgenlargement .node title:contains(' + reading_clicked + ')').parent();
+            // update text of node
+            myNode.find('text').text($('#reading_display').val());
+            //update title of node (use new id)
+            myNode.find('title').text($('#reading_id').val());
+            //update g id
+            myNode.attr('id', rid2node[$('#reading_id').val()]);
+        }
+    }
+}
+
 function toggle_normalise_for(relObj) {
     // Toggle selected
     $('#normalize-for-type').children().eq(relObj.index()).prop("selected",
@@ -2980,6 +3020,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             }
           });
           mybuttons.button("enable");
+          update_representative_node();
           $("#reading-form").dialog("close");
         });
         return false;
@@ -2999,6 +3040,9 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     open: function() {
       dialog_background('#reading-status');
       $("#reading-form").parent().find('.ui-button').button("enable");
+      $('#unlock').prop('checked', false);
+      $('#reading_is_representative').prop('checked', false)
+      lock_unlock_changes(false);
     },
     close: function() {
       $("#dialog_overlay").hide();
