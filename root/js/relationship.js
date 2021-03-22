@@ -148,9 +148,6 @@ function display_reading_info(rid) {
   var inReading = readingdata[rid2node[rid]];
   if ( inReading ) {
     // Set the easy properties first
-    var opt = {
-      title: 'Reading information for "' + inReading['text'] + '"'
-    };
     $('#reading_id').val(inReading['id']);
     toggle_checkbox($('#reading_is_lemma'), inReading['is_lemma']);
     toggle_checkbox($('#reading_is_nonsense'), inReading['is_nonsense']);
@@ -164,7 +161,7 @@ function display_reading_info(rid) {
     lock_unlock_edited_form();
 
     // and then open the dialog.
-    $('#reading-form').dialog(opt).dialog("open");
+    $('#reading-form').dialog("open");
   }
 }
 
@@ -241,11 +238,12 @@ function node_dblclick_listener(evt) {
   reading_clicked = myRid;
   var allReadings = populateReadingsFamily([svg_id])[0].sort();
   $('#reading-select-div').hide();
-  $('#reading_is_representative').hide(); $('#reading_is_representative').nextUntil('input').hide();
+  $('#reading_info_left').hide();
   $('#reading_select_form').empty();
-  if (allReadings.length > 1) {
+  $('#repr_readings_list').empty();
+  if (allReadings.length > 1) { // multiple readings
     $('#reading-select-div').show();
-    $('#reading_is_representative').show(); $('#reading_is_representative').nextUntil('input').show();
+    $('#reading_info_left').show();
     $.each(allReadings, function(i, reading) {
       var myReading = readingdata[rid2node[reading]];
       var myWitText = myReading.witnesses.length > 5 ?
@@ -253,11 +251,15 @@ function node_dblclick_listener(evt) {
         myReading.witnesses.join(', ');
       var myText = myReading.text + " (id: " + myReading.id + "; in " + myWitText + ")";
       $('#reading_select_form').append($('<option>').attr('value', reading).text(myText));
+      $('#repr_readings_list').append($('<input>').attr('type', "radio").attr('id', "radio" + reading).attr('name', "repr_reading").attr('value', reading));
+      $('#repr_readings_list').append($('<label>').attr('for', "radio" + reading).text(myText));
+      $('#repr_readings_list').append($('<br>'));      
     });
   }
   // and then populate the dialog box with it.
   // auto-select the clicked reading
   $('#reading_select_form option[value=' + myRid +']').attr('selected',true);
+  $('#repr_readings_list input[value=' + myRid +']').prop("checked", true);
   display_reading_info(myRid);
   return false;
 }
@@ -2479,16 +2481,15 @@ function lock_unlock_edited_form(){
 }
 
 function update_representative_node(){
-    if ( $('#reading_is_representative').prop('checked') ) {
-        if ($('#reading_id').val() != reading_clicked) {
-            var myNode = $('#svgenlargement .node title:contains(' + reading_clicked + ')').parent();
-            // update text of node
-            myNode.find('text').text($('#reading_display').val());
-            //update title of node (use new id)
-            myNode.find('title').text($('#reading_id').val());
-            //update g id
-            myNode.attr('id', rid2node[$('#reading_id').val()]);
-        }
+    var myValue = $('input[name="repr_reading"]:checked').val();
+    if (myValue != reading_clicked) {
+        var myNode = $('#svgenlargement .node title:contains(' + reading_clicked + ')').parent();
+        // update text of node
+        myNode.find('text').text(readingdata[rid2node[myValue]].text);
+        //update title of node (use new id)
+        myNode.find('title').text(myValue);
+        //update g id
+        myNode.attr('id', rid2node[myValue]);
     }
 }
 
@@ -2985,7 +2986,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
   $('#reading-form').dialog({
     autoOpen: false,
     // height: 400,
-    width: 450,
+    width: 600,
     modal: true,
     buttons: {
       Cancel: function() {
@@ -3041,7 +3042,6 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       dialog_background('#reading-status');
       $("#reading-form").parent().find('.ui-button').button("enable");
       $('#unlock').prop('checked', false);
-      $('#reading_is_representative').prop('checked', false)
       lock_unlock_changes(false);
     },
     close: function() {
