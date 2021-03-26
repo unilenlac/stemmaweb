@@ -249,7 +249,7 @@ function node_dblclick_listener(evt) {
     $.each(allReadings, function(i, reading) {
       var myReading = readingdata[rid2node[reading]];
       var myWitText = myReading.witnesses.length > 5 ?
-        myReading.witnesses.slice(0, 3).join(', ') + " and other " + (myReading.witnesses.length - 3).toString() + " other witnesses" :
+        myReading.witnesses.slice(0, 3).join(', ') + " + " + (myReading.witnesses.length - 3).toString() + " wit." :
         myReading.witnesses.join(', ');
       var myText = myReading.text + " (id: " + myReading.id + "; in " + myWitText + ")";
       $('#reading_select_form').append($('<option>').attr('value', reading).text(myText));
