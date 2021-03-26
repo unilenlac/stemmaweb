@@ -469,3 +469,10 @@ rect.showcase {
   fill: red;
   fill-opacity: 0.2;
 }
+
+#reading_info_left {
+  border-right: 1px double grey;
+}
+#reading_info_right {
+  padding-left: 10px;
+}

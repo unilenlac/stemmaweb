@@ -204,7 +204,7 @@
               <br>
             </div>
       </td>
-      <td style="width:50%;">
+      <td id="reading_info_right" style="width:50%;">
         <br />
         <div id="reading-select-div">
           <span id="reading_select_form-desc">Form to modify: &nbsp;</span><p />
