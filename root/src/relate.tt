@@ -232,11 +232,9 @@
           <br>
         </div>
         <!-- Morphological options go here -->
-
-        <br><br>
-        <input type="checkbox" id="unlock" onclick="lock_unlock_changes(true)"><label for="unlock"> Unlock changes </label>
+        <br>
         <div id="correction" class="floatcontainer caution">
-          Correct the reading - handle with care!<br>
+          <input type="checkbox" id="unlock" onclick="lock_unlock_changes(true)"><label for="unlock">Correct the reading - handle with care! </label><br>
           <div class="labels">
             <label for="reading_display">Token form: </label>
           </div>
