@@ -193,8 +193,16 @@
 
             <div class="morph">
               <br/>
-              <input type="checkbox" name="repr_reading_is_lemma" id="repr_reading_is_lemma"/>
+              <input type="checkbox" name="repr_reading_is_lemma" id="repr_reading_is_lemma" onclick="on_repr_reading_is_lemma()"/>
               <label for="repr_reading_is_lemma">This is the lemma reading</label>
+                <div id="repr_editedform" class="class="floatcontainer morph"">
+                  <div class="labels">
+                    <label for="reading_text">Edited form: </label>
+                  </div>
+                  <div class="inputs">
+                    <textarea rows="2" style="width:100%;" class=".ui-widget input" name="reading_text" id="repr_reading_text"></textarea>
+                  </div>
+                </div>
               <br>
               <input type="checkbox" name="repr_reading_is_nonsense" id="repr_reading_is_nonsense" />
               <label for="repr_reading_is_nonsense">All readings are nonsense words</label>

@@ -158,7 +158,9 @@ function display_reading_info(rid) {
     setup_readingbox('text', inReading);
     setup_readingbox('display', inReading);
 
-    lock_unlock_edited_form();
+    toggle_checkbox($('#repr_reading_is_lemma'), readingdata[rid2node[rid]]['is_lemma']);
+    $('#repr_reading_text').val($('#reading_text').val());
+    on_repr_reading_is_lemma();
 
     // and then open the dialog.
     $('#reading-form').dialog("open");
@@ -251,18 +253,18 @@ function node_dblclick_listener(evt) {
       var myWitText = myReading.witnesses.length > 5 ?
         myReading.witnesses.slice(0, 3).join(', ') + " + " + (myReading.witnesses.length - 3).toString() + " wit." :
         myReading.witnesses.join(', ');
-      var myText = myReading.text + " (id: " + myReading.id + "; in " + myWitText + ")";
+      var myText = myReading.display + " (id: " + myReading.id + "; in " + myWitText + ")";
       $('#reading_select_form').append($('<option>').attr('value', reading).text(myText));
-      $('#repr_readings_list').append($('<input>').attr('type', "radio").attr('id', "radio" + reading).attr('name', "repr_reading").attr('value', reading));
+      $('#repr_readings_list').append($('<input>').attr('type', "radio").attr('id', "radio" + reading).attr('name', "repr_reading").attr('value', reading).attr('onclick', "repr_readings_click(this);"));
       $('#repr_readings_list').append($('<label>').attr('for', "radio" + reading).text(myText));
       $('#repr_readings_list').append($('<br>'));
     });
   }
   // and then populate the dialog box with it.
-  // auto-select the clicked reading
+  // auto select the clicked reading
   $('#reading_select_form option[value=' + myRid +']').attr('selected',true);
-  $('#repr_readings_list input[value=' + myRid +']').prop("checked", true);
   display_reading_info(myRid);
+  $('#repr_readings_list input[value=' + myRid +']').prop("checked", true);
   return false;
 }
 
@@ -2482,12 +2484,26 @@ function lock_unlock_edited_form(){
     }
 }
 
+function on_repr_reading_is_lemma() {
+  // Edited form is accessible iff reading is lemma
+  if ( $('#repr_reading_is_lemma').prop('checked') ) {
+      $('#repr_editedform').show();
+  } else {
+      $('#repr_editedform').hide();
+  }
+}
+
+function repr_readings_click(obj) {
+  $('#reading_select_form option[value=' + obj.value +']').prop('selected',true);
+  display_reading_info(obj.value);
+}
+
 function update_representative_node(){
     var myValue = $('input[name="repr_reading"]:checked').val();
     if (myValue != reading_clicked) {
         var myNode = $('#svgenlargement .node title:contains(' + reading_clicked + ')').parent();
         // update text of node
-        myNode.find('text').text(readingdata[rid2node[myValue]].text);
+        myNode.find('text').text(readingdata[rid2node[myValue]].display);
         //update title of node (use new id)
         myNode.find('title').text(myValue);
         //update g id
@@ -3000,6 +3016,11 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         mybuttons.button('disable');
         $('#reading-form-status').empty();
         var reading_id = $('#reading_id').val()
+        if ( $('#repr_readings_list input').length > 1 ) {
+          $('#reading_is_lemma').prop('checked', $('#repr_reading_is_lemma').is(':checked'));
+          $('#reading_text').val($('#repr_reading_text').val());
+          update_representative_node();
+        }
         var form_values = {
           'id': reading_id,
           'is_lemma': $('#reading_is_lemma').is(':checked'),
@@ -3023,7 +3044,6 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             }
           });
           mybuttons.button("enable");
-          update_representative_node();
           $("#reading-form").dialog("close");
         });
         return false;
@@ -3043,6 +3063,9 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     open: function() {
       dialog_background('#reading-status');
       $("#reading-form").parent().find('.ui-button').button("enable");
+      $("#reading-form").parent().find('.ui-button').focus();
+      if ( ! $('#reading_is_lemma').prop('checked') ) { $('#editedform').hide(); }
+      if ( ! $('#repr_reading_is_lemma').prop('checked') ) { $('#repr_editedform').hide(); }
       $('#unlock').prop('checked', false);
       lock_unlock_changes(false);
     },

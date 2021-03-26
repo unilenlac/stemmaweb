@@ -472,7 +472,11 @@ rect.showcase {
 
 #reading_info_left {
   border-right: 1px double grey;
+  padding-right: 10px;
 }
 #reading_info_right {
   padding-left: 10px;
+}
+#repr_editedform {
+  display: table;
 }
