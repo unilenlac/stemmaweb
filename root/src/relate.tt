@@ -197,10 +197,10 @@
               <label for="repr_reading_is_lemma">This is the lemma reading</label>
               <br>
               <input type="checkbox" name="repr_reading_is_nonsense" id="repr_reading_is_nonsense" />
-              <label for="repr_reading_is_nonsense">These readings are nonsense words</label>
+              <label for="repr_reading_is_nonsense">All readings are nonsense words</label>
               <br>
               <input type="checkbox" name="repr_reading_grammar_invalid" id="repr_reading_grammar_invalid" />
-              <label for="repr_reading_grammar_invalid">These readings' grammar cannot be right</label>
+              <label for="repr_reading_grammar_invalid">All readings are ungrammatical</label>
               <br>
             </div>
       </td>
