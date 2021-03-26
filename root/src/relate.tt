@@ -215,6 +215,14 @@
         <div class="morph">
           <input type="checkbox" name="reading_is_lemma" id="reading_is_lemma" onclick="lock_unlock_edited_form()"/>
           <label for="reading_is_lemma">This is the lemma reading</label>
+            <div id="editedform" class="floatcontainer morph">
+              <div class="labels">
+                <label for="reading_text">Edited form: </label>
+              </div>
+              <div class="inputs">
+                <textarea rows="2" style="width:100%;" class=".ui-widget input" name="reading_text" id="reading_text"></textarea>
+              </div>
+            </div>
           <br>
           <input type="checkbox" name="reading_is_nonsense" id="reading_is_nonsense" />
           <label for="reading_is_nonsense">This is a nonsense word</label>
@@ -224,14 +232,7 @@
           <br>
         </div>
         <!-- Morphological options go here -->
-        <div id="editedform" class="floatcontainer morph">
-          <div class="labels">
-            <label for="reading_text">Edited form: </label>
-          </div>
-          <div class="inputs">
-            <textarea rows="2" style="width:100%;" class=".ui-widget input" name="reading_text" id="reading_text"></textarea>
-          </div>
-        </div>
+
         <br><br>
         <input type="checkbox" id="unlock" onclick="lock_unlock_changes(true)"><label for="unlock"> Unlock changes </label>
         <div id="correction" class="floatcontainer caution">
