@@ -241,9 +241,11 @@ function node_dblclick_listener(evt) {
   $('#reading_info_left').hide();
   $('#reading_select_form').empty();
   $('#repr_readings_list').empty();
+  $('#reading_is_lemma').show(); $('#reading_is_lemma').nextUntil('input').show();
   if (allReadings.length > 1) { // multiple readings
     $('#reading-select-div').show();
     $('#reading_info_left').show();
+    $('#reading_is_lemma').hide(); $('#reading_is_lemma').nextUntil('input').hide();
     $.each(allReadings, function(i, reading) {
       var myReading = readingdata[rid2node[reading]];
       var myWitText = myReading.witnesses.length > 5 ?
