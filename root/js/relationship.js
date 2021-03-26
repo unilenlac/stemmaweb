@@ -253,7 +253,7 @@ function node_dblclick_listener(evt) {
       $('#reading_select_form').append($('<option>').attr('value', reading).text(myText));
       $('#repr_readings_list').append($('<input>').attr('type', "radio").attr('id', "radio" + reading).attr('name', "repr_reading").attr('value', reading));
       $('#repr_readings_list').append($('<label>').attr('for', "radio" + reading).text(myText));
-      $('#repr_readings_list').append($('<br>'));      
+      $('#repr_readings_list').append($('<br>'));
     });
   }
   // and then populate the dialog box with it.
@@ -1347,7 +1347,7 @@ function relation_factory() {
     }
     if (relation.data('non_independent')) {
       $('#delete_relation_attributes').append(
-        "Variance unlikely to arise coincidentally<br/>");
+        "Variance unlikely to arise by chance<br/>");
     }
     if (relation.data('note')) {
       $('#delete_relation_note').text('note: ' + relation.data('note'));

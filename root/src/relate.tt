@@ -131,7 +131,7 @@
           <br>
         </div>
         <input type="checkbox" id="dependent" />
-        <label for="dependent">Variants could arise coincidentally&nbsp;</label>
+        <label for="dependent">Variants could arise by chance</label>
         <input type="checkbox" name="non_independent" id="non_independent" />
         <label for="non_independent">Variants unlikely to arise coincidentally&nbsp;</label>
         <br><br>
