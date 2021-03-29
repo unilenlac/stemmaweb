@@ -259,6 +259,7 @@ function node_dblclick_listener(evt) {
       $('#repr_readings_list').append($('<label>').attr('for', "radio" + reading).text(myText));
       $('#repr_readings_list').append($('<br>'));
     });
+    var myBool = true;
   }
   // and then populate the dialog box with it.
   // auto select the clicked reading
