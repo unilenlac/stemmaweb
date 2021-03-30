@@ -259,7 +259,17 @@ function node_dblclick_listener(evt) {
       $('#repr_readings_list').append($('<label>').attr('for', "radio" + reading).text(myText));
       $('#repr_readings_list').append($('<br>'));
     });
+    // Checked/uncheck "All readings..." by looking at each reading in group
     var myBool = true;
+    $('#repr_readings_list input[type="radio"]').each(function(i, r) {
+      myBool = myBool && readingdata[rid2node[r.value]].is_nonsense;
+    });
+    $('#repr_reading_is_nonsense').prop("checked", myBool); // checked iff all readings in group are as such
+    var myBool = true;
+    $('#repr_readings_list input').each(function(i, r) {
+      myBool = myBool && readingdata[rid2node[r.value]].grammar_invalid;
+    });
+    $('#repr_reading_grammar_invalid').prop("checked", myBool); // checked iff all readings in group are as such
   }
   // and then populate the dialog box with it.
   // auto select the clicked reading
@@ -3022,15 +3032,38 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           $('#reading_text').val($('#repr_reading_text').val());
           update_representative_node();
         }
+        var all_nonsense = $('#repr_reading_is_nonsense').is(':checked');
+        var all_invalid = $('#repr_reading_grammar_invalid').is(':checked');
         var form_values = {
           'id': reading_id,
           'is_lemma': $('#reading_is_lemma').is(':checked'),
-          'is_nonsense': $('#reading_is_nonsense').is(':checked'),
-          'grammar_invalid': $('#reading_grammar_invalid').is(':checked'),
+          'is_nonsense': $('#reading_is_nonsense').is(':checked') || all_nonsense,
+          'grammar_invalid': $('#reading_grammar_invalid').is(':checked') || all_invalid,
           'normal_form': $('#reading_normal_form').val(),
           'text': $('#reading_text').val(),
           'display': $('#reading_display').val()
         };
+        // Batch set nonsense/agrammatical if required
+        if ( all_nonsense || all_invalid ) { // set all readings as such
+          $('#repr_readings_list input[type="radio"]').each(function (index, reading){
+            var myForm = {
+              'id': reading.value,
+            };
+            if ( all_nonsense ) {
+              myForm.is_nonsense = "true";
+            }
+            if ( all_invalid ) {
+              myForm.grammar_invalid = "true";
+            }
+            var myPath = getReadingURL(reading.value);
+            $.post(myPath, myForm, function(data) {
+              $.each(data['readings'], function(i, rdgdata) {
+                update_reading(rdgdata);
+              });
+            });
+          });
+        }
+
         // Make the JSON call
         var ncpath = getReadingURL(reading_id);
         $.post(ncpath, form_values, function(data) {
@@ -3640,6 +3673,20 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 
   $('#relation_hider_button').click(function() {
     $('#keymap').toggle();
+  });
+
+  $('#reading_is_nonsense').change(function() {
+    if (! $('#reading_is_nonsense').is(':checked') ) {
+      // uncheck group to allow individual changes
+      $('#repr_reading_is_nonsense').prop("checked", false);
+    }
+  });
+
+  $('#reading_grammar_invalid').change(function() {
+    if (! $('#reading_grammar_invalid').is(':checked') ) {
+      // uncheck group to allow individual changes
+      $('#repr_reading_grammar_invalid').prop("checked", false);
+    }
   });
 
   $('.helptag').popupWindow({
