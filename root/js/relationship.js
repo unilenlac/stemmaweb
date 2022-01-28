@@ -2817,7 +2817,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         // Show the merge button if applicable
         var buttonset = $(this).parent().find('.ui-dialog-buttonset')
         if (show_merge) {
-          buttonset.find("button:contains('Merge readings')").hide();
+          buttonset.find("button:contains('Merge readings')").show();
         } else {
           buttonset.find("button:contains('Merge readings')").hide();
         }
