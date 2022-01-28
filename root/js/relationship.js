@@ -2065,16 +2065,16 @@ var keyCommands = {
       }
     }
   },
-  '101': {
-    'key': 'e',
-    'description': 'Provide an emendation at the selected text position',
-    'function': function() {
-      // E for Emend
-      if (readings_selected.length > 0) {
-        $('#emend').dialog('open');
-      }
-    }
-  },
+  // '101': {
+  //   'key': 'e',
+  //   'description': 'Provide an emendation at the selected text position',
+  //   'function': function() {
+  //     // E for Emend
+  //     if (readings_selected.length > 0) {
+  //       $('#emend').dialog('open');
+  //     }
+  //   }
+  // },
   '108': {
     'key': 'l',
     'description': 'Set / unset the selected reading(s) as canonical / lemma',
