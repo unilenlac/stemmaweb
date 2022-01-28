@@ -2117,8 +2117,8 @@ var keyCommands = {
     'key': 'r',
     'description': 'Relate the selected readings',
     'function': function() {
-      if (readings_selected.length > 1) {
-        $('#dialog-form').data('binary', readings_selected.length == 2);
+      if (readings_selected.length > 0) {
+        $('#dialog-form').data('binary', false);
         $('#dialog-form').dialog('open');
       }
     }
