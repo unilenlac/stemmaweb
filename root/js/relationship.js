@@ -2156,10 +2156,12 @@ var keyCommands = {
     'description': 'Expunge all relationships on the selected reading(s)',
     'function': function() {
       // X for eXpunge relationships
-      $.each(readings_selected, function(i, reading_id) {
-        var form_values = 'from_reading=' + readingdata[reading_id]['id'];
-        delete_relation(form_values);
-      });
+      if (confirm("I confirm I want to delete all the relationships of the selected reading(s).")) {
+        $.each(readings_selected, function(i, reading_id) {
+          var form_values = 'from_reading=' + readingdata[reading_id]['id'];
+          delete_relation(form_values);
+        });
+      }
     }
   },
 };
