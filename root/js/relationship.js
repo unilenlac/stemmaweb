@@ -934,9 +934,9 @@ function node_obj(ellipse) {
       $(self.ellipse).parent().click(function(evt) {
         evt.stopPropagation();
         // Enable shift-select for multiple readings
-        if (!evt.shiftKey) {
-          unselect_all_readings();
-        }
+        // if (!evt.shiftKey) {
+        //   unselect_all_readings();
+        // }
         // Unselect a selected reading if we clicked on it
         var idx = readings_selected.indexOf(self.get_id())
         if (idx > -1) {
