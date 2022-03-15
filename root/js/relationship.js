@@ -2375,6 +2375,19 @@ function display_complex_reading(obj){
     }
 }
 
+function intersection(A,B){
+  // intersection of two arrays
+  var result = new Array();
+  for (i=0; i<A.length; i++) {
+      for (j=0; j<B.length; j++) {
+          if (A[i] == B[j] && $.inArray(A[i],result) == -1) {
+              result.push(A[i]);
+          }
+      }
+  }
+  return result;
+}
+
 function setListOptions(data, listIdString) {
   $.each(data, function(index, cReading) { // Add each complex reading as list element
     var myText = "";
@@ -2395,6 +2408,23 @@ function setListOptions(data, listIdString) {
       var rids = $.map(collectedReadings, function(t) {
         return t.id
       });
+      // add sigla text as the intersection of witnesses
+      var commonWit = [];
+      $.each(collectedReadings, function(i, crtReading) {
+        // console.log("witnesses: ", i, crtReading.witnesses);
+        if ( i == 0 ) {
+          commonWit = crtReading.witnesses
+        } else {
+          commonWit = intersection(commonWit, crtReading.witnesses)
+        }
+      });
+
+      var myWitText = commonWit.length > 5 ?
+        commonWit.slice(0, 3).join(', ') + " + " + (commonWit.length - 3).toString() + " wit." :
+        commonWit.join(', ');
+
+      myText = myText + " (id: " + myCID + "; in " + myWitText + ")";
+
       $(listIdString).append($('<option />')
         .attr("rids", rids)
         .attr("rank", myRank)
