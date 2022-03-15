@@ -253,7 +253,7 @@ function node_dblclick_listener(evt) {
       var myWitText = myReading.witnesses.length > 5 ?
         myReading.witnesses.slice(0, 3).join(', ') + " + " + (myReading.witnesses.length - 3).toString() + " wit." :
         myReading.witnesses.join(', ');
-      var myText = myReading.display + " (id: " + myReading.id + "; in " + myWitText + ")";
+      var myText = myReading.text + " (id: " + myReading.id + "; in " + myWitText + ")";
       $('#reading_select_form').append($('<option>').attr('value', reading).text(myText));
       $('#repr_readings_list').append($('<input>').attr('type', "radio").attr('id', "radio" + reading).attr('name', "repr_reading").attr('value', reading).attr('onclick', "repr_readings_click(this);"));
       $('#repr_readings_list').append($('<label>').attr('for', "radio" + reading).text(myText));
@@ -2516,7 +2516,7 @@ function update_representative_node(){
     if (myValue != reading_clicked) {
         var myNode = $('#svgenlargement .node title:contains(' + reading_clicked + ')').parent();
         // update text of node
-        myNode.find('text').text(readingdata[rid2node[myValue]].display);
+        myNode.find('text').text(readingdata[rid2node[myValue]].text);
         //update title of node (use new id)
         myNode.find('title').text(myValue);
         //update g id
