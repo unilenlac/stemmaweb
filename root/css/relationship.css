@@ -291,6 +291,11 @@ span.apimore {
   padding-left:10px;
 }
 
+#complex-reading-full-list option{
+  padding-left:10px;
+  padding-right:10px;
+}
+
 .draggable {
   cursor: pointer;
 }
