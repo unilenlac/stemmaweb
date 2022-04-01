@@ -2715,7 +2715,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       width: 340,
       modal: true,
       buttons: {
-        'Merge readings': function(evt) {
+        'Attach': function(evt) {
           var mybuttons = $(evt.target).closest('button').parent().find('button');
           mybuttons.button('disable');
           var form_values = get_relation_querystring();
