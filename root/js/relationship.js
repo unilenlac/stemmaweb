@@ -2670,7 +2670,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
   }
 
   // Populate the box with the error message
-  $(errordiv).append('<p class="error">Error: ' + error);
+  $(errordiv).html('<p class="error">Error: ' + error);
 
   // Open the dialog explicitly if we need to
   if (errordiv === '#error-display') {
