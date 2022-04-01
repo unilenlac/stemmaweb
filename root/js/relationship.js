@@ -2388,6 +2388,24 @@ function intersection(A,B){
   return result;
 }
 
+function getElementTopLeft(id) {
+
+    var ele = document.getElementById(id);
+    var top = 0;
+    var left = 0;
+
+    if (ele == null )
+      return { top: top, left: left };
+
+    while(ele.tagName != "BODY") {
+          top += ele.offsetTop;
+          left += ele.offsetLeft;
+          ele = ele.offsetParent;
+    }
+    return { top: top, left: left };
+
+}
+
 function setListOptions(data, listIdString) {
   $.each(data, function(index, cReading) { // Add each complex reading as list element
     var myText = "";
