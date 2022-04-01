@@ -2566,14 +2566,14 @@ function toggle_normalise_for(relObj) {
     }
     // Change button text if no selection
     if ($('#normalize-for-type').children('option:selected').length > 0) {
-      $('#normalise_button > span').text("Normalise");
+      $('#normalise_button > span').text("Reduce");
     } else {
       $('#normalise_button > span').text("Expand");
     }
 }
 
 function normalise() {
-    if (($('#normalise_button > span').text() == "Normalise") &&
+    if (($('#normalise_button > span').text() == "Reduce") &&
         ($('#normalize-for-type option:selected').length == 0)) {
         alert("Click on the relation names above to select the graph normalisation criteria.");
     } else {

@@ -361,7 +361,7 @@
       </div>
     [% END %]
     <div class="button textcontrol editcontrol" id="normalise_button" onClick="normalise()">
-      <span>Normalise</span>
+      <span>Reduce</span>
     </div>
   </div>
   <div id="keystroke_menu">
