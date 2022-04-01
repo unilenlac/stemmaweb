@@ -2423,7 +2423,11 @@ function setListOptions(data, listIdString) {
         commonWit.slice(0, 3).join(', ') + " + " + (commonWit.length - 3).toString() + " wit." :
         commonWit.join(', ');
 
-      myText = myText + " (id: " + myCID + "; in " + myWitText + ")";
+      myText = myText + " (id: " + myCID;
+      if (commonWit.length > 0) {
+        myText += "; in " + myWitText;
+      }
+      myText += ")";
 
       $(listIdString).append($('<option />')
         .attr("rids", rids)
