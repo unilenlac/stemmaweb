@@ -3742,16 +3742,14 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 
   // Enable the keyboard shortcuts.
 }).bind('keypress', function(event) {
-  console.log(event.which);
   if (!$(".ui-dialog").is(":visible") && editable) {
     if (event.which in keyCommands) {
       var fn = keyCommands[event.which]['function'];
       fn();
     }
   }
-
+}).bind('keydown', function(event) {
   if (event.which == 27) {
-    console.log("Unselecting");
     unselect_all_readings();
   }
 });
