@@ -2763,6 +2763,9 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           var form_values = get_relation_querystring();
           var ncpath = getTextURL('relationships');
           console.log("About to post: ", ncpath, form_values);
+          var startRank = readingdata[rid2node[$('#source_node_id').val()]].rank;
+          var targetRank = readingdata[rid2node[$('#target_node_id').val()]].rank;
+
           var jqjson = $.post(ncpath, form_values, function(data) {
             // If we were handed a 304 response, there won't be data.
             if (data) {
@@ -2780,6 +2783,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
               $.each(data['readings'], function(i, rdgdata) {
                 update_reading(rdgdata);
               });
+              if (startRank != targetRank) { location.reload(); }
             }
             // Stash the new relationships.
             mybuttons.button('enable');
@@ -2911,6 +2915,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
               detach_node(data);
               mybuttons.button("enable");
               self.dialog("close");
+              location.reload();
             });
           }
         }
