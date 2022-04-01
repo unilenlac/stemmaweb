@@ -2875,9 +2875,9 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         // Show the merge button if applicable
         var buttonset = $(this).parent().find('.ui-dialog-buttonset')
         if (show_merge) {
-          buttonset.find("button:contains('Merge readings')").show();
+          buttonset.find("button:contains('Attach')").show();
         } else {
-          buttonset.find("button:contains('Merge readings')").hide();
+          buttonset.find("button:contains('Attach')").hide();
         }
         // Set the dialog background and our form state data
         dialog_background('#dialog-form-status');

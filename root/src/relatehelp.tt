@@ -64,7 +64,7 @@
     <p>To attach the separated reading elsewhere, select it and drag it to the corresponding reading elsewhere in the graph, just as though you were making a relationship.</p>
     <img src="[% c.uri_for( '/images/04_rejoin_correct.png' ) %]">
 
-    <p>There should be an option "Merge readings" to specify that the readings are identical; select it.</p>
+    <p>There should be an option "Attach" to specify that the readings are identical; select it.</p>
     <img src="[% c.uri_for( '/images/05_select_merge.png' ) %]">
 
     <p>When two identical readings are merged, the relationship mapper will display a set of suggestions for other readings that might also need to be merged, in light of the change that was just made. Selecting the green button will accept the suggestion; selecting the red button will reject it. If a reading is erroneously merged, it may be detached again in the same manner described above.</p>
