@@ -1235,6 +1235,7 @@ function get_edge_elements_for(ellipse) {
   var edge_elements = new Array();
   var node_id = ellipse.parent().attr('id');
   if (!node_id) return edge_elements;
+  if (!readingdata[node_id]) return edge_elements;
   var reading_id = readingdata[node_id]['id'];
   var edge_in_pattern = new RegExp(reading_id + '$');
   var edge_out_pattern = new RegExp('^' + reading_id + '-');
