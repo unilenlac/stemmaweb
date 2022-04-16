@@ -710,6 +710,7 @@ function svgEnlargementLoaded() {
       $.getJSON(getTextURL('emendations'), function(data) {
         add_emendation(data);
       });
+      show_shallow_emendations(); // for all lemmas, show as emendation the "Edited form" different from the display form
       // Restore keymap selection
       $('#normalize-for-type option:selected').each(function() {
         $(this).prop("selected", false); // fake it was not selected to enable toggle
@@ -1508,7 +1509,8 @@ function add_emendation(emenddata) {
         // Find the highest of all the nodes covered
         var coveredNodes = Object.entries(readingdata)
           .filter(x => x[1].rank >= d.rank && x[1].rank <= endrank).map(x => x[0]);
-        var highestY = coveredNodes.map(x => parseFloat(get_ellipse(x).attr('cy'))).reduce(floor);
+        var highestY = coveredNodes.length != 0 ? coveredNodes.map(x => parseFloat(get_ellipse(x).attr('cy'))).reduce(floor): 100;
+
         return highestY - 100;
       })
       .attr('height', 36)
@@ -1535,6 +1537,32 @@ function add_emendation(emenddata) {
   });
 
   // TODO add sequences maybe?
+}
+
+function shallow_emend(reading_id) {
+  // source: id of nodes in previous rank
+  // target: id of nodes in next rank
+  var data = { 'readings': [ readingdata[rid2node[reading_id]] ],
+               'sequences': [ ] }
+  var myRank = readingdata[rid2node[reading_id]].rank;
+  $.each(readingdata, function(k, v) {
+    if (v.rank === myRank - 1) {
+      data.sequences.push({ 'source': v.id, 'target': reading_id });
+    }
+    else if (v.rank === myRank + 1) {
+      data.sequences.push({ 'source': reading_id, 'target': v.id });
+    }
+  });
+  add_emendation(data);
+}
+
+function show_shallow_emendations() {
+  // for all lemmas, show as emendation the "Edited form" different from the display form
+  $.each(readingdata, function(k, v) {
+    if (v.is_lemma && v.display && v.display != v.text) {
+      shallow_emend(v.id);
+    }
+  });
 }
 
 function detach_node(readings) {
@@ -2090,6 +2118,16 @@ var keyCommands = {
           'id': reading_id,
           'is_lemma': set_lemma,
         };
+
+        $.each(readingdata, function(k, v) {
+          if (v.rank === selected.rank) {
+            $('#e' + v.id).remove(); // remove emendations in that rank
+          }
+        });
+        if ( set_lemma && selected.display && selected.display != selected.text ) {
+          shallow_emend(selected.id);
+        };
+
         $.post(ncpath, form_values, function(data) {
           unselect_all_readings();
           $.each(data['readings'], function(i, rdgdata) {
@@ -3137,6 +3175,17 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
               color_active(get_ellipse(this_nodeid));
             }
           });
+
+          var myReading = readingdata[rid2node[reading_id]];
+          $.each(readingdata, function(k, v) {
+            if (v.rank === myReading.rank) {
+              $('#e' + v.id).remove(); // remove emendations in that rank
+            }
+          });
+          if ( myReading.is_lemma && myReading.display && myReading.display != myReading.text ) {
+            shallow_emend(myReading.id);
+          };
+
           mybuttons.button("enable");
           $("#reading-form").dialog("close");
         });
