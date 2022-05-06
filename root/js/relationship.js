@@ -2786,6 +2786,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             if (data.status === 'ok') {
               $('#dialog-form').dialog('close');
             }
+            location.reload();
           });
         },
         'Create': function(evt) {
