@@ -3419,6 +3419,18 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         id: 'complexreading_add_button',
         click: function(evt) {
           if ($('#complex-reading-text').val()) {
+
+            var commonWit = [];
+            $.each(readings_selected, function(i, crtReading) {
+              if ( i == 0 ) {
+                commonWit = readingdata[crtReading].witnesses
+              } else {
+                commonWit = intersection(commonWit, readingdata[crtReading].witnesses)
+              }
+            });
+
+            if (commonWit.length < 1) {alert('Readings must have at least one witness in common'); return; };
+
             // prepare form items (rids) for complex reading creation
             $.each(readings_selected, function(i, reading_id) {
               if (! isNaN(readingdata[reading_id].id)) {//numeric : exclude START and END
@@ -3459,6 +3471,19 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         click: function() {
           // Create a new hyperreading by merging the selected complex reading and the selected (simple) readings
           if ($('#complex-reading-text').val()) {
+
+            var commonWit = [];
+            $.each(readings_selected, function(i, crtReading) {
+              if ( i == 0 ) {
+                commonWit = readingdata[crtReading].witnesses
+              } else {
+                commonWit = intersection(commonWit, readingdata[crtReading].witnesses)
+              }
+            });
+
+            if (commonWit.length < 1) {alert('Readings must have at least one witness in common'); return; };
+
+
             var myCid = $('#complex-reading-list').val();
             // prepare form items: first member (cid)
             $('#complex-reading-form').append($('<input style="display:none"/>').attr('name', "cid").attr('value', myCid));
