@@ -3455,7 +3455,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         }
       },
       merge: {
-        text: 'Merge',
+        text: 'Add to selected',
         click: function() {
           // Create a new hyperreading by merging the selected complex reading and the selected (simple) readings
           if ($('#complex-reading-text').val()) {
