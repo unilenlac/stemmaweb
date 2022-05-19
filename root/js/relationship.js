@@ -3189,6 +3189,8 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 
           mybuttons.button("enable");
           $("#reading-form").dialog("close");
+
+          location.reload();
         });
         return false;
       }
