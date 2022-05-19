@@ -85,6 +85,7 @@
 
   <div id="keystroke_menu_button" title="Keystroke menu"></div>
   <div id="relation_hider_button" title="Show/hide relation types"></div>
+  <div id="hypernode_hider_button" title="Show/hide hypernodes"></div>
   <div id="update_workspace_button"></div>
 
   <div id="dialog-form" title="Create relation between readings...">

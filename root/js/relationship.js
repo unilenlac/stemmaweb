@@ -2543,9 +2543,6 @@ function getComplexReadings(){
               var at = parseInt($(a).attr('rank')), bt = parseInt($(b).attr('rank'));
               return (at > bt)?1:((at < bt)?-1:0);
           }));
-          $('#complex-reading-div').show();
-        } else {
-          $('#complex-reading-div').hide();
         }
         setComplexReadingBorder();
     },
@@ -3810,6 +3807,10 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 
   $('#relation_hider_button').click(function() {
     $('#keymap').toggle();
+  });
+
+  $('#hypernode_hider_button').click(function() {
+    $('#complex-reading-div').toggle();
   });
 
   $('#reading_is_nonsense').change(function() {
