@@ -160,7 +160,7 @@ function display_reading_info(rid) {
 
     toggle_checkbox($('#repr_reading_is_lemma'), readingdata[rid2node[rid]]['is_lemma']);
     $('#repr_reading_text').val($('#reading_text').val());
-    on_repr_reading_is_lemma();
+    // on_repr_reading_is_lemma(); disabled
 
     // and then open the dialog.
     $('#reading-form').dialog("open");
@@ -2579,7 +2579,7 @@ function lock_unlock_changes(ask){
     $('#correction .inputs .input').prop('disabled', ! $('#unlock').prop('checked'));
 }
 
-function lock_unlock_edited_form(){
+function lock_unlock_edited_form(){ // disabled
     // Edited form is accessible iff reading is lemma
     if ( $('#reading_is_lemma').prop('checked') ) {
         $('#editedform').show();
@@ -2588,7 +2588,7 @@ function lock_unlock_edited_form(){
     }
 }
 
-function on_repr_reading_is_lemma() {
+function on_repr_reading_is_lemma() { // disabled
   // Edited form is accessible iff reading is lemma
   if ( $('#repr_reading_is_lemma').prop('checked') ) {
       $('#repr_editedform').show();
@@ -3210,8 +3210,8 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       dialog_background('#reading-status');
       $("#reading-form").parent().find('.ui-button').button("enable");
       $("#reading-form").parent().find('.ui-button').focus();
-      if ( ! $('#reading_is_lemma').prop('checked') ) { $('#editedform').hide(); }
-      if ( ! $('#repr_reading_is_lemma').prop('checked') ) { $('#repr_editedform').hide(); }
+      // if ( ! $('#reading_is_lemma').prop('checked') ) { $('#editedform').hide(); }
+      // if ( ! $('#repr_reading_is_lemma').prop('checked') ) { $('#repr_editedform').hide(); }
       $('#unlock').prop('checked', false);
       lock_unlock_changes(false);
     },

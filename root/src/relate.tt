@@ -193,7 +193,7 @@
 
             <div class="morph">
               <br/>
-              <input type="checkbox" name="repr_reading_is_lemma" id="repr_reading_is_lemma" onclick="on_repr_reading_is_lemma()"/>
+              <input type="checkbox" name="repr_reading_is_lemma" id="repr_reading_is_lemma"/>
               <label for="repr_reading_is_lemma">This is the lemma reading</label>
                 <div id="repr_editedform" class="class="floatcontainer morph"">
                   <div class="labels">
@@ -221,7 +221,7 @@
         </div>
         <div id="reading-status"></div>
         <div class="morph">
-          <input type="checkbox" name="reading_is_lemma" id="reading_is_lemma" onclick="lock_unlock_edited_form()"/>
+          <input type="checkbox" name="reading_is_lemma" id="reading_is_lemma" />
           <label for="reading_is_lemma">This is the lemma reading</label>
             <div id="editedform" class="floatcontainer morph">
               <div class="labels">
