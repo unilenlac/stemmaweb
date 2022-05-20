@@ -279,6 +279,8 @@ sub complex :Chained('section') :PathPart :Args(0) {
 
   my $cid  = $c->request->param('cid');
   my @rids  = $c->request->param('rid');
+  my $source = $c->request->param('source');
+  my $note = $c->request->param('note');
 
   my $first = shift @rids;
 
@@ -309,6 +311,10 @@ sub complex :Chained('section') :PathPart :Args(0) {
       my $options = {
           'components' => $components
       };
+
+      if (defined $source) {$options->{source} = $source}
+      if (defined $note) {$options->{note} = $note}
+
       $c->log->warn("Creating complex reading for:");
       $c->log->warn(encode_json($options));
       my $location = "/complex/";

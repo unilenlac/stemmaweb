@@ -333,10 +333,22 @@
   <div id="complex-reading-dialog" title="Manage hypernodes">
     <div id="complex-reading-status"></div>
       <form id="complex-reading-form">
-        <h4><span class="texttitle">Selected reading(s)</span></h4>
-        <textarea id="complex-reading-text" name="displaytext" type="text" autocomplete="off" style="width:90%" disabled></textarea>
+        <h4><span class="texttitle">Proposed hypernode</span></h4>
+        <textarea rows="1" id="complex-reading-text" name="displaytext" type="text" autocomplete="off" style="width:100%" disabled></textarea>
+        <br/>
+        <fieldset style="width:95%">
+        <legend>Attach a note or a source</legend>
+        <table width="100%">
+            <tr>
+            <td style="padding:10px;vertical-align:top">Note</td>
+            <td width="40%"><textarea rows="3" id="complex-reading-note" name="note" type="text" autocomplete="off" class=".ui-widget input"></textarea></td>
+            <td style="padding:10px;vertical-align:top">Source</td>
+            <td width="40%"><textarea rows="3" id="complex-reading-source" name="source" type="text" autocomplete="off" class=".ui-widget input"></textarea></td>
+            </tr>
+        </table>
+        </fieldset>
         <h4><span id="hypernodes-title" class="texttitle">Hypernodes</span></h4>
-        <select id="complex-reading-list" class="complex-reading-list" style="width:95%;"></select>
+        <select id="complex-reading-list" class="complex-reading-list" style="width:100%;"></select>
       </form>
   </div>
 

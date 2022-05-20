@@ -2003,7 +2003,7 @@ var keyCommands = {
     'function': function() {
       $('#complex-reading-list option').remove();
       $('#complex-reading-for input[name="rid"]').remove();
-      $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+      $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
       if (readings_selected.length > 0) {
         var displayText = "";
         readings_selected.sort(sortByRank);
@@ -2023,7 +2023,7 @@ var keyCommands = {
                   $('#complex-reading-list option:first').attr("selected", "selected");
                   oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
                 }
-                $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
                 getComplexReadings();
               },
               dataType: 'json',
@@ -3441,6 +3441,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             });
             if ($('#complex-reading-form input[name="rid"]').length > 1) {
               var form_values = $('#complex-reading-form').serialize();
+
               console.log("Creating complex reading from: " + form_values);
               console.log("In my form, there are n inputs, n=", $('#complex-reading-form input[name="rid"]').length);
               $.ajax({
@@ -3448,7 +3449,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                 data: form_values,
                 success: function(data) {
                     setListOptions([ data ], "#complex-reading-list");
-                    $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                    $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
                     // select the newly-added option (value is data.id)
@@ -3504,7 +3505,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                 data: form_values,
                 success: function(data) {
                     setListOptions([ data ], "#complex-reading-list");
-                    $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                    $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
                     // select the newly-added option (value is data.id)
@@ -3540,7 +3541,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     // Remove the affected list element
                     $('#complex-reading-list option[value = ' + selectedCR + ']').remove();
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
-                    $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+                    $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
                     oldComplexReadings = [];
                     getComplexReadings();
                 },
@@ -3580,7 +3581,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
               }
             });
             $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
-            $('#hypernodes-title').text($('#complex-reading-list option').length.toString() + " Hypernode(s)");
+            $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
             oldComplexReadings = [];
             mybuttons.button("enable");
           }
