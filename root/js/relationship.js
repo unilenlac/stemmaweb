@@ -3267,6 +3267,18 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     width: 800,
     height: 600,
     buttons: {
+      save: {
+        text: 'Save',
+        click: function(evt) {
+          var mybuttons = $(evt.target).closest('button').parent().find('button');
+          mybuttons.button('disable');
+          var ncpath = getTextURL('metadata');
+          var myTranslation = $('#translation').val();
+          $.post(ncpath, $('#section_info_form').serialize() + "&translation=" + myTranslation, function() {
+            mybuttons.button("enable");
+          });
+        }
+      },
       Close: function() {
         $(this).dialog("close");
       }

@@ -264,6 +264,7 @@
       <h4>Section information</h4>
       <form id="section-edit">
         <input id="section_id" name="id" type="hidden" />
+        <input id="section_translation" name="translation" type="hidden" />
         <label for="section_name">Name: </label>
         <input id="section_name" name="name" type="text" /><br>
         <label for="section_language">Language: </label>

@@ -296,6 +296,11 @@
       </select>
     </form>
     <div id="section_text_display"></div>
+    <div id="section_translation_display">
+      Translation
+      <br/>
+      <textarea style="width:98%;height:80%" id="translation" name="translation" type="text" autocomplete="off" class=".ui-widget input">Add translation here</textarea>
+    </div>
   </div>
 
   <div id="section-info" title="[% IF permission == 'full' %]Edit[% ELSE %]View[% END %] section information">

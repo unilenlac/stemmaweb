@@ -447,8 +447,16 @@ span.apimore {
   border: 1px solid #B0C6F7;
   padding: 0px 10px;
   margin: 7px;
-  height: 430px;
+  height: 45%;
   overflow: scroll;
+  font-size: 150%;
+}
+
+#section_translation_display {
+  border: 1px solid #B0C6F7;
+  padding: 0px 10px;
+  margin: 7px;
+  height: 45%;
   font-size: 150%;
 }
 
