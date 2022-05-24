@@ -299,7 +299,7 @@
     <div id="section_translation_display">
       Translation
       <br/>
-      <textarea style="width:98%;height:80%" id="translation" name="translation" type="text" autocomplete="off" class=".ui-widget input">Add translation here</textarea>
+      <textarea style="width:98%;height:80%" id="translation" name="translation" type="text" autocomplete="off" class=".ui-widget input"></textarea>
     </div>
   </div>
 
