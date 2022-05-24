@@ -3295,6 +3295,10 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       }
       // Refresh whatever form settings we last had
       requestRunningText();
+      var ncpath = getTextURL('metadata');
+      $.get(ncpath, $('#section_info_form').serialize(), function(data) {
+        $('#translation').val(data.translation);
+      });
     },
     close: function() {
       $("#dialog_overlay").hide();
