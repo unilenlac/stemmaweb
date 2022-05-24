@@ -353,7 +353,7 @@
         </table>
         </fieldset>
         <h4><span id="hypernodes-title" class="texttitle">Hypernodes</span></h4>
-        <select id="complex-reading-list" class="complex-reading-list" style="width:100%;"></select>
+        <select id="complex-reading-list" class="complex-reading-list" style="width:100%;" onchange="display_complex_reading(this);"></select>
       </form>
   </div>
 

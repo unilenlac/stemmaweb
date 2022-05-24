@@ -2381,37 +2381,55 @@ function setDeleteButtonDisabled() {
 
 // Complex readings dialog functions
 function display_complex_reading(obj){
-    if ($('#update_workspace_button').data('locked')) { // edit mode
-      unselect_all_readings();
-      // set old
-      oldComplexReadings = $(obj).find('option[value = ' + obj.value + ']').attr('rids').split(',');
-      $.each(oldComplexReadings, function(i, rid) {
-        if (! readings_selected.includes(rid2node[rid])) { // avoid including twice
-          readings_selected.push(rid2node[rid]);
-        };
-        color_active(get_ellipse(rid));
-      });
-      readings_selected.sort(sortByRank);
-      // set text
-      var displayText = "";
-      $.each(readings_selected, function(i, reading_id) {
-        if (! isNaN(readingdata[reading_id].id)) {// numeric
-          displayText += readingdata[reading_id]['text'] + " ";
-        }
-      });
-      $('#complex-reading-text').val(displayText.trim());
-    }
-    else { // view mode
-      // alternate between inactive and active
-      $('#svgenlargement .node ellipse').each(function(){
-        color_inactive($(this));
-      });
+    // Retrieve source and note
 
-      // current selection is active
-      $(obj).find('option[value = ' + obj.value + ']').attr('rids').split(',').forEach(function(rid){
-          get_ellipse(rid).attr("fill", "#9999ff");
-      });
-    }
+    var ncpath = getTextURL('complex');
+    $.get(ncpath, function(data) {
+        console.log("data (complex):", data);
+        $.each(data, function(i, item) {
+            if (item.id == obj.value) {
+                console.log("match:", item);
+                var myNote = item.note != null ? item.note : "";
+                var mySource = item.source != null ? item.source : "";
+                $('#complex-reading-note').prop('disabled', true);
+                $('#complex-reading-source').prop('disabled', true);
+                $('#complex-reading-note').val(myNote);
+                $('#complex-reading-source').val(mySource);
+            }
+        });
+    });
+
+    // if ($('#update_workspace_button').data('locked')) { // edit mode
+    //   unselect_all_readings();
+    //   // set old
+    //   oldComplexReadings = $(obj).find('option[value = ' + obj.value + ']').attr('rids').split(',');
+    //   $.each(oldComplexReadings, function(i, rid) {
+    //     if (! readings_selected.includes(rid2node[rid])) { // avoid including twice
+    //       readings_selected.push(rid2node[rid]);
+    //     };
+    //     color_active(get_ellipse(rid));
+    //   });
+    //   readings_selected.sort(sortByRank);
+    //   // set text
+    //   var displayText = "";
+    //   $.each(readings_selected, function(i, reading_id) {
+    //     if (! isNaN(readingdata[reading_id].id)) {// numeric
+    //       displayText += readingdata[reading_id]['text'] + " ";
+    //     }
+    //   });
+    //   $('#complex-reading-text').val(displayText.trim());
+    // }
+    // else { // view mode
+    //   // alternate between inactive and active
+    //   $('#svgenlargement .node ellipse').each(function(){
+    //     color_inactive($(this));
+    //   });
+    //
+    //   // current selection is active
+    //   $(obj).find('option[value = ' + obj.value + ']').attr('rids').split(',').forEach(function(rid){
+    //       get_ellipse(rid).attr("fill", "#9999ff");
+    //   });
+    // }
 }
 
 function intersection(A,B){
@@ -3456,6 +3474,8 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
               }
             });
             if ($('#complex-reading-form input[name="rid"]').length > 1) {
+              $('#complex-reading-note').prop('disabled', false);
+              $('#complex-reading-source').prop('disabled', false);
               var form_values = $('#complex-reading-form').serialize();
 
               console.log("Creating complex reading from: " + form_values);
