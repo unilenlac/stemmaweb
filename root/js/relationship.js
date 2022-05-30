@@ -2391,8 +2391,8 @@ function display_complex_reading(obj){
                 console.log("match:", item);
                 var myNote = item.note != null ? item.note : "";
                 var mySource = item.source != null ? item.source : "";
-                $('#complex-reading-note').prop('disabled', true);
-                $('#complex-reading-source').prop('disabled', true);
+                // $('#complex-reading-note').prop('disabled', true);
+                // $('#complex-reading-source').prop('disabled', true);
                 $('#complex-reading-note').val(myNote);
                 $('#complex-reading-source').val(mySource);
             }
@@ -3474,8 +3474,8 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
               }
             });
             if ($('#complex-reading-form input[name="rid"]').length > 1) {
-              $('#complex-reading-note').prop('disabled', false);
-              $('#complex-reading-source').prop('disabled', false);
+              // $('#complex-reading-note').prop('disabled', false);
+              // $('#complex-reading-source').prop('disabled', false);
               var form_values = $('#complex-reading-form').serialize();
 
               console.log("Creating complex reading from: " + form_values);
