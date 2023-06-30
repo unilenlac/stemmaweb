@@ -17,7 +17,7 @@ BEGIN { extends 'Catalyst::Controller' }
 has stemweb_url => (
     is      => 'ro',
     isa     => 'Str',
-    default => 'http://slinkola.users.cs.helsinki.fi',
+    default => 'http://cosco.hiit.fi/Projects/STAM/',
 );
 
 has pars_path => (
@@ -102,12 +102,12 @@ parameters. Returns the JSON answer as obtained from Stemweb.
 
 sub available :Local :Args(0) {
     my ($self, $c) = @_;
-    my $ua         = LWP::UserAgent->new();
-    my $resp       = $ua->get($self->stemweb_url . '/algorithms/available');
+    # my $ua         = LWP::UserAgent->new();
+    # my $resp       = $ua->get($self->stemweb_url . '/algorithms/available');
     my $parameters = [];
-    if ($resp->is_success && $resp->content_type =~ /json/) {
-        $parameters = decode_json($resp->content);
-    }    # otherwise we have no available algorithms.
+    # if ($resp->is_success && $resp->content_type =~ /json/) {
+    #     $parameters = decode_json($resp->content);
+    # }    # otherwise we have no available algorithms.
     ## Temporary HACK: run Pars too
     if ($self->_has_pars) {
 

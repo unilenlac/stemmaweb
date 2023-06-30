@@ -18,4 +18,4 @@ RUN cd stemmaweb && cpanm -n --installdeps .
 RUN git clone https://github.com/tla/stemmatology.git
 RUN cd stemmatology/base && perl Makefile.PL && make && make install && make distclean
 WORKDIR "/stemmaweb"
-CMD script/stemmaweb_server.pl
+CMD perl script/stemmaweb_server.pl
