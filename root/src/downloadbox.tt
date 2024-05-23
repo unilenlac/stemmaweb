@@ -19,6 +19,8 @@
           <option value="dot">Graphviz dot format (collation and relationships)</option>
           <option value="SVG">SVG graph display (collation and relationships)</option>
           <option value="GraphML">Native GraphML XML format</option>
+          <option value="TEICAT">XML TEI P5 (parrallel segmentation 1)</option>
+          <option value="TEICAT2">XML TEI P5 (parrallel segmentation 2)</option>
           <!-- option value="tei_ps" -->
           <!-- option value="tei_dea" -->
         </select><br>

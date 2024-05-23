@@ -17,6 +17,7 @@ use Catalyst::Runtime 5.80;
 #                 directory
 
 use Catalyst qw/
+  -Debug
   ConfigLoader
   Static::Simple
   Authentication
@@ -25,6 +26,7 @@ use Catalyst qw/
   Session::State::Cookie
   StatusMessage
   StackTrace
+  ErrorCatcher
   Cache
   /;
 use CatalystX::RoleApplicator;
@@ -95,32 +97,22 @@ __PACKAGE__->config(
                 realm      => 'default',
             },
         },
-        # openid => {
-        #     credential => {
-        #         class      => 'OpenID',
-        #         extensions => [
-        #             'http://openid.net/srv/ax/1.0' => {
-        #                 ns           => 'ax',
-        #                 uri          => 'http://openid.net/srv/ax/1.0',
-        #                 mode         => 'fetch_request',
-        #                 required     => 'email',
-        #                 'type.email' => 'http://axschema.org/contact/email',
-        #
-        #                 # type        => {
-        #                 #     email => 'http://axschema.org/contact/email'
-        #                 # }
-        #             }
-        #         ],
-        #     },
-        #     store => {
-        #         class      => 'Neo4p',
-        #         model_name => 'Directory',
-        #     },
-        #     auto_create_user => 1,
-        # },
-        google => {
+        openid => {
             credential => {
-                class => '+stemmaweb::Authentication::Credential::Google',
+                class      => 'OpenID',
+                extensions => [
+                    'http://openid.net/srv/ax/1.0' => {
+                        ns           => 'ax',
+                        uri          => 'http://openid.net/srv/ax/1.0',
+                        mode         => 'fetch_request',
+                        required     => 'email',
+                        'type.email' => 'http://axschema.org/contact/email',
+        
+                        # type        => {
+                        #     email => 'http://axschema.org/contact/email'
+                        # }
+                    }
+                ],
             },
             store => {
                 class      => 'Neo4p',
@@ -128,6 +120,16 @@ __PACKAGE__->config(
             },
             auto_create_user => 1,
         },
+        # google => {
+        #     credential => {
+        #         class => '+stemmaweb::Authentication::Credential::Google',
+        #     },
+        #     store => {
+        #         class      => 'Neo4p',
+        #         model_name => 'Directory',
+        #     },
+        #     auto_create_user => 1,
+        # },
     },
     ## Auth with CatalystX::Controller::Auth
     'Controller::Users' => {

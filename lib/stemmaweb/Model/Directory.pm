@@ -8,11 +8,12 @@ use Encode qw/ decode_utf8 /;
 use File::Which;
 use File::Temp;
 use HTTP::Response;
-use IPC::Run qw( run binary );
+use IPC::Run qw( run binary ); #THROW THIS DEPENDENCY TO THE TRASH
 use JSON qw/ decode_json to_json /;
 use LWP::UserAgent;
 use URI;
 use stemmaweb::Error;
+use File::Slurp;
 
 extends 'Catalyst::Model';
 
@@ -76,6 +77,7 @@ sub ajax {
 
 ### Graphviz transmogrification for passed-in dot
 sub tradition_as_svg {
+
     my ($self, $textid, $opts) = @_;
 
     # Get the dot from the DB
@@ -107,7 +109,8 @@ sub tradition_as_svg {
     return dot_to_svg($dotstr);
 }
 
-# Really a generic utility, but this is as good a place as any for that.
+# # Function for dev puposes in Windows only - not for production
+# # Really a generic utility, but this is as good a place as any for that.
 sub dot_to_svg {
     my ($dotstr) = @_;
     unless (File::Which::which('dot')) {
@@ -117,17 +120,49 @@ sub dot_to_svg {
 
     # Transmogrify it to SVG
     my @cmd = qw/dot -Tsvg/;
+    # dot -oC:\Users\sibrizpe\AppData\Local\Temp\test2.txt -Tsvg iKugon50iG
+    my @cmd = qw/dot -o C:\Users\sibrizpe\AppData\Local\Temp\test4.txt -Tsvg/;
     my ($svg, $err);
     my $dotfile = File::Temp->new();
     ## USE FOR DEBUGGING
-    # $dotfile->unlink_on_destroy(0);
+    $dotfile->unlink_on_destroy(0);
     binmode $dotfile, ':utf8';
     print $dotfile $dotstr;
     push(@cmd, $dotfile->filename);
-    run(\@cmd, ">", binary(), \$svg);
+    print "CDM : @cmd" ;
+    # run(\@cmd, ">", binary(), \$svg);
+    system(@cmd);
+    my $svg = read_file('C:\Users\sibrizpe\AppData\Local\Temp\test4.txt');
+    print "SVG BEFORE: $svg";
     $svg = decode_utf8($svg);
+    print "SVG AFTER: $svg";
     return $svg;
 }
+
+# Really a generic utility, but this is as good a place as any for that.
+# sub dot_to_svg {
+#       # if ( $^O eq 'MSWin32' ) {
+#     #     return dot_to_svg_windows(@_);
+#     # }
+#     my ($dotstr) = @_;
+#     unless (File::Which::which('dot')) {
+#         throw_ua(
+#             HTTP::Response->new(500, "Need GraphViz installed to output SVG"));
+#     }
+
+#     # Transmogrify it to SVG
+#     my @cmd = qw/dot -Tsvg/;
+#     my ($svg, $err);
+#     my $dotfile = File::Temp->new();
+#     ## USE FOR DEBUGGING
+#     # $dotfile->unlink_on_destroy(0);
+#     binmode $dotfile, ':utf8';
+#     print $dotfile $dotstr;
+#     push(@cmd, $dotfile->filename);
+#     run(\@cmd, ">", binary(), \$svg);
+#     $svg = decode_utf8($svg);
+#     return $svg;
+# }
 
 sub throw_ua {
     stemmaweb::Error->throw(
