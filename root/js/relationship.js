@@ -2295,6 +2295,10 @@ function get_relation_querystring() {
       }
     })
   }
+
+  console.log("form_values:", form_values);
+  console.info("form_values:", form_values);
+
   return form_values;
 }
 
