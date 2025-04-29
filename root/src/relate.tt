@@ -82,11 +82,10 @@
       <div id="svgenlargement" class="fillPage"></div>
     </div>
   </div>
-
   <div id="keystroke_menu_button" title="Keystroke menu"></div>
   <div id="relation_hider_button" title="Show/hide relation types"></div>
-  <div id="hypernode_hider_button" title="Show/hide hypernodes"></div>
-  <div id="update_workspace_button"></div>
+  <div id="hypernode_hider_button" title="Show/hide hypernodes (h)"></div>
+  <div id="update_workspace_button" title="edit mode (e)"></div>
 
   <div id="dialog-form" title="Create relation between readings...">
     <div id="dialog-form-status"></div>
@@ -356,14 +355,6 @@
         <select id="complex-reading-list" class="complex-reading-list" style="width:100%;" onchange="display_complex_reading(this);"></select>
       </form>
   </div>
-
-  <!-- Complex readings browse -->
-  <div id="complex-reading-div" title="View hypernodes">
-    <div id="complex-reading-divheader">Hypernodes</div>
-    <div id="complex-reading-div-status"></div>
-    <select id="complex-reading-full-list" onchange="display_complex_reading(this);"></select>
-  </div>
-
   <div id="error-display" title="Error">
   </div>
 
@@ -386,5 +377,34 @@
   </div>
 
   <div id="witness_list_container"><span id="witness_list_content"></span></div>
+  <!-- Complex readings browse -->
+  <form id="complex-reading-div" title="View hypernodes" style="display: none;">
+    <div id="complex-reading-divheader">Hypernodes</div>
+    <div id="complex-reading-div-status"></div>
+    <select id="complex-reading-full-list" onchange="display_complex_reading(this);" style="margin-inline: 10px" name="complex-list"></select>
+    <div style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px;">hypernode fields :</div><br>
+    <div id="note-source-fields">
+      <div id="islemma-field">
+        <label>is lemma</label><br>
+        <input id="islemma" type="checkbox" name="islemma" value="false">
+      </div>
+      <div id="weight-field">
+        <label>weight</label><br>
+        <input id="weight" type="number" placeholder="weight" name="weight">
+      </div>
+      <div id="note-field">
+        <label>note</label><br>
+        <input id="note" type="text" placeholder="note" name="note">
+      </div>
+      <div id="source-field">
+        <label>source</label><br>
+        <input id="source" type="text" placeholder="source" name="source">
+      </div>
+    </div>
+    <div style="display: flex; justify-content: end; width: 90%">
+      <button type="submit" id="complex-reading-div-save">save</button>
+    </div>
+    <div id="complex-message" style="display: none;"></div>
+  </form>
 
 [% PROCESS footer.tt %]

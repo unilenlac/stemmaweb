@@ -280,6 +280,7 @@ sub request :Local :Args(0) {
     if ($self->_has_pars && $algorithm == 100) {
         my $start_time = scalar(gmtime(time()));
         $t->set_stemweb_jobid('local');
+        $DB::single=1;
         my $cdata = character_input($t, { collapse => $mergetypes });
         my $newick;
         try {

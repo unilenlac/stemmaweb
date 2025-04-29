@@ -43,6 +43,7 @@ sub index :Path :Args(0) {
 
     # Are we being asked to load a text immediately? If so
     if ($c->req->param('withtradition')) {
+        $c->log->debug("########START APP#######");
         $c->stash->{'withtradition'} = $c->req->param('withtradition');
     }
     $c->stash->{template} = 'index.tt';

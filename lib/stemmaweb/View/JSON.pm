@@ -8,6 +8,7 @@ use JSON::XS ();
 sub encode_json {
     my ($self, $c, $data) = @_;
     my $json = JSON::XS->new->utf8->convert_blessed(1);
+    #$DB::single=1;
     $json->encode($data);
 }
 

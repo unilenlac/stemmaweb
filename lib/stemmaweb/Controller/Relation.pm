@@ -4,6 +4,7 @@ use Moose;
 use Moose::Util::TypeConstraints qw/ find_type_constraint /;
 use Module::Load;
 use String::Diff;
+use LWP::UserAgent;
 use namespace::autoclean;
 use stemmaweb::Controller::Util
   qw/ load_tradition json_error json_bool section_metadata /;
@@ -31,6 +32,7 @@ Renders the application for the text identified by $textid.
 
 # Here is the tradition lookup and ACL check...
 sub text :Chained('/') :PathPart('relation') :CaptureArgs(1) {
+    # $DB::single=1;
     my ($self, $c, $textid) = @_;
     my $textinfo = load_tradition($c, $textid);
 
@@ -62,6 +64,7 @@ sub firstsection :Chained('text') :PathPart('') :Args(0) {
 
 # Here is the action for when a section has been explicitly specified.
 sub section :Chained('text') :PathPart('') :CaptureArgs(1) {
+    # $DB::single=1;
     my ($self, $c, $sectionid) = @_;
     my $section;
     try {
@@ -341,6 +344,59 @@ sub complex :Chained('section') :PathPart :Args(0) {
   }
 }
 
+=head2 savecomplex
+
+POST method
+
+Save complex reading node changes.
+alllows specially to declare CR lemmatization and polarisation through
+the is_lemma field and the weight field
+
+Return JSON query status => {message: 'ok'}
+
+=cut
+
+sub savecomplex :Chained('section') :PathPart :Args(0) {
+    my ($self, $c) = @_;
+    my $textid = $c->stash->{textid};
+    my $sectid = $c->stash->{sectid};
+    my $m      = $c->model('Directory');
+    my @data   = $c->req->body_data;
+
+    if ($c->request->method eq 'POST') {
+        
+        my $ua = LWP::UserAgent->new;
+        my $response = { status => 'ok' };
+        
+        my $data = {
+            id => $c->request->param('complex-list'),
+            islemma => $c->request->param('islemma'),
+            weight => $c->request->param('weight'),
+            source => $c->request->param('source'),
+            note => $c->request->param('note'),
+        };
+        
+        try{
+            
+            my $complexid = $c->request->param('complex-list');
+            
+            # $DB::single=1;
+
+            if($complexid){
+                $m->ajax(
+                    'post', "/complexreading/$complexid",
+                    'Content-Type' => "application/json",
+                    'Content' => encode_json($data));
+            }
+
+        }catch (stemmaweb::Error $e ) {
+            $response->{status} = 'error';
+            $response->{warning} = 'Could not merge the nodes : ' . $e->message;
+        }
+        $c->stash->{'result'} = $response;
+        $c->forward('View::JSON');
+    }
+}
 
 =head2 relationships
 
@@ -969,7 +1025,8 @@ On success returns a JSON object that looks like this:
 =cut
 
 ## TODO push the >2-node compress operation out to stemmarest
-sub compress :Chained('section') :PathPart :Args(0) {
+sub compress :Chained('section') :PathPart :Args(0) { 
+    # $DB::single=1;
     my ($self, $c) = @_;
     my $m = $c->model('Directory');
     if ($c->request->method eq 'POST') {
@@ -1014,6 +1071,43 @@ sub compress :Chained('section') :PathPart :Args(0) {
         json_error($c, 405, "Use POST instead");
     }
 }
+
+=head2 mergenodes
+
+    POST relation/$textid/$sectionid/mergenodes {data}
+    merge two node from the same rank that have different witnesses
+
+    on success return status object.
+
+=cut
+
+sub mergenodes :Chained('section') :PathPart :Args(0) {
+
+    my ($self, $c) = @_;
+    my $m      = $c->model('Directory');
+    my $textid = $c->stash->{textid};
+    my $sectid = $c->stash->{sectid};
+
+    if ($c->request->method eq 'POST') {
+        
+        my $response = { status => 'ok' };
+        try{
+            my $source = $c->request->param('source');
+            my $target = $c->request->param('target');
+            if($source and $target){
+                $m->ajax('post', "/reading/$source/mergenodes/$target");
+            }
+
+        }catch (stemmaweb::Error $e ) {
+            $response->{status} = 'error';
+            $response->{warning} = 'Could not merge the nodes : ' . $e->message;
+        }
+        $c->stash->{'result'} = $response;
+        $c->forward('View::JSON');
+    }
+
+}
+
 
 =head2 merge
 
@@ -1239,17 +1333,17 @@ structure should be reflected in the updated visual display of the client.
 =cut
 
 sub split :Chained('section') :PathPart :Args(0) {
+    
     my ($self, $c) = @_;
+    
     my $m      = $c->model('Directory');
     my $textid = $c->stash->{textid};
     if ($c->request->method eq 'POST') {
-
         # Auth check
         if ($c->stash->{'permission'} ne 'full') {
             json_error($c, 403,
                 'You do not have permission to modify this tradition.');
         }
-
         # Get and check the parameters
         my $rid      = $c->request->param('reading');
         my $rtext    = $c->request->param('rtext');
@@ -1295,6 +1389,7 @@ sub split :Chained('section') :PathPart :Args(0) {
         # Fill out the readings and return the result. This response
         # uses database IDs.
         $c->stash->{result}->{relationships} = $response->{sequences};
+
         foreach my $r (@{ $response->{readings} }) {
             my $rinfo = _reading_struct($r);
             delete $rinfo->{svg_id};

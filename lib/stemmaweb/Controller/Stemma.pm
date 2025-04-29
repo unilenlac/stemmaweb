@@ -1,6 +1,8 @@
 package stemmaweb::Controller::Stemma;
 use Moose;
 use namespace::autoclean;
+use JSON::XS;
+use IPC::Run qw(run);
 
 use strict;
 use warnings;
@@ -73,14 +75,38 @@ sub index :Path :Args(2) {
     if ($c->req->method eq 'POST') {
         if ($textinfo->{permission} eq 'full') {
             my $dot = $c->request->body_params->{dot};
+
+            
+            # my $temp_file = '/tmp/graph.dot';
+            # open my $fh, '>', $temp_file or die $!;
+            # print $fh $dot;
+            # close $fh;
+            # $c->log->debug("Dot file written to $temp_file");
+
+            # my $json_output;
+            # run ['dot', '-Tdot_json', $temp_file], '>', \$json_output;
+            
+            # Parse JSON
+            # my $json_struct = decode_json($json_output);
+
+            my $data = {
+                # identifier  => 'John Doe',
+                # is_undirected   => 30,
+                # is_contaminated  => 'New York',
+                dot        => $dot,
+            };
+            my $json_output = JSON->new->utf8->encode($data);
+
+            $DB::single=1;
             try {
                 $stemmadata = $c->model('Directory')->ajax(
                     $method, $location,
                     'Content-Type' => 'application/json',
-                    Content        => encode_utf8($dot)
+                    Content        => $json_output
                 );
             }
             catch (stemmaweb::Error $e ) {
+                $DB::single=1;
                 return json_error($c, $e->status, $e->message);
             }
         } else {
@@ -146,7 +172,7 @@ sub dot :Local :Args(2) {
         $stemmadata = $c->model('Directory')->ajax('get', $location);
     }
     catch (stemmaweb::Error $e ) {
-        return _json_error($c, $e->status, $e->message);
+        return json_error($c, $e->status, $e->message);
     }
 
     # Get the dot and transmute its line breaks to literal '|n'

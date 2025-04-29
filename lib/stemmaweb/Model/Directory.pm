@@ -31,6 +31,8 @@ has basic_auth => (
 
 sub ajax {
 
+    # todo improve verb handling to allow PUT/PATCH method, could be done with if/else statement based on $method var
+
     # Generic and simple LWP request method for our application that returns
     # a decoded-from-JSON object.
     # Args are the same as for LWP::UA but we will fill in the repo URL.
@@ -53,6 +55,7 @@ sub ajax {
         );
     }
 
+    # $DB::single=1;
     my $resp = $ua->$method($url, @lwpargs);
 
     # Did it work?
@@ -118,24 +121,28 @@ sub dot_to_svg {
             HTTP::Response->new(500, "Need GraphViz installed to output SVG"));
     }
 
+    #### WRITE ####
+    # {
+    #     open my $fh, '>', 'test.txt';
+    #     print {$fh} $dotstr . "\n";
+    #     close $fh;
+    # }
     # Transmogrify it to SVG
     my @cmd = qw/dot -Tsvg/;
-    # dot -oC:\Users\sibrizpe\AppData\Local\Temp\test2.txt -Tsvg iKugon50iG
-    my @cmd = qw/dot -o C:\Users\sibrizpe\AppData\Local\Temp\test4.txt -Tsvg/;
     my ($svg, $err);
     my $dotfile = File::Temp->new();
     ## USE FOR DEBUGGING
-    $dotfile->unlink_on_destroy(0);
+    # $dotfile->unlink_on_destroy(0);
     binmode $dotfile, ':utf8';
     print $dotfile $dotstr;
     push(@cmd, $dotfile->filename);
-    print "CDM : @cmd" ;
-    # run(\@cmd, ">", binary(), \$svg);
-    system(@cmd);
-    my $svg = read_file('C:\Users\sibrizpe\AppData\Local\Temp\test4.txt');
-    print "SVG BEFORE: $svg";
+    run(\@cmd, ">", binary(), \$svg);
     $svg = decode_utf8($svg);
-    print "SVG AFTER: $svg";
+    {
+        open my $fh, '>', 'test.txt';
+        print {$fh} $svg . "\n";
+        close $fh;
+    }
     return $svg;
 }
 
@@ -169,6 +176,20 @@ sub throw_ua {
         ident    => 'Datastore error',
         response => $_[0]
     );
+}
+
+sub tradition{
+    my ($self, $tradition_id) = @_;
+    my $location = "/stemmarest/tradition/$tradition_id/stemmata";
+    my $tradition = $self->ajax('get', $location);
+    unless ($tradition) {
+        stemmaweb::Error->throw(
+            ident   => 'Datastore error',
+            status  => 500,
+            message => "Bad tradition: $tradition"
+        );
+    }
+    return $tradition;
 }
 
 # TODO move T::T::Stemma interactions here

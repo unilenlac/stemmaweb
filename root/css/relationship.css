@@ -86,8 +86,9 @@ span.apimore {
   margin-top: 5px;
   border: 2px solid #B0C6F7;
   background: #fff;
-  padding-top: 5px;
-  padding-bottom: 5px;
+
+  display: flex;
+  flex-direction: column;
 }
 
 #loading_overlay {
@@ -190,18 +191,25 @@ span.apimore {
 #enlargement {
   padding: 0px;
   overflow: hidden;
+  height: 100%;
 }
 
 #svgenlargement {
   border: red, 2px;
-  padding: 0px;
-  overflow-x: scroll;
-  overflow-y: scroll;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
   position: relative;
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
 
 #svgenlargement svg {
-  position: absolute;
+  height: 100%;
+  width: 100%;
 }
 
 #workspace {
@@ -211,18 +219,36 @@ span.apimore {
 
 #complex-reading-div {
   position: absolute;
-  left: 30px;
-  top: 600px;
+  top: 128px;
+  left: 80%;
+  width: 18%;
+  height: 575px;
   border: 2px solid #B0C6F7;
   overflow-y: auto;
-  max-height: 600px;
-  z-index: 10;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 5px 10px;
 }
 
 #complex-reading-divheader {
   padding: 10px;
   cursor: move;
   background-color: #F2F5F7;
+}
+
+#note-source-fields {
+  width: 95%;
+  justify-content: space-evenly;
+  padding-left: 10px;
+  margin-bottom: 5px;
+  gap: 10px;
+}
+#source, #weight, #note{
+  width: 90%
+}
+label {
+  margin-bottom: 2px;
 }
 
 #keymap {

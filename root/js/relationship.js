@@ -273,9 +273,11 @@ function node_dblclick_listener(evt) {
   }
   // and then populate the dialog box with it.
   // auto select the clicked reading
-  $('#reading_select_form option[value=' + myRid +']').attr('selected',true);
+  $('#reading_select_form option[value="' + myRid +'"]').attr('selected',true);
+  //$('#reading_select_form').attr('selected',true);
   display_reading_info(myRid);
-  $('#repr_readings_list input[value=' + myRid +']').prop("checked", true);
+  $('#repr_readings_list input[value="' + myRid +'"]').prop("checked", true);
+  //$('#repr_readings_list').prop("checked", true);
   return false;
 }
 
@@ -528,7 +530,7 @@ var dragBehavior = d3.drag()
   .on("end", dragEnd);
 
 var zoomBehavior = d3.zoom()
-  .scaleExtent([0.1, 3])
+  .scaleExtent([0.1, 10])
   .filter(function() {
     return !d3.event.button && d3.event.type !== "wheel";
   })
@@ -573,7 +575,7 @@ function svgEnlargementLoaded() {
   svg_root = svg_root_element.parentNode;
 
   // Get the SVG into d3 for manipulation
-  d3svg = d3.select("svg");
+  d3svg = d3.select("svg")
   d3svg.style("background-color", "white");
   d3svg.style('transformOrigin', 'top left');
   // Give any lemma-text paths a more interesting color
@@ -601,6 +603,9 @@ function svgEnlargementLoaded() {
   if (initialScale > 1) {
     initialScale = 1;
   }
+  if (initialScale < 1){
+    initialScale = initialScale * 10
+  }
 
   var initialScrollTop;
   var initialScrollLeft;
@@ -627,6 +632,7 @@ function svgEnlargementLoaded() {
   }
 
   // Make the zoom slider
+  /*
   slider = d3.select("body").append("p").append("input")
     .datum({})
     .attr("id", "slider")
@@ -638,17 +644,19 @@ function svgEnlargementLoaded() {
     .on("input", function(d) {
       zoomBehavior.scaleTo(d3svg, d3.select(this).property("value"));
     });
-
+  */
   // d3svg.style("transform-origin", "top left");
-  d3svg.attr("transform", "scale(" + initialScale + ")");
-  d3svg.call(zoomBehavior);
+  /*
+  // d3svg.attr("transform", "scale(" + initialScale + ")");
+  */
+  // d3svg.call(zoomBehavior);
 
   // Scroll to our starting position
-  svg_container.scrollTo({
-    'top': initialScrollTop,
-    'left': initialScrollLeft,
-    'behavior': 'auto'
-  });
+  // svg_container.scrollTo({
+  //   'top': initialScrollTop,
+  //   'left': initialScrollLeft,
+  //   'behavior': 'auto'
+  // });
 
   //document.getElementsByClassName('hasSVG')[1].style.transform = "scale(" + global_graph_scale + ")";
   //$('#svgenlargement').scrollTop(ghigh*(global_graph_scale/2));
@@ -816,11 +824,13 @@ function zoomer() {
     } else {
       // Panning zoom in X Axis, no need to change Y axis
       // Get the scale factor of the internal width vs. DOM with of the SVG
-      var scrollScale = svg_root.getBoundingClientRect().width / svg_root.getBBox().width;
+      // var scrollScale = svg_root.getBoundingClientRect().width / svg_root.getBBox().width;
       // Apply this factor to the SVG center point, offsetting half the width of the box
-      svg_root.parentNode.scrollTo({
-        left: (svgpt.x * scrollScale) - (crect.width / 2)
-      })
+      // console.log(svgpt.x, svgpt.y);
+      // console.log("Mouse coords at " + coords);
+      // svg_root.parentNode.scrollTo({
+      //   left: (svgpt.x * scrollScale) - (crect.width / 2)
+      // })
     }
 
   }
@@ -1994,50 +2004,71 @@ function requestRunningText() {
   });
 }
 
-// Set up keypress commands:
+// Set keypress commands visualisation mode
+
+var mainKeyCommands = {
+  '72': {
+    'key': 'alt+h',
+    'description': 'View/edit hypernodes',
+    'function': function() {      
+        $('#complex-reading-div').toggle();
+        $('#witness_list_container').toggle();
+    }
+  },
+  '69': {
+    'key': 'alt+e',
+    'description': "edit mode",
+    'function': switchEditMode
+  }
+
+}
+
+// Set up keypress commands edit mode:
 
 var keyCommands = {
+  '72': {
+    'key': 'alt+h',
+    'description': 'View/edit hypernodes',
+    'function': function() {      
+        $('#complex-reading-div').toggle();
+        $('#witness_list_container').toggle();
+    }
+  },
+  '69': {
+    'key': 'alt+e',
+    'description': "edit mode",
+    'function': switchEditMode
+  },
+  '109': {
+    'key': 'm',
+    'description': 'Merge identical nodes from different witnesses. Equivalent to rollback the "detach" (d) operation.',
+    'function': function(){
+      console.log("merge");
+      if(confirm("confirm")){
+        $.ajax({
+          url: getTextURL('mergenodes/'),
+          data: {
+            source: readings_selected[0].slice(1, readings_selected[0].length),
+            target: readings_selected[1].slice(1, readings_selected[1].length),
+            single: true
+          },
+          type: "POST",
+          success: function(res){
+            if(res.status == "ok"){
+              location.reload();
+            } 
+          }
+        })
+        return true;
+      }else{
+        return false;
+      }
+    }
+  },
   '104': {
     'key': 'h',
     'description': 'View/Set hypernodes for the selected reading(s)',
-    'function': function() {
-      $('#complex-reading-list option').remove();
-      $('#complex-reading-for input[name="rid"]').remove();
-      $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
-      if (readings_selected.length > 0) {
-        var displayText = "";
-        readings_selected.sort(sortByRank);
-        $.each(readings_selected, function(i, reading_id) {
-          if (! isNaN(readingdata[reading_id].id)) {// numeric
-            // set text
-            displayText += readingdata[reading_id]['text'] + " ";
-            // get complex readings and populate the list
-            var myString = 'rid=' + readingdata[reading_id].id;
-            $.ajax({
-              url: getTextURL('complex/'),
-              data: myString,
-              success: function(data) {
-                setListOptions(data, "#complex-reading-list");
-                $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
-                if ($('#complex-reading-list option').length > 0) {
-                  $('#complex-reading-list option:first').attr("selected", "selected");
-                  oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
-                }
-                $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
-                getComplexReadings();
-              },
-              dataType: 'json',
-              type: 'GET'
-            });
-          }
-        });
-        if (displayText) {
-          $('#complex-reading-text').val(displayText.trim());
-          $('#complex-reading-dialog').dialog('open');
-          $(".ui-widget-overlay").css("background", "none");
-        }
-      }
-    }
+    'function': loadComplexReading
   },
   '99': {
     'key': 'c',
@@ -2113,9 +2144,10 @@ var keyCommands = {
         // need current state of lemmatization
         var selected = readingdata[reading_id]
         var set_lemma = !selected['is_lemma']
-        var ncpath = getReadingURL(reading_id);
+        console.log(`relationships.js 2119 : ${selected.id}`)
+        var ncpath = getReadingURL(selected.id);
         var form_values = {
-          'id': reading_id,
+          'id': selected.id,
           'is_lemma': set_lemma,
         };
 
@@ -2211,7 +2243,7 @@ function keystroke_menu() {
     'selection. Readings can be selected by clicking, or by dragging across ' +
     'the screen in edit mode. Press any of the following keys to take the ' +
     'corresponding action:</p><ul>';
-  $.each(keyCommands, function(k, v) {
+  $.each({...mainKeyCommands, ...keyCommands}, function(k, v) {
     htmlstr += '<li><b>' + v['key'] + '</b>: ' + v['description'] + '</li>';
   });
   htmlstr += '</ul><p>Double-click a reading to access its properties; drag a reading to another one to create a relationship. For fuller documentation see the "About/Help" link.</p>';
@@ -2383,25 +2415,64 @@ function setDeleteButtonDisabled() {
     $('#relationtype_delete_button').button(action);
 }
 
+var last_obj;
+var last_opacity = {};
 // Complex readings dialog functions
 function display_complex_reading(obj){
     // Retrieve source and note
-
+  
     var ncpath = getTextURL('complex');
     $.get(ncpath, function(data) {
-        console.log("data (complex):", data);
+      var selected_option = data.filter(function(val){
+        if(val.id == obj.value){
+          return val
+        }
+      })[0];
+      $("#complex-reading-div #note").val(selected_option.note);
+      $("#complex-reading-div #source").val(selected_option.source);
+      $("#complex-reading-div #islemma").val(selected_option.is_lemma);
+      $("#complex-reading-div #islemma").prop('checked', selected_option.is_lemma);
+      $("#complex-reading-div #weight").val(selected_option.weight);
+      console.log("selected data (complex)", selected_option);
+      console.log("data (complex):", data);
+      if (Object.keys(last_opacity).length > 0 && typeof last_obj !== 'undefined'){
         $.each(data, function(i, item) {
-            if (item.id == obj.value) {
-                console.log("match:", item);
-                var myNote = item.note != null ? item.note : "";
-                var mySource = item.source != null ? item.source : "";
-                // $('#complex-reading-note').prop('disabled', true);
-                // $('#complex-reading-source').prop('disabled', true);
-                $('#complex-reading-note').val(myNote);
-                $('#complex-reading-source').val(mySource);
+          if(item.id == last_obj){
+              $.each(item.components, function(i, val){
+                var reading = val.reading.id;
+                $('#svgenlargement .node title:contains(' + reading + ')').next('ellipse').attr({
+                  "stroke-width": "2.5",
+                  "stroke-opacity": `${last_opacity[reading]}`,
+                  // "hn-stroke" : $(this).attr('stroke-color')
+                });
+              })
             }
+          })
+        }
+        $.each(data, function(i, item) {
+          if (item.id == obj.value) {
+            console.log("match:", item);
+            var myNote = item.note != null ? item.note : "";
+            var mySource = item.source != null ? item.source : "";
+            var is_lemma = item.is_lemma != null ? item.is_lemma : false;
+            var weight = item.weight != null ? item.weight : '';
+            // $('#complex-reading-note').prop('disabled', true);
+            // $('#complex-reading-source').prop('disabled', true);
+            $('#complex-reading-note').val(myNote);
+            $.each(item.components, function(i, val){
+              var reading = val.reading.id;
+              var node = $('#svgenlargement .node title:contains(' + reading + ')').next('ellipse')
+              last_opacity[reading] = node.attr("stroke-opacity");
+              $('#svgenlargement .node title:contains(' + reading + ')').next('ellipse').attr({
+                "stroke-width": "2.5",
+                "stroke-opacity": '100%',
+                // "hn-stroke" : $(this).attr('stroke-color')
+              });
+            });
+            last_obj = structuredClone(obj.value);
+          }
         });
-    });
+      });
 
     // if ($('#update_workspace_button').data('locked')) { // edit mode
     //   unselect_all_readings();
@@ -2468,6 +2539,11 @@ function getElementTopLeft(id) {
 }
 
 function setListOptions(data, listIdString) {
+  
+  var opacity_fraction = Math.round(100 / data.length);
+  var color_fraction = Math.round(70 / data.length);
+  var stroke_light = 30;
+  
   $.each(data, function(index, cReading) { // Add each complex reading as list element
     var myText = "";
     var myRank = "";
@@ -2482,7 +2558,7 @@ function setListOptions(data, listIdString) {
     }
     var myCID = cReading.id;
     // if not already added
-    if (! $(listIdString + ' option[value=' + myCID + ']').length ) {
+    if (! $(listIdString + ' option[value="' + myCID + '"]').length ) {
       // store id of readings
       var rids = $.map(collectedReadings, function(t) {
         return t.id
@@ -2502,19 +2578,23 @@ function setListOptions(data, listIdString) {
         commonWit.slice(0, 3).join(', ') + " + " + (commonWit.length - 3).toString() + " wit." :
         commonWit.join(', ');
 
-      myText = myText + " (id: " + myCID;
+      myText = myText + " (id: " + myCID.split(":")[2];
       if (commonWit.length > 0) {
         myText += "; in " + myWitText;
       }
       myText += ")";
+      
+      stroke_light = stroke_light+color_fraction;
 
       $(listIdString).append($('<option />')
         .attr("rids", rids)
         .attr("rank", myRank)
         .attr("name", "cid")
         .attr("value", myCID)
+        .attr("stroke-opacity", opacity_fraction)
+        //.attr("stroke-color", `hsl(${Math.round(Math.random() * (359 - 1) + 1)}, ${Math.round(Math.random() * (100 - 1) + 1)}%, ${stroke_light}%)`)
         .text(myText));
-    }
+      }
   });
   // Sort complex reading list alphabetically
   $(listIdString).append($(listIdString + ' option').remove().sort(function(a, b) {
@@ -2551,22 +2631,37 @@ function setHyperTarget(){
   console.log("target hypernode set: ", $('#target_hypernode_id').val());
 }
 
-function getComplexReadings(){
+async function getComplexReadings(reading_border = true){
+  last_obj = undefined; // reset this variable if hypernodes higlight is needed
   $('#complex-reading-full-list').empty();
-  $.ajax({
+  await $.ajax({
     url: getTextURL('complex/'),
     data: "",
     success: function(data) {
         setListOptions(data, "#complex-reading-full-list");
         if ( $('#complex-reading-full-list option').length ) {
-          $('#complex-reading-full-list').attr('size', $('#complex-reading-full-list option').length);
+          //$('#complex-reading-full-list').attr('size', $('#complex-reading-full-list option').length);
           // Sort list according to rank
           $('#complex-reading-full-list').append($('#complex-reading-full-list option').remove().sort(function(a, b) {
               var at = parseInt($(a).attr('rank')), bt = parseInt($(b).attr('rank'));
               return (at > bt)?1:((at < bt)?-1:0);
           }));
         }
-        setComplexReadingBorder();
+        var first_option_cid = $('#complex-reading-full-list option:nth-child(1)').val();
+        var hr_data = data.filter(function(val){
+          if(val.id==first_option_cid){
+            return val;
+          }
+        })[0]
+        var source = $("#complex-reading-div #source");
+        var note = $("#complex-reading-div #note");
+        source.val(hr_data.source);
+        note.val(hr_data.note);
+        if(reading_border){
+          setComplexReadingBorder();
+        }else{
+          $('#svgenlargement .node').data("ellipse").greyout_edges();
+        }
     },
     dataType: 'json',
     type: 'GET'
@@ -2575,17 +2670,29 @@ function getComplexReadings(){
 
 function setComplexReadingBorder(){
     // reset bolders of all nodes
-    $('#svgenlargement .node ellipse').removeAttr("stroke-width");
+    $('#svgenlargement .node ellipse').removeAttr("stroke-width stroke");
 
     // Collect individual readings from the Hypernodes list and increase border width for each
     var readings = [];
     $('#complex-reading-full-list option').each(function(){ // for each complex reading
         for (let reading of $(this).attr('rids').split(',')) { // for each individual reading
-            if ( readings.indexOf(reading) < 0 ) { // make sure it is treated only once
-                readings.push(reading);
-                $('#svgenlargement .node title:contains(' + reading + ')').next('ellipse').attr("stroke-width", "2.5");
+          //if ( readings.indexOf(reading) < 0 ) { // make sure it is treated only once
+            var stroke_opacity = 0;
+            var ellipse = $('#svgenlargement .node title:contains(' + reading + ')').next('ellipse');
+            if(typeof ellipse.attr('stroke-opacity') !== 'undefined'){
+              stroke_opacity = Number(ellipse.attr("stroke-opacity").slice(0, -1)) + Number($(this).attr('stroke-opacity'));
             }
-        }
+            //readings.push(reading);
+            if(stroke_opacity == 0){
+              stroke_opacity = $(this).attr('stroke-opacity');
+            }
+            $('#svgenlargement .node title:contains(' + reading + ')').next('ellipse').attr({
+              "stroke-width": "2.5",
+              "stroke-opacity": `${stroke_opacity}%`,
+              //"hn-stroke" : $(this).attr('stroke-color')
+            });
+          }
+        //}
     });
 }
 
@@ -3385,7 +3492,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     data: form_values,
                     success: function(data) {
                         // Remove the affected list element
-                        $('.relation-type-list option[value = ' + value + ']').remove();
+                        $('.relation-type-list option[value = "' + value + '"]').remove();
                         $('#keymaplist li:contains(' + value + ')').remove();
                         // Remove the affected data
                         var toRemove = -1;
@@ -3443,6 +3550,31 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       $('#relation_edit_status').empty();
     },
   });
+  $("#complex-reading-div #islemma").on('click', function(e){
+    if($("#complex-reading-div #islemma").prop('checked')){
+      $("#complex-reading-div #islemma").val(true)
+    }else{
+      $("#complex-reading-div #islemma").val(false)
+    }
+  })
+  $('#complex-reading-div').on('submit', function(e){
+    console.log("save");
+    e.preventDefault();
+    var data = $(this).serialize();
+    if(!data.includes("islemma")){
+      data = `${data}&islemma=false`;
+    }
+    $.ajax({
+      url: getTextURL("savecomplex/"),
+      data: data,
+      type: "POST",
+      success: function(res){
+        $("complex-message").text("Saved!");
+        $("complex-message").toggle();
+      }
+    })
+
+  })
 
   // Set up the complex reading dialog
   $('#complex-reading-dialog').dialog({
@@ -3470,7 +3602,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 
             // prepare form items (rids) for complex reading creation
             $.each(readings_selected, function(i, reading_id) {
-              if (! isNaN(readingdata[reading_id].id)) {//numeric : exclude START and END
+              if (readingdata[reading_id].id) {//numeric : exclude START and END
                 $('#complex-reading-form').append($('<input style="display:none"/>')
                   .attr('id', "complex-reading-id")
                   .attr('name', "rid")
@@ -3494,7 +3626,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                     $('#complex-reading-list option[value="' + data.id + '"]').attr("selected", "selected");
                     // select the newly-added option (value is data.id)
                     oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
-                    getComplexReadings();
+                    getComplexReadings(false);
                 },
                 dataType: 'json',
                 type: 'POST'
@@ -3579,11 +3711,11 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                 data: myString,
                 success: function() {
                     // Remove the affected list element
-                    $('#complex-reading-list option[value = ' + selectedCR + ']').remove();
+                    $('#complex-reading-list option[value = "' + selectedCR + '"]').remove();
                     $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
                     $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
                     oldComplexReadings = [];
-                    getComplexReadings();
+                    getComplexReadings(false);
                 },
                 dataType: 'json',
                 type: 'DELETE'
@@ -3611,8 +3743,8 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
                   data: myString,
                   success: function() {
                       // Remove the affected list element
-                      $('#complex-reading-list option[value = ' + selectedCR + ']').remove();
-                      getComplexReadings();
+                      $('#complex-reading-list option[value = "' + selectedCR + '"]').remove();
+                      getComplexReadings(false);
                   },
                   async: false,
                   dataType: 'json',
@@ -3783,63 +3915,8 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     }
   });
 
-  $('#update_workspace_button').click(function() {
-    if (!editable) {
-      return;
-    }
-    $(this).hide();
-    mouse_scale = svg_root_element.getScreenCTM().a;
-    if ($(this).data('locked') == true) {
-      d3svg.on(".drag", null);
-      d3svg.call(zoomBehavior); // JMB turn zoom function on
-      unselect_all_readings();
-      $('#svgenlargement ellipse').each(function(index) {
-        if ($(this).data('node_obj') != null) {
-          $(this).data('node_obj').ungreyout_edges();
-          $(this).data('node_obj').set_selectable(false);
-          color_inactive($(this));
-          $(this).data('node_obj', null);
-        }
-      });
-      $(this).data('locked', false);
-      $(this).css('background-position', '0px 44px');
-      $(this).attr('title', "Edit");
-    } else {
-      d3svg.on(".zoom", null); // JMB turn zoom function off
-      d3svg.call(dragBehavior);
-      document.getElementById('graph0').style.transformOrigin = 'top left';
-      var left = $('#enlargement').offset().left;
-      var right = left + $('#enlargement').width();
-      var tf = svg_root_element.getScreenCTM().inverse();
-      var p = svg_root.createSVGPoint();
-      p.x = left;
-      p.y = 100;
-      var cx_min = p.matrixTransform(tf).x;
-      p.x = right;
-      var cx_max = p.matrixTransform(tf).x;
-      $('#svgenlargement ellipse').each(function(index) {
-        if ($(this).data('node_obj') == null) {
-          $(this).data('node_obj', new node_obj($(this)));
-        } else {
-          $(this).data('node_obj').set_selectable(true);
-        }
-        $(this).data('node_obj').greyout_edges();
-        /*$('#svgenlargement ellipse').each( function( index ) {
-            var cx = parseInt( $(this).attr('cx') );
-            if( cx > cx_min && cx < cx_max) {
-                if( $(this).data( 'node_obj' ) == null ) {
-                    $(this).data( 'node_obj', new node_obj( $(this) ) );
-                } else {
-                    $(this).data( 'node_obj' ).set_selectable( true );
-                }
-                $(this).data( 'node_obj' ).greyout_edges();
-            }*/
-      });
-      $(this).css('background-position', '0px 0px');
-      $(this).attr('title', "View");
-      $(this).data('locked', true);
-    }
-    $(this).show();
+  $('#update_workspace_button').click(function(){
+    switchEditMode();
   });
 
   $('#keystroke_menu_button').click(function() {
@@ -3852,6 +3929,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 
   $('#hypernode_hider_button').click(function() {
     $('#complex-reading-div').toggle();
+    $('#witness_list_container').toggle();
   });
 
   $('#reading_is_nonsense').change(function() {
@@ -3886,8 +3964,11 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
   // Enable the keyboard shortcuts.
 }).bind('keypress', function(event) {
   if (!$(".ui-dialog").is(":visible") && editable) {
-    if (event.which in keyCommands) {
+    if (event.which in keyCommands && edit_mode) {
       var fn = keyCommands[event.which]['function'];
+      fn();
+    } else if (event.which in mainKeyCommands && !edit_mode){
+      var fn = mainKeyCommands[event.which]['function'];
       fn();
     }
   }
@@ -3897,6 +3978,121 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
   }
 });
 
+var edit_mode = false;
+
+function loadComplexReading(){
+  // document.getElementById('complex-reading-div').reset();
+  $('#complex-reading-list option').remove();
+  $('#complex-reading-for input[name="rid"]').remove();
+  $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
+  if (readings_selected.length > 0) {
+    var displayText = "";
+    readings_selected.sort(sortByRank);
+    $.each(readings_selected, function(i, reading_id) {
+      if (readingdata[reading_id].id) {
+        // numeric
+        // set text
+        displayText += readingdata[reading_id]['text'] + " ";
+        // get complex readings and populate the list
+        var myString = 'rid=' + readingdata[reading_id].id;
+        $.ajax({
+          url: getTextURL('complex/'),
+          data: myString,
+          success: function(data) {
+            setListOptions(data, "#complex-reading-list");
+            $('#complex-reading-list').attr('size', $('#complex-reading-list option').length);
+            if ($('#complex-reading-list option').length > 0) {
+              $('#complex-reading-list option:first').attr("selected", "selected");
+              oldComplexReadings = $('#complex-reading-list option:selected').attr('rids').split(',');
+            }
+            $('#hypernodes-title').text("Existing hypernodes here (" + $('#complex-reading-list option').length.toString() + ")");
+            getComplexReadings(false);
+            $("#complex-reading-full-list").prop("selectedIndex", 0);
+          },
+          dataType: 'json',
+          type: 'GET'
+        });
+      }
+    });
+    if (displayText) {
+      $('#complex-reading-text').val(displayText.trim());
+      $('#complex-reading-dialog').dialog('open');
+      $(".ui-widget-overlay").css("background", "none");
+    }
+  }
+}
+
+function switchEditMode(){
+    if (!editable) {
+      return;
+    }
+    $(this).hide();
+    mouse_scale = svg_root_element.getScreenCTM().a;
+    if ($(this).data('locked') == true) {
+      edit_mode = false;
+      d3svg.on(".drag", null);
+      //d3svg.call(zoomBehavior); // JMB turn zoom function on
+      unselect_all_readings();
+      $('#svgenlargement ellipse').each(function(index) {
+        if ($(this).data('node_obj') != null) {
+          $(this).data('node_obj').ungreyout_edges();
+          $(this).data('node_obj').set_selectable(false);
+          color_inactive($(this));
+          $(this).data('node_obj', null);
+        }
+      });
+      $(this).data('locked', false);
+      $(this).css('background-position', '0px 44px');
+      $(this).attr('title', "Edit");
+    } else {
+      edit_mode = true;
+      d3svg.on(".zoom", null); // JMB turn zoom function off
+      d3svg.call(dragBehavior);
+      document.getElementById('graph0').style.transformOrigin = 'top left';
+      var left = $('#enlargement').offset().left;
+      var right = left + $('#enlargement').width();
+      var tf = svg_root_element.getScreenCTM().inverse();
+      var p = svg_root.createSVGPoint();
+      p.x = left;
+      p.y = 100;
+      var cx_min = p.matrixTransform(tf).x;
+      p.x = right;
+      var cx_max = p.matrixTransform(tf).x;
+      $('#svgenlargement ellipse').each(function(index) {
+        if ($(this).data('node_obj') == null) {
+          $(this).data('node_obj', new node_obj($(this)));
+        } else {
+          $(this).data('node_obj').set_selectable(true);
+        }
+        $(this).data('node_obj').greyout_edges();
+        /*$('#svgenlargement ellipse').each( function( index ) {
+            var cx = parseInt( $(this).attr('cx') );
+            if( cx > cx_min && cx < cx_max) {
+                if( $(this).data( 'node_obj' ) == null ) {
+                    $(this).data( 'node_obj', new node_obj( $(this) ) );
+                } else {
+                    $(this).data( 'node_obj' ).set_selectable( true );
+                }
+                $(this).data( 'node_obj' ).greyout_edges();
+            }*/
+      });
+      $(this).css('background-position', '0px 0px');
+      $(this).attr('title', "View");
+      $(this).data('locked', true);
+
+      // enable zoom and pan d3 feature
+
+      var svg_frame_h = Number($('svg').attr("height").slice(0,-2));
+      var svg_frame_w = Number($('svg').attr("width").slice(0,-2));
+      var g = d3.select(".graph");
+      var zoom = d3.zoom().translateExtent([[0, -svg_frame_h], [svg_frame_w, svg_frame_h]]).on("zoom", function() {
+        g.attr("transform", d3.event.transform);
+      });
+      d3.select("svg").call(zoom);
+    }
+    $(this).show();
+}
+
 function expandFillPageClients() {
   $('.fillPage').each(function() {
     $(this).height($(window).height() - $(this).offset().top - MARGIN);
@@ -3905,7 +4101,7 @@ function expandFillPageClients() {
 
 // Wondering what kicks it all in motion? See: relate.tt
 
-function loadSVG(normalised) {
+async function loadSVG(normalised) {
   // Disable the toggle button
   $('#select_normalised').addClass('disable');
   // Save our state
@@ -3925,7 +4121,7 @@ function loadSVG(normalised) {
   }
 
   // Make the request
-  $.get(ncpath, function(svgData) {
+  await $.get(ncpath, function(svgData) {
     // Change the button text and re-enable the button
     $('#select_normalised span').text(buttonText);
     $('#select_normalised').removeClass('disable');
@@ -3951,13 +4147,20 @@ function loadSVG(normalised) {
         if ( node && node.siblings('text') ) {
             targetText = node.siblings('text').first().text();
         }
-
         $(this).children('title').text(sigilText + ":\n" + edgeText + "\n\n" + sourceText + "\n->\n" + targetText);
     });
   });
-
+  // add pan and zoom d3.js behaviour
+  var svg_frame_h = Number($('svg').attr("height").slice(0,-2));
+  var svg_frame_w = Number($('svg').attr("width").slice(0,-2));
+  var g = d3.select(".graph");
+  var zoom = d3.zoom().translateExtent([[0, -svg_frame_h], [svg_frame_w, svg_frame_h]]).on("zoom", function() {
+    g.attr("transform", d3.event.transform);
+  });
+  d3.select("svg").call(zoom);
   getComplexReadings();
-  dragElement(document.getElementById("complex-reading-div"));
+  // dragElement(document.getElementById("complex-reading-div"));
+  
 }
 
 
