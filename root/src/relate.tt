@@ -237,7 +237,12 @@
           <br>
           <input type="checkbox" name="reading_grammar_invalid" id="reading_grammar_invalid" />
           <label for="reading_grammar_invalid">This word's grammar cannot be right</label>
-          <br>
+          </br>
+          </br>
+          <label for="repr_reading_rank">Reading rank (node reallignment): </label>
+          </br>
+          </br>
+          <input type="number" name="reading_rank" id="reading_rank" min="0" max="10000" value="0" />
         </div>
         <!-- Morphological options go here -->
         <br>

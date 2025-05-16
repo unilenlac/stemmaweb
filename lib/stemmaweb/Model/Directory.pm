@@ -55,7 +55,6 @@ sub ajax {
         );
     }
 
-    # $DB::single=1;
     my $resp = $ua->$method($url, @lwpargs);
 
     # Did it work?
@@ -122,11 +121,12 @@ sub dot_to_svg {
     }
 
     #### WRITE ####
-    # {
-    #     open my $fh, '>', 'test.txt';
-    #     print {$fh} $dotstr . "\n";
-    #     close $fh;
-    # }
+    # uncomment for debugging, result is stored in the runing container...
+    #{
+    #    open my $fh, '>', 'dot_output.txt';
+    #    print {$fh} $dotstr . "\n";
+    #    close $fh;
+    #}
     # Transmogrify it to SVG
     my @cmd = qw/dot -Tsvg/;
     my ($svg, $err);
@@ -138,11 +138,11 @@ sub dot_to_svg {
     push(@cmd, $dotfile->filename);
     run(\@cmd, ">", binary(), \$svg);
     $svg = decode_utf8($svg);
-    {
-        open my $fh, '>', 'test.txt';
-        print {$fh} $svg . "\n";
-        close $fh;
-    }
+    #{
+    #    open my $fh, '>', 'svg_output.txt';
+    #    print {$fh} $svg . "\n";
+    #    close $fh;
+    #}
     return $svg;
 }
 

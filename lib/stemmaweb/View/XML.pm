@@ -1,4 +1,4 @@
-package stemmaweb::View::TEICAT;
+package stemmaweb::View::XML;
 
 use strict;
 use base 'Catalyst::View';
@@ -30,7 +30,7 @@ sub process {
 
 =head1 NAME
 
-stemmaweb::View::JSON - Catalyst JSON View
+stemmaweb::View::XML - Catalyst XML View
 
 =head1 SYNOPSIS
 
@@ -38,11 +38,11 @@ See L<stemmaweb>
 
 =head1 DESCRIPTION
 
-Catalyst JSON View.
+Catalyst XML View.
 
 =head1 AUTHOR
 
-Tara Andrews
+Renato Diaz
 
 =head1 LICENSE
 

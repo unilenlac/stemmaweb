@@ -467,7 +467,8 @@ sub download :Local :Args(0) {
     my $format   = delete $prm->{format};
     my $sectid   = delete $prm->{section}; # for single-section downloads
     my $textinfo = load_tradition($c, $textid);
-    ## Available formats are graphml, json, csv, tsv, dot. Dot -> SVG
+    
+    ## Available formats are xml, graphml, json, csv, tsv, dot. Dot -> SVG
 
     my $view = $format eq 'dot' ? 'View::Plain' : "View::$format";
     $c->stash->{'name'}   ||= $textinfo->{name};

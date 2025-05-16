@@ -149,7 +149,7 @@ sub query :Local :Args(1) {
 
         # Process it
         my $response = decode_utf8($resp->content);
-        $c->log->debug("Got a response from the server: $response");
+        # $c->log->debug("Got a response from the server: $response");
         my $answer;
         try {
             $answer = from_json($response);
@@ -331,8 +331,8 @@ sub request :Local :Args(0) {
         if ($resp->is_success) {
 
             # Process it
-            $c->log->debug('Got a response from the server: '
-                  . decode_utf8($resp->content));
+            # $c->log->debug('Got a response from the server: '
+            #       . decode_utf8($resp->content));
             my $stemweb_response = decode_json($resp->content);
             try {
                 $t->set_stemweb_jobid($stemweb_response->{jobid});

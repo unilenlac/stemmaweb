@@ -726,9 +726,11 @@ sub reading :Chained('section') :PathPart :Args(1) {
             push(@$changed_props, { key => $k, property => $prop })
               if $read_write_keys{$k};
         }
-
+        # $DB::single = 1;
         # Change the reading
         my $reading;
+        my $rank = $c->request->param('rank');
+
         my @changed;
         try {
             ## First update all the non-side-effect properties
@@ -737,6 +739,17 @@ sub reading :Chained('section') :PathPart :Args(1) {
                     'put', "/reading/$reading_id",
                     'Content-Type' => 'application/json',
                     'Content'      => encode_json({ properties => $changed_props })
+                );
+                push(@changed, $reading);
+            }
+            if (defined $rank and $rank ne $orig_reading->{rank}) {
+                # my $props = [{ 'rank' => $rank }];
+                my $payload = { rank => $rank };
+                my $json = JSON->new->utf8->encode($payload);
+                $reading = $m->ajax(
+                    'put', 
+                    "/reading/$reading_id/rank?rank=$rank",
+                    'Content-Type' => 'application/json',
                 );
                 push(@changed, $reading);
             }

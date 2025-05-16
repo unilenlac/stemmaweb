@@ -8,7 +8,7 @@
         <label for="download_format">Choose a format for download: </label>
         [% IF referringpage == 'index' %]
         <select id="download_format" name="format" onchange="$('#dl_choose_sections').toggle(
-  					$(this).val() == 'JSON' || $(this).val() == 'CSV' || $(this).val() == 'TSV'
+  					$(this).val() == 'JSON' || $(this).val() == 'CSV' || $(this).val() == 'TSV' || $(this).val() == TEICAT
   				)">
         [% ELSE %]
         <select id="download_format" name="format">
@@ -19,18 +19,19 @@
           <option value="dot">Graphviz dot format (collation and relationships)</option>
           <option value="SVG">SVG graph display (collation and relationships)</option>
           <option value="GraphML">Native GraphML XML format</option>
-          <option value="TEICAT">XML TEI P5 in parrallel segmentation (simple)</option>
-          <option value="TEICAT2">XML TEI P5 in parrallel segmentation (with relationships)</option>
-          <option value="TEICAT3">XML TEI P5 in parrallel segmentation (with hyper-relationships)</option>
-          <option value="TEICAT4">XML TEI P5 in parrallel segmentation (with hyper-relations, recursive)</option>
-          <!-- option value="tei_ps" -->
-          <!-- option value="tei_dea" -->
+          [% IF referringpage == "relate" %]
+            <option value="XML">XML TEI P5 (segment)</option>
+          [% ELSE %]
+            <option value="XML">XML TEI P5 (full tradition)</option>
+          [% END %]
         </select><br>
         [% IF referringpage == "index" %]
+        <br/>
         <div id="dl_choose_sections">
           <label for="download_start">From section: </label>
           <select id="download_start" name="start_section">
           </select>
+          <br/>
           <label for="download_end">To section: </label>
           <select id="download_end" name="end_section">
           </select>

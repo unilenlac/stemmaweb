@@ -12,8 +12,6 @@ sub process {
         $c->res->header('Content-Disposition',
             sprintf("attachment; filename=\"%s.svg\"", $c->stash->{name}));
     }
-    #$DB::single=1;
-    print($c->stash->{result});
     $c->res->output(encode('UTF-8', $c->stash->{result}));
 }
 

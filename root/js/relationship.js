@@ -157,6 +157,7 @@ function display_reading_info(rid) {
     setup_readingbox('normal_form', inReading);
     setup_readingbox('text', inReading);
     setup_readingbox('display', inReading);
+    setup_readingbox('rank', inReading);
 
     toggle_checkbox($('#repr_reading_is_lemma'), readingdata[rid2node[rid]]['is_lemma']);
     $('#repr_reading_text').val($('#reading_text').val());
@@ -291,8 +292,8 @@ function setup_readingbox(boxname, reading) {
     boxsize = datum.length + 1;
   }
   var boxident = '#reading_' + boxname;
-  $(boxident).attr('size', boxsize);
   $(boxident).val(datum);
+  if(boxname != 'rank') $(boxident).attr('size', boxsize);
 }
 
 function toggle_checkbox(box, value) {
@@ -1486,11 +1487,11 @@ function add_emendation(emenddata) {
   emenddata.readings.forEach(function(r) {
     // Initialize the d3 element
     var enode = d3svg.select('#graph0')
-      .selectAll('#e' + r.id)
+      .selectAll(`g[id="${r.id}"]`)
       .data([r])
       .enter()
       .append('g')
-      .attr('id', 'e' + r.id);
+      .attr('id', 'n' + r.id);
     enode.append('rect')
       .attr('x', function(d) {
         var startNodes = Object.entries(readingdata)
@@ -2738,6 +2739,8 @@ function update_representative_node(){
         myNode.find('title').text(myValue);
         //update g id
         myNode.attr('id', rid2node[myValue]);
+        //update node rank
+        myNode.attr('rank', readingdata[rid2node[myValue]].rank);
     }
 }
 
@@ -3266,7 +3269,8 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           'grammar_invalid': $('#reading_grammar_invalid').is(':checked') || all_invalid,
           'normal_form': $('#reading_normal_form').val(),
           'text': $('#reading_text').val(),
-          'display': $('#reading_display').val()
+          'display': $('#reading_display').val(),
+          'rank': $('#reading_rank').val(),
         };
         // Batch set nonsense/agrammatical if required
         if ( all_nonsense || all_invalid ) { // set all readings as such
