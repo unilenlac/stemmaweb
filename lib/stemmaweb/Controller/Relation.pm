@@ -215,6 +215,42 @@ sub download :Chained('section') :PathPart :Args(0) {
     $c->detach($self->action_for("../download"));
 }
 
+=head2 download_log
+
+  GET relation/download_log
+Downloads the section download log.
+=cut
+sub download_log :Chained('section') :PathPart :Args(0) {
+    my ($self, $c) = @_;
+
+    # API endpoint for the logfile
+    my $api_url = 'http://stemmarest:8080/stemmarest/log_file';
+
+    # Initialize HTTP client
+    my $ua = LWP::UserAgent->new;
+    $ua->timeout(10); # Short timeout for simplicity
+
+    # Make the GET request to the JAX-RS API
+    my $response = $ua->get($api_url);
+
+    # Check if the request was successful
+    if ($response->is_success) {
+        # Set response headers to trigger download
+        $c->response->header('Content-Type' => 'text/plain');
+        $c->response->header('Content-Disposition' => 'attachment; filename="xml_export_download.log"');
+
+        $DB::single=1;
+        # Send the file content to the client
+        $c->response->body($response->content);
+    } else {
+        $DB::single=1;
+        # Handle error
+        $c->response->status(500);
+        $c->response->body('Failed to fetch logfile: ' . $response->status_line);
+    }
+}
+
+
 
 =head2 relationtype
 =cut
@@ -379,8 +415,6 @@ sub savecomplex :Chained('section') :PathPart :Args(0) {
         try{
             
             my $complexid = $c->request->param('complex-list');
-            
-            # $DB::single=1;
 
             if($complexid){
                 $m->ajax(
@@ -726,7 +760,6 @@ sub reading :Chained('section') :PathPart :Args(1) {
             push(@$changed_props, { key => $k, property => $prop })
               if $read_write_keys{$k};
         }
-        # $DB::single = 1;
         # Change the reading
         my $reading;
         my $rank = $c->request->param('rank');

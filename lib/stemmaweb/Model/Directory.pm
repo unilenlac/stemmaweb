@@ -88,7 +88,7 @@ sub tradition_as_svg {
       ? sprintf("/tradition/$textid/section/%s/dot", $opts->{'section'})
       : "/tradition/$textid/dot";
     $location .= '?show_normal=true';
-    $location .= '&expand_sigla=true';
+    $location .= '&expand_sigla=false';
     $location .= '&include_relations=true' if $opts->{'include_relations'};
     if ($opts->{'normalise'}) {
       if (ref($opts->{'normalise'}) eq 'ARRAY') {
@@ -138,11 +138,11 @@ sub dot_to_svg {
     push(@cmd, $dotfile->filename);
     run(\@cmd, ">", binary(), \$svg);
     $svg = decode_utf8($svg);
-    #{
-    #    open my $fh, '>', 'svg_output.txt';
-    #    print {$fh} $svg . "\n";
-    #    close $fh;
-    #}
+    {
+        open my $fh, '>', 'svg_output.txt';
+        print {$fh} $svg . "\n";
+        close $fh;
+    }
     return $svg;
 }
 

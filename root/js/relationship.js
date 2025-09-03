@@ -2725,7 +2725,7 @@ function on_repr_reading_is_lemma() { // disabled
 }
 
 function repr_readings_click(obj) {
-  $('#reading_select_form option[value=' + obj.value +']').prop('selected',true);
+  $(`#reading_select_form option[value="${obj.value}"]`).prop('selected',true);
   display_reading_info(obj.value);
 }
 
@@ -3786,7 +3786,51 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       Download: function(evt) {
         var ncpath = getTextURL('download');
         ncpath += '?' + $('#download_form').serialize();
-        window.location = ncpath;
+        // window.location = ncpath;
+        var req = async (url) => {
+          try{
+              const res = await fetch(url, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/xml'
+                }
+              })
+              if (!res.ok) {
+                var message = await res.json();
+                throw new Error(`status: ${res.status} : ${message.error}`);
+              }
+              const blob = await res.blob();
+              // Create a temporary URL for the Blob object
+              const downloadUrl = window.URL.createObjectURL(blob);
+
+              // Create a temporary anchor element
+              const a = document.createElement('a');
+              a.href = downloadUrl;
+
+              // Set the suggested file name (you can customize this)
+              a.download = 'file.xml';
+
+              // Append anchor to the body
+              document.body.appendChild(a);
+
+              // Programmatically click the anchor to trigger download
+              a.click();
+
+              // Clean up
+              a.remove();
+              window.URL.revokeObjectURL(downloadUrl);
+          } catch (error) {
+            return Promise.reject(error);
+          }
+        }
+        req(ncpath).then((success_message) => {
+          $('#download_status').text(success_message);
+        }).catch((error) => {
+          console.error(error);
+          var url = getTextURL('download_log');
+          $('#download_status').css('color', 'red').html(`<br/><strong>${error}</strong>
+            <br/><a href='${url}' download='xml_export_download.log'>Download log file</a>`);
+        });
       },
       Done: function() {
         $('#download-dialog').dialog('close');

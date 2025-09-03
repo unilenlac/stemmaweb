@@ -18,7 +18,9 @@
           <option value="TSV">Tab-separated values (collation only)</option>
           <option value="dot">Graphviz dot format (collation and relationships)</option>
           <option value="SVG">SVG graph display (collation and relationships)</option>
+          <!--
           <option value="GraphML">Native GraphML XML format</option>
+          -->
           [% IF referringpage == "relate" %]
             <option value="XML">XML TEI P5 (segment)</option>
           [% ELSE %]
