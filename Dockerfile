@@ -1,5 +1,4 @@
 FROM ubuntu:18.04
-MAINTAINER Tara L Andrews <tla@mit.edu>
 RUN apt-get update && apt-get install -y gcc \
 	make \
 	libxml2-dev \
