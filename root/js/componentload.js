@@ -1132,6 +1132,83 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       g.setAttribute('transform', new_transform);
     }
   });
+  $('#sbridge-dialog').dialog({
+    autoOpen: false,
+    height: 550,
+    width: 480,
+    modal: true,
+    buttons: {
+      submit: {
+        text: 'Create Tradition',
+        id: 'sbridge_submit_button',
+        click: function() {
+          $('#sbridge_status').empty();
+          var collection_url = $('#sbridge_collection_url').val().trim();
+          var ref_val = $('#sbridge_ref').val().trim();
+          
+          var normalization = $('#sbridge_normalization').val();
+          var filter_del = $('#sbridge_filter_del').is(':checked');
+          var format = $('#sbridge_format').val();
+          var strategy = $('#sbridge_strategy').val();
+
+          if (!collection_url) {
+            $('#sbridge_status').html('<span class="error">Collection URL is mandatory.</span>');
+            return;
+          }
+          $('#sbridge_submit_button').button("disable");
+          
+          var payload = { collection_url: collection_url };
+          if (ref_val) {
+            payload.ref = ref_val;
+          }
+
+          var url = _get_url(['sbridge', 'process_and_collate']);
+          var queryParams = $.param({
+            normalization: normalization,
+            filter_del: filter_del,
+            format: format,
+            strategy: strategy
+          });
+          url += '?' + queryParams;
+
+          $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function(ret) {
+              $('#sbridge_submit_button').button("enable");
+              if (ret.error) {
+                var err_msg = ret.error;
+                if (ret.details && ret.details.detail) {
+                    err_msg += ": " + JSON.stringify(ret.details.detail);
+                }
+                $('#sbridge_status').empty().append(
+                  $('<span>').attr('class', 'error').append(err_msg));
+              } else {
+                $('#sbridge_status').empty().append(
+                  $('<span>').attr('class', 'notification').append(
+                    'The NLP pipeline has started. Please close this dialog and check back later by refreshing the directory.'
+                  )
+                );
+              }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              $('#sbridge_submit_button').button("enable");
+              display_error(jqXHR, $("#sbridge_status"));
+            }
+          });
+        }
+      },
+      Cancel: function() {
+        $('#sbridge-dialog').dialog('close');
+      }
+    },
+    open: function() {
+      $('#sbridge_status').empty();
+    }
+  });
+
   // Once all the page elements are set up...
   refreshDirectory();
 });

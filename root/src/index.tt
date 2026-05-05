@@ -1,6 +1,6 @@
 [% WRAPPER header.tt
     pagetitle = "Stemmaweb - Text tradition tools"
-    applicationjs = c.uri_for( 'js/componentload.js' )
+    applicationjs = c.uri_for( 'js/componentload.js', { v => 2 } )
     applicationstyle = c.uri_for( 'css/dashboard.css' )
   %]
   <script type="text/javascript">
@@ -24,6 +24,9 @@
       <h2>Text directory</h2>
       <div id="directory"></div>
 [% IF c.user_exists -%]
+      <div class="button" id="sbridge_new_trad_button" onClick="$('#sbridge-dialog').dialog('open')">
+        <span><b>New</b>, automatically create a tradition</span>
+      </div>
       <div class="button" id="new_trad_button" onClick="$('#upload-collation-dialog').dialog('open')">
         <span>Add a new text tradition or section</span>
       </div>
@@ -189,6 +192,44 @@
   </div>
 
   [% INCLUDE downloadbox.tt referringpage = "index" %]
+
+  <!-- s-bridge automatic creation dialog box -->
+  <div id="sbridge-dialog" title="Automatically create a tradition" style="display:none;">
+    <div id="sbridge_container">
+      <form id="sbridge_form">
+        <div class="controlgroup">
+          <label for="sbridge_collection_url">Collection URL (mandatory):</label><br>
+          <input id="sbridge_collection_url" type="text" name="collection_url" size="50" placeholder="http://ftsr-dev.unil.ch:8000/api/dts/v1/collection?id=s-bridge" /><br><br>
+          <label for="sbridge_ref">Reference / Section (optional):</label><br>
+          <input id="sbridge_ref" type="text" name="ref" size="30" /><br><br>
+          
+          <label for="sbridge_normalization">Normalization:</label><br>
+          <select id="sbridge_normalization" name="normalization">
+            <option value="lemma+pos" selected>Lemma + POS</option>
+            <option value="lemma">Lemma</option>
+            <option value="text">Text</option>
+          </select><br><br>
+
+          <label for="sbridge_filter_del">Filter Deleted Tokens:</label>
+          <input type="checkbox" id="sbridge_filter_del" name="filter_del" checked><br><br>
+
+          <label for="sbridge_format">Input Data Format:</label><br>
+          <select id="sbridge_format" name="format">
+            <option value="tei" selected>TEI</option>
+            <option value="json">JSON</option>
+            <option value="text">Text</option>
+          </select><br><br>
+
+          <label for="sbridge_strategy">Strategy:</label><br>
+          <select id="sbridge_strategy" name="strategy">
+            <option value="enriched" selected>Enriched</option>
+            <option value="raw">Raw</option>
+          </select><br>
+        </div>
+      </form>
+      <div id="sbridge_status"></div>
+    </div>
+  </div>
 
   <!-- File upload dialog box -->
   <div id="upload-collation-dialog" title="Upload a collation">
