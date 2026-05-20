@@ -103,6 +103,73 @@ sub process_and_collate :Local :Args(0) {
     $c->forward('View::JSON');
 }
 
+=head2 pending_jobs
+
+ GET /sbridge/jobs/pending
+
+ Proxies the request to the s-bridge server's /dts/jobs/pending endpoint to get active jobs.
+
+=cut
+
+sub pending_jobs :Path('jobs/pending') :Args(0) {
+    my ($self, $c) = @_;
+
+    my $ua = LWP::UserAgent->new();
+    my $url = $self->sbridge_url . '/dts/jobs/pending';
+
+    my $resp = $ua->get($url);
+
+    if ($resp->is_success) {
+        my $result;
+        try {
+            $result = from_json($resp->decoded_content || $resp->content);
+        } catch {
+            $result = { result => $resp->decoded_content || $resp->content };
+        }
+        $c->stash->{'result'} = $result;
+    } else {
+        $c->response->status($resp->code);
+        $c->stash->{'result'} = { error => 's-bridge API error', details => $resp->decoded_content || $resp->content };
+    }
+
+    $c->forward('View::JSON');
+}
+
+=head2 cancel_job
+
+ POST /sbridge/jobs/cancel/:job_id
+
+ Proxies the request to the s-bridge server's /dts/jobs/:job_id/cancel endpoint to cancel a job.
+
+=cut
+
+sub cancel_job :Path('jobs/cancel') :Args(1) {
+    my ($self, $c, $job_id) = @_;
+
+    require HTTP::Request;
+    my $ua = LWP::UserAgent->new();
+    my $url = $self->sbridge_url . "/dts/jobs/$job_id/cancel";
+
+    my $req = HTTP::Request->new(PUT => $url);
+    my $resp = $ua->request($req);
+
+    if ($resp->is_success) {
+        my $result;
+        try {
+            $result = from_json($resp->decoded_content || $resp->content);
+        } catch {
+            $result = { result => $resp->decoded_content || $resp->content };
+        }
+        $c->stash->{'result'} = $result;
+    } else {
+        $c->response->status($resp->code);
+        $c->stash->{'result'} = { error => 's-bridge API error', details => $resp->decoded_content || $resp->content };
+    }
+
+    $c->forward('View::JSON');
+}
+
+
 =encoding utf8
 
 =head1 AUTHOR

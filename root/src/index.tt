@@ -209,25 +209,16 @@
             <option value="lemma">Lemma</option>
             <option value="text">Text</option>
           </select><br><br>
-
-          <label for="sbridge_filter_del">Filter Deleted Tokens:</label>
-          <input type="checkbox" id="sbridge_filter_del" name="filter_del" checked><br><br>
-
-          <label for="sbridge_format">Input Data Format:</label><br>
-          <select id="sbridge_format" name="format">
-            <option value="tei" selected>TEI</option>
-            <option value="json">JSON</option>
-            <option value="text">Text</option>
-          </select><br><br>
-
-          <label for="sbridge_strategy">Strategy:</label><br>
-          <select id="sbridge_strategy" name="strategy">
-            <option value="enriched" selected>Enriched</option>
-            <option value="raw">Raw</option>
-          </select><br>
         </div>
       </form>
       <div id="sbridge_status"></div>
+      <hr style="margin: 20px 0; border: 0; border-top: 1px solid #d0d0d0;" />
+      <div id="sbridge_jobs_container">
+        <h4 style="margin-bottom: 8px; color: #555;">Recent Job Activity</h4>
+        <div id="sbridge_jobs_list" style="max-height: 200px; overflow-y: auto;">
+          <!-- Dynamic jobs table or empty message will be rendered here -->
+        </div>
+      </div>
     </div>
   </div>
 
