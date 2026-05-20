@@ -1132,15 +1132,21 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       g.setAttribute('transform', new_transform);
     }
   });
+
+  // Fetch active/pending s-bridge jobs from the backend proxy
   function fetch_sbridge_jobs() {
     var url = _get_url(['sbridge', 'jobs', 'pending']);
     $.getJSON(url, function (ret) {
       var container = $('#sbridge_jobs_list');
       container.empty();
+      
+      // Handle proxy/API errors gracefully
       if (ret.error) {
         container.append($('<p>').addClass('error').text('Failed to load active jobs: ' + ret.error));
         return;
       }
+      
+      // Display a friendly placeholder when there are no active jobs
       if (!Array.isArray(ret) || ret.length === 0) {
         container.append($('<p>').css({
           'color': '#888',
@@ -1151,6 +1157,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
         return;
       }
 
+      // Construct the active jobs table
       var table = $('<table>').css({
         'width': '100%',
         'border-collapse': 'collapse',
@@ -1173,6 +1180,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
         var status = job.status || 'unknown';
         var truncId = jobId.length > 8 ? jobId.substring(0, 8) + '...' : jobId;
 
+        // "Kill" button to terminate the corresponding s-bridge job
         var killBtn = $('<button>')
           .text('Kill')
           .addClass('ui-button ui-widget ui-state-default ui-corner-all')
@@ -1212,6 +1220,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
     });
   }
 
+  // Request s-bridge background job cancellation via proxy
   function cancel_sbridge_job(jobId) {
     if (confirm('Are you sure you want to terminate this s-bridge background job?')) {
       var url = _get_url(['sbridge', 'jobs', 'cancel', jobId]);
@@ -1222,7 +1231,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           if (ret.error) {
             alert('Error canceling job: ' + ret.error);
           } else {
-            fetch_sbridge_jobs();
+            fetch_sbridge_jobs(); // Refresh jobs list immediately on success
           }
         },
         error: function () {
@@ -1234,6 +1243,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
 
   var sbridge_poll_interval;
 
+  // Dialog configuration for automatic tradition creation modal
   $('#sbridge-dialog').dialog({
     autoOpen: false,
     height: 550,
@@ -1247,7 +1257,6 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           $('#sbridge_status').empty();
           var collection_url = $('#sbridge_collection_url').val().trim();
           var ref_val = $('#sbridge_ref').val().trim();
-
           var normalization = $('#sbridge_normalization').val();
 
           if (!collection_url) {
@@ -1256,6 +1265,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           }
           $('#sbridge_submit_button').button("disable");
 
+          // Build POST payload for s-bridge
           var payload = { collection_url: collection_url };
           if (ref_val) {
             payload.ref = ref_val;
@@ -1267,6 +1277,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           });
           url += '?' + queryParams;
 
+          // Dispatch asynchronous collation task to s-bridge proxy
           $.ajax({
             url: url,
             type: 'POST',
@@ -1285,7 +1296,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
                 $('#sbridge_status').empty().append(
                   $('<span>').attr('class', 'notification').append(
                     'The NLP pipeline has started.'));
-                fetch_sbridge_jobs();
+                fetch_sbridge_jobs(); // Instantly show the new active job
               }
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -1299,6 +1310,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
         $('#sbridge-dialog').dialog('close');
       }
     },
+    // Start active polling on open, and clear interval on close
     open: function () {
       $('#sbridge_status').empty();
       fetch_sbridge_jobs();

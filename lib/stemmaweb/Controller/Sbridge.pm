@@ -35,7 +35,10 @@ Catalyst Controller to interface with the s-bridge NLP pipeline.
 
 =cut
 
+# :Local matches the action name, exposing this at /sbridge/process_and_collate
+# :Args(0) specifies that the action accepts no extra path parameters
 sub process_and_collate :Local :Args(0) {
+    # In Perl OO, the first arg is the class instance ($self) and the second is the Catalyst Context ($c)
     my ($self, $c) = @_;
 
     if ($c->request->method eq 'POST') {
@@ -44,9 +47,12 @@ sub process_and_collate :Local :Args(0) {
             # Parse the incoming JSON request
             my $body = $c->request->body;
             my $body_content = '';
+            
+            # Catalyst automatically writes larger POST request bodies to a File::Temp file on disk.
+            # We check if $body is a File::Temp reference and read it, or handle it as a direct string.
             if (ref($body) eq 'File::Temp') {
                 open(my $fh, '<', $body) or die "Cannot open temp file";
-                local $/;
+                local $/; # Enable slurp mode to read the whole file at once
                 $body_content = <$fh>;
                 close $fh;
             } else {
@@ -60,11 +66,11 @@ sub process_and_collate :Local :Args(0) {
             return;
         }
 
-        # Prepare LWP UserAgent
+        # Prepare LWP UserAgent (Perl's standard HTTP Client)
         my $ua = LWP::UserAgent->new();
         my $url = $self->sbridge_url . '/dts/process-and-collate';
 
-        # Forward any query parameters for format, strategy, etc if necessary
+        # Forward any query parameters (like ?normalization=...) to s-bridge
         my $req_uri = URI->new($url);
         my %query_params = %{ $c->request->query_parameters };
         $req_uri->query_form(%query_params) if keys %query_params;
@@ -76,12 +82,11 @@ sub process_and_collate :Local :Args(0) {
         );
 
         if ($resp->is_success) {
-            # Try parsing the response JSON from s-bridge
+            # Parse s-bridge response and store it in the Catalyst "stash" (view model)
             my $result;
             try {
                 $result = from_json($resp->decoded_content || $resp->content);
             } catch {
-                # Fallback to plain content
                 $result = { result => $resp->decoded_content || $resp->content };
             }
             $c->stash->{'result'} = $result;
@@ -100,17 +105,20 @@ sub process_and_collate :Local :Args(0) {
         $c->stash->{'result'} = { error => 'Method not allowed. Use POST.' };
     }
 
+    # Forward control to Catalyst's JSON View, which automatically serializes 
+    # whatever is in $c->stash->{'result'} back to the client as a JSON HTTP response.
     $c->forward('View::JSON');
 }
 
 =head2 pending_jobs
 
- GET /sbridge/jobs/pending
+ # GET /sbridge/jobs/pending
 
  Proxies the request to the s-bridge server's /dts/jobs/pending endpoint to get active jobs.
 
 =cut
 
+# :Path overrides the method name match, mounting this at /sbridge/jobs/pending
 sub pending_jobs :Path('jobs/pending') :Args(0) {
     my ($self, $c) = @_;
 
@@ -137,12 +145,14 @@ sub pending_jobs :Path('jobs/pending') :Args(0) {
 
 =head2 cancel_job
 
- POST /sbridge/jobs/cancel/:job_id
+ # POST /sbridge/jobs/cancel/:job_id
 
  Proxies the request to the s-bridge server's /dts/jobs/:job_id/cancel endpoint to cancel a job.
 
 =cut
 
+# :Path mounts this at /sbridge/jobs/cancel
+# :Args(1) captures the next path segment and passes it as $job_id (e.g. /sbridge/jobs/cancel/123)
 sub cancel_job :Path('jobs/cancel') :Args(1) {
     my ($self, $c, $job_id) = @_;
 
@@ -150,6 +160,7 @@ sub cancel_job :Path('jobs/cancel') :Args(1) {
     my $ua = LWP::UserAgent->new();
     my $url = $self->sbridge_url . "/dts/jobs/$job_id/cancel";
 
+    # Translate the incoming POST request into a PUT request as expected by s-bridge
     my $req = HTTP::Request->new(PUT => $url);
     my $resp = $ua->request($req);
 
