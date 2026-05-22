@@ -77,6 +77,7 @@ docker run -p 3000:3000 stemmaweb:ubuntu-18.04
 ```
 or for development purpose:
 ```bash
+docker build -t stemmaweb:ubuntu-18.04 . 
 docker run -it --rm \
 -p 3000:3000 \
 -v $PWD:/stemmaweb \
