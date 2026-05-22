@@ -75,6 +75,14 @@ To run the docker container, use the following command:
 docker build -t stemmaweb:ubuntu-18.04 .
 docker run -p 3000:3000 stemmaweb:ubuntu-18.04
 ```
+or for development purpose:
+```bash
+docker run -it --rm \
+-p 3000:3000 \
+-v $PWD:/stemmaweb \
+stemmaweb:ubuntu-18.04 \
+perl script/stemmaweb_server.pl -r
+```
 
 You don't necesseraly need to add Stemmaweb to a Docker network to make it work with Stemmarest, but it is recommended to, specially if you are using Docker.
 
