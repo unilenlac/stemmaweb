@@ -1213,12 +1213,28 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           displayId += ' (' + launchTime + ')';
         }
         
+        var displayStatus = status;
+        if (statusLower === 'failed' && job.error_message) {
+          var words = job.error_message.trim().split(/\s+/);
+          if (words.length > 0) {
+            var firstTwoWords = words.slice(0, 2).join(' ');
+            if (firstTwoWords) {
+              // Strip trailing punctuation (like colons, semicolons, commas, or hyphens)
+              firstTwoWords = firstTwoWords.replace(/[:;,\-\s]+$/, '');
+              displayStatus += ' - ' + firstTwoWords;
+            }
+          }
+        }
+        
         var tooltipText = 'Job ID: ' + jobId;
         if (job.collection_url) {
           tooltipText += '\nCollection URL: ' + job.collection_url;
         }
         if (job.created_at) {
           tooltipText += '\nLaunched At: ' + new Date(job.created_at).toLocaleString();
+        }
+        if (job.error_message) {
+          tooltipText += '\nError Message: ' + job.error_message;
         }
 
         var isKillable = statusLower === 'pending' || statusLower === 'processing';
@@ -1249,7 +1265,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
 
         var tr = $('<tr>').append(
           $('<td>').append($('<span>').attr('title', tooltipText).text(displayId)).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
-          $('<td>').text(status).css({
+          $('<td>').text(displayStatus).attr('title', job.error_message ? 'Error: ' + job.error_message : '').css({
             'padding': '6px',
             'border-bottom': '1px solid #eee',
             'font-weight': 'bold',
