@@ -110,22 +110,27 @@ sub process_and_collate :Local :Args(0) {
     $c->forward('View::JSON');
 }
 
-=head2 pending_jobs
+=head2 all_jobs
 
- # GET /sbridge/jobs/pending
+ # GET /sbridge/jobs
 
- Proxies the request to the s-bridge server's /dts/jobs/pending endpoint to get active jobs.
+ Proxies the request to the s-bridge server's /dts/jobs endpoint to get recent jobs.
 
 =cut
 
-# :Path overrides the method name match, mounting this at /sbridge/jobs/pending
-sub pending_jobs :Path('jobs/pending') :Args(0) {
+# :Path mounts this at /sbridge/jobs
+sub all_jobs :Path('jobs') :Args(0) {
     my ($self, $c) = @_;
 
     my $ua = LWP::UserAgent->new();
-    my $url = $self->sbridge_url . '/dts/jobs/pending';
+    my $url = $self->sbridge_url . '/dts/jobs';
 
-    my $resp = $ua->get($url);
+    # Forward any query parameters (like limit or offset) to s-bridge
+    my $req_uri = URI->new($url);
+    my %query_params = %{ $c->request->query_parameters };
+    $req_uri->query_form(%query_params) if keys %query_params;
+
+    my $resp = $ua->get($req_uri->as_string);
 
     if ($resp->is_success) {
         my $result;
@@ -142,6 +147,7 @@ sub pending_jobs :Path('jobs/pending') :Args(0) {
 
     $c->forward('View::JSON');
 }
+
 
 =head2 cancel_job
 
@@ -167,7 +173,7 @@ sub cancel_job :Path('jobs/cancel') :Args(1) {
     if ($resp->is_success) {
         my $result;
         try {
-            $result = from_json($resp->decoded_content || $resp->content);
+            $result = from_json($resp->decoded_content || $resp->content); # || is a fallback. if not decoded -> get the undecoded content
         } catch {
             $result = { result => $resp->decoded_content || $resp->content };
         }

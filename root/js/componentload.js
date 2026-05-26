@@ -1135,29 +1135,29 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
 
   // Fetch active/pending s-bridge jobs from the backend proxy
   function fetch_sbridge_jobs() {
-    var url = _get_url(['sbridge', 'jobs', 'pending']);
+    var url = _get_url(['sbridge', 'jobs']);
     $.getJSON(url, function (ret) {
       var container = $('#sbridge_jobs_list');
       container.empty();
       
       // Handle proxy/API errors gracefully
       if (ret.error) {
-        container.append($('<p>').addClass('error').text('Failed to load active jobs: ' + ret.error));
+        container.append($('<p>').addClass('error').text('Failed to load jobs: ' + ret.error));
         return;
       }
       
-      // Display a friendly placeholder when there are no active jobs
+      // Display a friendly placeholder when there are no jobs
       if (!Array.isArray(ret) || ret.length === 0) {
         container.append($('<p>').css({
           'color': '#888',
           'font-style': 'italic',
           'text-align': 'center',
           'margin': '15px 0'
-        }).text('No active jobs.'));
+        }).text('No jobs found.'));
         return;
       }
 
-      // Construct the active jobs table
+      // Construct the jobs table
       var table = $('<table>').css({
         'width': '100%',
         'border-collapse': 'collapse',
@@ -1178,28 +1178,34 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       $.each(ret, function (i, job) {
         var jobId = job.job_id || job.id || 'N/A';
         var status = job.status || 'unknown';
+        var statusLower = status.toLowerCase();
         var truncId = jobId.length > 8 ? jobId.substring(0, 8) + '...' : jobId;
 
-        // "Kill" button to terminate the corresponding s-bridge job
-        var killBtn = $('<button>')
-          .text('Kill')
-          .addClass('ui-button ui-widget ui-state-default ui-corner-all')
-          .css({
-            'color': '#d9534f',
-            'border': '1px solid #d43f3a',
-            'background-color': '#fff',
-            'padding': '2px 8px',
-            'font-size': '11px',
-            'cursor': 'pointer',
-            'border-radius': '3px'
-          })
-          .hover(
-            function () { $(this).css('background-color', '#f2dede'); },
-            function () { $(this).css('background-color', '#fff'); }
-          )
-          .click(function () {
-            cancel_sbridge_job(jobId);
-          });
+        var isKillable = statusLower === 'pending' || statusLower === 'processing';
+        
+        // "Kill" button to terminate the corresponding s-bridge job if still active
+        var killBtn = '';
+        if (isKillable) {
+          killBtn = $('<button>')
+            .text('Kill')
+            .addClass('ui-button ui-widget ui-state-default ui-corner-all')
+            .css({
+              'color': '#d9534f',
+              'border': '1px solid #d43f3a',
+              'background-color': '#fff',
+              'padding': '2px 8px',
+              'font-size': '11px',
+              'cursor': 'pointer',
+              'border-radius': '3px'
+            })
+            .hover(
+              function () { $(this).css('background-color', '#f2dede'); },
+              function () { $(this).css('background-color', '#fff'); }
+            )
+            .click(function () {
+              cancel_sbridge_job(jobId);
+            });
+        }
 
         var tr = $('<tr>').append(
           $('<td>').append($('<span>').attr('title', jobId).text(truncId)).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
@@ -1207,7 +1213,10 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
             'padding': '6px',
             'border-bottom': '1px solid #eee',
             'font-weight': 'bold',
-            'color': status === 'processing' ? '#337ab7' : '#f0ad4e'
+            'color': statusLower === 'processing' ? '#337ab7' : 
+                     statusLower === 'pending' ? '#f0ad4e' :
+                     statusLower === 'completed' ? '#5cb85c' :
+                     statusLower === 'failed' || statusLower === 'cancelled' ? '#d9534f' : '#777'
           }),
           $('<td>').append(killBtn).css({ 'text-align': 'right', 'padding': '6px', 'border-bottom': '1px solid #eee' })
         );
@@ -1216,7 +1225,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       table.append(tbody);
       container.append(table);
     }).fail(function () {
-      $('#sbridge_jobs_list').html('<p class="error">Error checking active jobs.</p>');
+      $('#sbridge_jobs_list').html('<p class="error">Error checking jobs.</p>');
     });
   }
 
