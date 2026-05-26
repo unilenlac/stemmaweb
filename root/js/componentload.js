@@ -1136,6 +1136,30 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
   // Fetch active/pending s-bridge jobs from the backend proxy
   function fetch_sbridge_jobs() {
     var url = _get_url(['sbridge', 'jobs']);
+
+    // Helper to safely parse collection ID parameter from the collection URL
+    function get_collection_id(urlStr) {
+      if (!urlStr) return null;
+      try {
+        var u = new URL(urlStr);
+        return u.searchParams.get('id');
+      } catch (e) {
+        var match = urlStr.match(/[?&]id=([^&]+)/);
+        return match ? decodeURIComponent(match[1]) : null;
+      }
+    }
+
+    // Helper to extract local time (HH:MM:SS) from the ISO datetime string
+    function format_launch_time(dateStr) {
+      if (!dateStr) return '';
+      var d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      var hh = String(d.getHours()).padStart(2, '0');
+      var mm = String(d.getMinutes()).padStart(2, '0');
+      var ss = String(d.getSeconds()).padStart(2, '0');
+      return hh + ':' + mm + ':' + ss;
+    }
+
     $.getJSON(url, function (ret) {
       var container = $('#sbridge_jobs_list');
       container.empty();
@@ -1167,7 +1191,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
 
       var thead = $('<thead>').append(
         $('<tr>').append(
-          $('<th>').text('Job ID').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
+          $('<th>').text('Collection / Job ID').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
           $('<th>').text('Status').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
           $('<th>').text('Action').css({ 'text-align': 'right', 'border-bottom': '2px solid #ddd', 'padding': '6px' })
         )
@@ -1179,7 +1203,23 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
         var jobId = job.job_id || job.id || 'N/A';
         var status = job.status || 'unknown';
         var statusLower = status.toLowerCase();
-        var truncId = jobId.length > 8 ? jobId.substring(0, 8) + '...' : jobId;
+        var truncId = jobId.length > 8 ? jobId.substring(0, 14) + '...' : jobId;
+
+        var collectionId = get_collection_id(job.collection_url);
+        var displayId = collectionId || truncId;
+        
+        var launchTime = format_launch_time(job.created_at);
+        if (launchTime) {
+          displayId += ' (' + launchTime + ')';
+        }
+        
+        var tooltipText = 'Job ID: ' + jobId;
+        if (job.collection_url) {
+          tooltipText += '\nCollection URL: ' + job.collection_url;
+        }
+        if (job.created_at) {
+          tooltipText += '\nLaunched At: ' + new Date(job.created_at).toLocaleString();
+        }
 
         var isKillable = statusLower === 'pending' || statusLower === 'processing';
         
@@ -1208,7 +1248,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
         }
 
         var tr = $('<tr>').append(
-          $('<td>').append($('<span>').attr('title', jobId).text(truncId)).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
+          $('<td>').append($('<span>').attr('title', tooltipText).text(displayId)).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
           $('<td>').text(status).css({
             'padding': '6px',
             'border-bottom': '1px solid #eee',
