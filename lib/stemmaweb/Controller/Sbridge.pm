@@ -7,12 +7,14 @@ use LWP::UserAgent;
 use TryCatch;
 use URI;
 
+#Begin is a Moose keywords/method and the Sbridge package inherits from Catalyst::Controller
 BEGIN { extends 'Catalyst::Controller' }
 
+#has is the way to declare a class
 has sbridge_url => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => 'http://localhost:8000',
+    is      => 'ro', #read only
+    isa     => 'Str', #type safety, is a string
+    default => 'http://localhost:8000', #Fallback server
 );
 
 =head1 NAME
@@ -200,6 +202,6 @@ it under the same terms as Perl itself.
 
 =cut
 
-__PACKAGE__->meta->make_immutable;
+__PACKAGE__->meta->make_immutable; #For runTime protection and speed
 
 1;
