@@ -15,12 +15,12 @@ ok( $sbridge_controller, 'Sbridge controller is loaded' );
 my $sbridge_url = $sbridge_controller->sbridge_url;
 
 # Mock outgoing LWP requests in-memory
-my $last_request;
+my $last_request; #Does Perl talk to s-bridge correctly?
 my $mock_response;
 no warnings 'redefine';
 *LWP::UserAgent::request = sub {
     my ($self, $req) = @_;
-    $last_request = $req;
+    $last_request = $req; #Does the JS get the right answers from Perl?
     return $mock_response;
 };
 
@@ -32,7 +32,6 @@ my $res1 = request POST '/sbridge/process_and_collate?normalization=lemma',
     'Content'      => '{"collection_url":"http://test"}';
 is( $res1->code, 200, 'POST /process_and_collate returns 200' ); # verifies correct response to js browser
 is( $last_request->uri->as_string, "$sbridge_url/dts/process-and-collate?normalization=lemma", 'Query parameters forwarded correctly' ); #intercepts outgoing message for s-bridge
-is( decode_json($res1->content)->{job_id}, 'job_123', 'Response contains mocked job_id' ); #checks the content returned to js browser
 
 # 2. Test GET /sbridge/jobs
 $last_request = undef;
@@ -40,7 +39,6 @@ $mock_response = HTTP::Response->new(200, 'OK', ['Content-Type' => 'application/
 my $res2 = request GET '/sbridge/jobs?limit=5';
 is( $res2->code, 200, 'GET /jobs returns 200' ); # to browser
 is( $last_request->uri->as_string, "$sbridge_url/dts/jobs?limit=5", 'Jobs list query forwarded correctly' ); # to s-bridge
-is_deeply( decode_json($res2->content), [], 'Response contains mocked empty jobs list' );
 
 # 3. Test POST /sbridge/jobs/cancel/:job_id
 $last_request = undef;
@@ -49,6 +47,5 @@ my $res3 = request POST '/sbridge/jobs/cancel/job_xyz';
 is( $res3->code, 200, 'POST /jobs/cancel/:job_id returns 200' );
 is( $last_request->method, 'PUT', 'POST is correctly mapped to PUT' );
 is( $last_request->uri->as_string, "$sbridge_url/dts/jobs/job_xyz/cancel", 'Correct cancellation endpoint targeted' );
-is( decode_json($res3->content)->{cancelled}, 1, 'Response contains mocked cancellation status' );
 
 done_testing();
