@@ -1149,15 +1149,17 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       }
     }
 
-    // Helper to extract local time (HH:MM:SS) from the ISO datetime string
+    // Helper to extract local time (HH:MM:SS) prefixed with the weekday from the ISO datetime string
     function format_launch_time(dateStr) {
       if (!dateStr) return '';
       var d = new Date(dateStr);
       if (isNaN(d.getTime())) return '';
+      var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var day = days[d.getDay()];
       var hh = String(d.getHours()).padStart(2, '0');
       var mm = String(d.getMinutes()).padStart(2, '0');
       var ss = String(d.getSeconds()).padStart(2, '0');
-      return hh + ':' + mm + ':' + ss;
+      return day + ' ' + hh + ':' + mm + ':' + ss;
     }
 
     $.getJSON(url, function (ret) {
