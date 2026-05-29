@@ -1149,11 +1149,24 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       }
     }
 
+    // Helper to parse the datetime string from s-bridge correctly as UTC if no timezone is specified
+    function parse_sbridge_date(dateStr) {
+      if (!dateStr) return null;
+      var utcStr = dateStr;
+      if (!/[Zz]$/.test(utcStr) && !/[+-]\d{2}:?\d{2}$/.test(utcStr)) {
+        utcStr = utcStr.replace(' ', 'T');
+        if (utcStr.indexOf('T') !== -1) {
+          utcStr += 'Z';
+        }
+      }
+      var d = new Date(utcStr);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
     // Helper to extract local time (HH:MM:SS) prefixed with the weekday from the ISO datetime string
     function format_launch_time(dateStr) {
-      if (!dateStr) return '';
-      var d = new Date(dateStr);
-      if (isNaN(d.getTime())) return '';
+      var d = parse_sbridge_date(dateStr);
+      if (!d) return '';
       var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       var day = days[d.getDay()];
       var hh = String(d.getHours()).padStart(2, '0');
@@ -1233,7 +1246,10 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           tooltipText += '\nCollection URL: ' + job.collection_url;
         }
         if (job.created_at) {
-          tooltipText += '\nLaunched At: ' + new Date(job.created_at).toLocaleString();
+          var dateObj = parse_sbridge_date(job.created_at);
+          if (dateObj) {
+            tooltipText += '\nLaunched At: ' + dateObj.toLocaleString();
+          }
         }
         if (job.error_message) {
           tooltipText += '\nError Message: ' + job.error_message;
