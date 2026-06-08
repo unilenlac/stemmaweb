@@ -102,6 +102,12 @@ The API endpoint can be set in the Stemmaweb configuration file (e.g., `stemmawe
 </Model Directory>
 ````
 
+Stemmaweb also needs to be configured to connect to the s-bridge module. This involves setting the API endpoint URL in the Stemmaweb configuration file  `stemmaweb.conf` after the stemmarest model definition. 
+
+<Component Controller::Sbridge>
+    sbridge_url http://s-bridge_host:s-bridge_port
+</Component>
+
 ### Usage guide
 --------
 
