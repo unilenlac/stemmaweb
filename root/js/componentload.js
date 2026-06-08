@@ -12,7 +12,7 @@ function refreshDirectory() {
   var lmesg = $('#loading_message').clone();
   $('#directory').empty().append(lmesg.contents());
   $('#directory').load(_get_url(["directory"]),
-    function(response, status, xhr) {
+    function (response, status, xhr) {
       if (status == "error") {
         var msg = "An error occurred: ";
         $("#directory").html(msg + xhr.status + " " + xhr.statusText);
@@ -25,15 +25,15 @@ function refreshDirectory() {
         }
         // Initialize the tradition picklist in the collation upload dialog.
         $('#upload_for_tradition').empty();
-        $(".canmod").each(function() {
+        $(".canmod").each(function () {
           var tid = $(this).attr('id');
           var tname = $(this).text();
-		  if (tid === selectedTextID) {
-			  $('#upload_for_tradition').append($('<option>')
-			  	.attr('value', tid).attr('selected', 'selected').text(tname));
-		  } else {
-			  $('#upload_for_tradition').append($('<option>').attr('value', tid).text(tname));
-		  }
+          if (tid === selectedTextID) {
+            $('#upload_for_tradition').append($('<option>')
+              .attr('value', tid).attr('selected', 'selected').text(tname));
+          } else {
+            $('#upload_for_tradition').append($('<option>').attr('value', tid).text(tname));
+          }
         });
       }
     }
@@ -54,7 +54,7 @@ function loadTradition(textid, textname, editable) {
   // Then get and load the actual content.
   // TODO: scale #stemma_graph both horizontally and vertically
   // TODO: load svgs from SVG.Jquery (to make scaling react in Safari)
-  $.getJSON(_get_url(["textinfo", textid]), function(textdata) {
+  $.getJSON(_get_url(["textinfo", textid]), function (textdata) {
     // Add the scalar data
     selectedTextInfo = textdata;
     load_textinfo();
@@ -100,7 +100,7 @@ function load_sections(load_sortable) {
   if (load_sortable) {
     $('#section_list').empty();
   }
-  $.each(selectedTextInfo.sections, function(i, s) {
+  $.each(selectedTextInfo.sections, function (i, s) {
     // Download dialog
     var displayname = (i + 1) + " - " + s.name;
     var startsect = $('<option>').attr('value', s.id).text(displayname);
@@ -173,13 +173,13 @@ function show_stemmapager() {
   $('.pager_right_button').unbind('click').addClass('greyed_out');
   var hasStemma = false;
   if (selectedStemmaSequence > 0) {
-    $('.pager_left_button').click(function() {
+    $('.pager_left_button').click(function () {
       load_stemma(selectedStemmaSequence - 1, selectedTextEditable);
     }).removeClass('greyed_out');
     hasStemma = true;
   }
   if (selectedStemmaSequence + 1 < stemmata.length) {
-    $('.pager_right_button').click(function() {
+    $('.pager_right_button').click(function () {
       load_stemma(selectedStemmaSequence + 1, selectedTextEditable);
     }).removeClass('greyed_out');
     hasStemma = true;
@@ -239,7 +239,7 @@ function query_stemweb_progress() {
   $('#stemweb-ui-dialog').dialog('open');
   $('#stemweb_run_status').empty().append(
     _make_message('notification', 'Querying Stemweb for calculation progress...'));
-  $.getJSON(requrl, function(data) {
+  $.getJSON(requrl, function (data) {
     process_stemweb_result(data);
   });
 }
@@ -303,7 +303,7 @@ function loadSVG(svgData) {
 
   $(svgElement).svg({
     loadURL: svgData,
-    onLoad: function() {
+    onLoad: function () {
       var theSVG = svgElement.find('svg');
       var svgoffset = theSVG.offset();
       var browseroffset = 1;
@@ -339,31 +339,31 @@ function set_stemma_interactive(svg_element) {
     // onclick handler to the root_tree_dialog_button_ok
     // that all re-root the stemma, that all add an onclick, etc..
     $("#root_tree_dialog_button_ok").unbind();
-    $("#root_tree_dialog_button_ok").click(function() {
+    $("#root_tree_dialog_button_ok").click(function () {
       $("#stemma_load_status").empty();
       var stemmaid = selectedTextInfo.stemmata[selectedStemmaSequence].name;
       var requrl = _get_url(["stemma", "reroot", selectedTextID, stemmaid]);
       var targetnode = $('#root_tree_dialog').data('selectedNode');
       $.post(requrl, {
         root: targetnode
-      }, function(data) {
+      }, function (data) {
         // Reload the new stemma
         stemmata[selectedStemmaSequence] = data;
         load_stemma(selectedStemmaSequence);
         // Put away the dialog
         $('#root_tree_dialog').data('selectedNode', null).hide();
       });
-    }).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
+    }).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       if (ajaxSettings.url.indexOf('stemmaroot') > -1 &&
         ajaxSettings.type == 'POST') {
         display_error(jqXHR, $("#stemma_load_status"));
       }
     });
     // TODO Clear error at some appropriate point
-    $.each($('ellipse', svg_element), function(index) {
+    $.each($('ellipse', svg_element), function (index) {
       var ellipse = $(this);
       var g = ellipse.parent('g');
-      g.click(function(evt) {
+      g.click(function (evt) {
         if (typeof root_tree_dialog_timeout !== 'undefined') {
           clearTimeout(root_tree_dialog_timeout)
         };
@@ -376,19 +376,19 @@ function set_stemma_interactive(svg_element) {
         dialog.css('top', evt.pageY + 3);
         dialog.css('left', evt.pageX + 3);
         dialog.show();
-        root_tree_dialog_timeout = setTimeout(function() {
+        root_tree_dialog_timeout = setTimeout(function () {
           $('#root_tree_dialog').data('selectedNode', null).hide();
           ellipse.removeClass('stemma_node_highlight');
-          g.mouseleave(function() {
+          g.mouseleave(function () {
             ellipse.removeClass('stemma_node_highlight')
           });
         }, 3000);
       });
-      g.mouseenter(function() {
+      g.mouseenter(function () {
         $('ellipse.stemma_node_highlight').removeClass('stemma_node_highlight');
         ellipse.addClass('stemma_node_highlight')
       });
-      g.mouseleave(function() {
+      g.mouseleave(function () {
         ellipse.removeClass('stemma_node_highlight')
       });
     });
@@ -431,7 +431,7 @@ function post_xhr2(url, data, cb, type) {
   });
   xhr.open('POST', url, true);
   // Handle the results
-  xhr.onload = function(e) {
+  xhr.onload = function (e) {
     // Get the response and parse it
     // Call the callback with the response, whatever it was
     var xhrs = e.target;
@@ -468,9 +468,9 @@ function upload_collation(upload_url) {
   // POST the lot and handle the response.
   var newfile = $('#new_file').get(0).files[0];
   var reader = new FileReader();
-  reader.onload = function(evt) {
+  reader.onload = function (evt) {
     var data = new FormData();
-    $.each($('#new_tradition').serializeArray(), function(i, o) {
+    $.each($('#new_tradition').serializeArray(), function (i, o) {
       if (o.name != 'uploadtype') {
         data.append(o.name, o.value.trim());
       }
@@ -491,7 +491,7 @@ function upload_collation(upload_url) {
     } else {
       // console.log("Title input field is empty. Is there a title in the graphml file?");
       var graphml_title = "";
-      var xmlDoc = $.parseXML( evt.target.result );
+      var xmlDoc = $.parseXML(evt.target.result);
       var name_id = $(xmlDoc).find('key[attr\\.name=name]').attr('id');
       graphml_title = $(xmlDoc).find('data[key=' + name_id + ']').first().text().trim();
       // TODO: what is the second data field with the same name_id for? Cases where to use that one?
@@ -508,7 +508,7 @@ function upload_collation(upload_url) {
     }
 
     if (ok4upload) {
-      post_xhr2(upload_url, data, function(ret) {
+      post_xhr2(upload_url, data, function (ret) {
         if (ret.tradId) {
           $('#upload-collation-dialog').dialog('close');
           // Reload the directory with the new text selected.
@@ -527,7 +527,7 @@ function upload_collation(upload_url) {
       }, 'json');
     }
   };
-  reader.onerror = function(evt) {
+  reader.onerror = function (evt) {
     var err_resp = 'File read error';
     if (evt.name == 'NotFoundError') {
       err_resp = 'File not found';
@@ -555,7 +555,7 @@ function _get_url(els) {
 }
 
 // General-purpose error-handling function.
-$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
+$(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
   var error;
   var errordiv;
   // Is it an authorization error?
@@ -606,7 +606,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     errordiv = '#relation_edit_status';
   } else if ($('#complex-reading-dialog').dialog('isOpen')) {
     error += '<br>The complex reading cannot be modified.</p>';
-    errordiv = '#complex-reading-status';       
+    errordiv = '#complex-reading-status';
   } else if (ajaxSettings.url.indexOf('textinfo') > -1 && ajaxSettings.type == 'GET') {
     $('#textinfo_waitbox').hide();
     $('#textinfo_container').show();
@@ -620,7 +620,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
   $(errordiv).parents('.ui-dialog').find('.ui-button').button("enable");
 
   // ...then initialization.
-}).ready(function() {
+}).ready(function () {
   // See if we have the browser functionality we need
   // TODO Also think of a test for SVG readiness
   if (!!window.FileReader && !!window.File) {
@@ -641,14 +641,14 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     width: 350,
     modal: true,
     buttons: {
-      'Delete tradition': function(evt) {
+      'Delete tradition': function (evt) {
         $("#edit_textinfo_status").empty();
         var mybuttons = $(evt.target).closest('button').parent().find('button');
         var requrl = _get_url(["delete", selectedTextID]);
         mybuttons.button('disable');
         var really = confirm("Tradition deletion cannot be undone. Are you sure?")
         if (really) {
-          $.post(requrl, function(data) {
+          $.post(requrl, function (data) {
             // TODO clear the text info pane
             $('#textinfo_container').hide();
             refreshDirectory();
@@ -659,13 +659,13 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           mybuttons.button("enable");
         }
       },
-      Save: function(evt) {
+      Save: function (evt) {
         $("#edit_textinfo_status").empty();
         var mybuttons = $(evt.target).closest('button').parent().find('button');
         mybuttons.button('disable');
         var requrl = _get_url(["textinfo", selectedTextID]);
         var reqparam = $('#edit_textinfo').serialize();
-        $.post(requrl, reqparam, function(data) {
+        $.post(requrl, reqparam, function (data) {
           // Reload the selected text fields
           selectedTextInfo = data;
           load_textinfo();
@@ -674,15 +674,15 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           $('#textinfo-edit-dialog').dialog('close');
         }, 'json');
       },
-      Cancel: function() {
+      Cancel: function () {
         $('#textinfo-edit-dialog').dialog('close');
       }
     },
-    open: function() {
+    open: function () {
       $("#edit_textinfo_status").empty();
       // Populate the form fields with the current values
       // edit_(name, language, public, owner)
-      $.each(['name', 'language', 'owner', 'direction'], function(idx, k) {
+      $.each(['name', 'language', 'owner', 'direction'], function (idx, k) {
         var fname = '#edit_' + k;
         // Special case: language Default is basically language null
         if (k == 'language' && selectedTextInfo[k] == 'Default') {
@@ -707,7 +707,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     width: 600,
     modal: true,
     buttons: {
-      Save: function(evt) {
+      Save: function (evt) {
         $("#edit_stemma_status").empty();
         var mybuttons = $(evt.target).closest('button').parent().find('button');
         mybuttons.button('disable');
@@ -721,7 +721,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         // We need to stash the literal SVG string in stemmata
         // somehow. Send an accept header to the server side so it
         // knows whether to send application/json or application/xml.
-        $.post(requrl, reqparam, function(data) {
+        $.post(requrl, reqparam, function (data) {
           // We received a stemma SVG string in return.
           // Stash the answer in the appropriate spot in our stemma array
           if (stemmaid === '__NEW__') {
@@ -738,11 +738,11 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           $('#stemma-edit-dialog').dialog('close');
         }, 'json');
       },
-      Cancel: function() {
+      Cancel: function () {
         $('#stemma-edit-dialog').dialog('close');
       }
     },
-    open: function(evt) {
+    open: function (evt) {
       $("#edit_stemma_status").empty();
       var stemmaseq = $('#stemmaseq').val();
       if (stemmaseq == 'n') {
@@ -758,7 +758,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         // Get the stemma identifier
         var stemmaid = selectedTextInfo.stemmata[stemmaseq].name;
         var doturl = _get_url(["stemma", "dot", selectedTextID, stemmaid]);
-        $.getJSON(doturl, function(data) {
+        $.getJSON(doturl, function (data) {
           // Re-insert the line breaks
           var dotstring = data.dot.replace(/\|n/gm, "\n");
           $('#dot_field').val(dotstring);
@@ -776,7 +776,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       Run: {
         id: 'stemweb_run_button',
         text: 'Run',
-        click: function(evt) {
+        click: function (evt) {
           $("#stemweb_run_status").empty();
           var mybuttons = $(evt.target).closest('button').parent().find('button');
           mybuttons.button('disable');
@@ -785,7 +785,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           // TODO We need to stash the literal SVG string in stemmata
           // somehow. Implement accept header on server side to decide
           // whether to send application/json or application/xml?
-          $.getJSON(requrl, reqparam, function(data) {
+          $.getJSON(requrl, reqparam, function (data) {
             mybuttons.button("enable");
             if ('jobid' in data) {
               // There is a pending job.
@@ -804,20 +804,20 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       Close: {
         id: 'stemweb_close_button',
         text: 'Close',
-        click: function() {
+        click: function () {
           $('#stemweb-ui-dialog').dialog('close');
           switch_stemweb_ui();
         },
       },
     },
-    create: function(evt) {
+    create: function (evt) {
       // Call out to Stemweb to get the algorithm options, with which we
       // populate the form.
       var algorithmTypes = {};
       var algorithmArgs = {};
       var requrl = _get_url(["stemweb", "available"]);
-      $.getJSON(requrl, function(data) {
-        $.each(data, function(i, o) {
+      $.getJSON(requrl, function (data) {
+        $.each(data, function (i, o) {
           if (o.model === 'algorithms.algorithm') {
             // it's an algorithm.
             algorithmTypes[o.pk] = o.fields;
@@ -828,17 +828,17 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         });
         // TODO if it is an empty object, disable Stemweb entirely.
         if (!jQuery.isEmptyObject(algorithmTypes)) {
-          $.each(algorithmTypes, function(pk, fields) {
+          $.each(algorithmTypes, function (pk, fields) {
             var algopt = $('<option>').attr('value', pk).append(fields.name);
             $('#stemweb_algorithm').append(algopt);
           });
           // Set up the relevant options for whichever algorithm is chosen.
           // "key" -> form name, option ID "stemweb_$key_opt"
           // "name" -> form label
-          $('#stemweb_algorithm_help').click(function() {
+          $('#stemweb_algorithm_help').click(function () {
             $('#stemweb_algorithm_desc_text').toggle('blind');
           });
-          $('#stemweb_algorithm').change(function() {
+          $('#stemweb_algorithm').change(function () {
             var pk = $(this).val();
             // Display a link to the popup description, and fill in
             // the description itself, if we have one.
@@ -849,7 +849,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
               $('#stemweb_algorithm_desc').hide();
             }
             $('#stemweb_runtime_options').empty();
-            $.each(algorithmTypes[pk].args, function(i, apk) {
+            $.each(algorithmTypes[pk].args, function (i, apk) {
               var argInfo = algorithmArgs[apk];
               if (argInfo) {
                 // Make the element ID
@@ -879,12 +879,12 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       });
       // Prime the initial options
     },
-    open: function(evt) {
+    open: function (evt) {
       $('#stemweb_run_status').empty();
       $('#stemweb_tradition').attr('value', selectedTextID);
       if (selectedTextInfo.stemweb_jobid == 0) {
         $('#stemweb_merge_reltypes').empty();
-        $.each(selectedTextInfo.reltypes, function(i, r) {
+        $.each(selectedTextInfo.reltypes, function (i, r) {
           var relation_opt = $('<option>').attr('value', r).append(r);
           $('#stemweb_merge_reltypes').append(relation_opt);
         });
@@ -903,12 +903,12 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
     width: 500,
     modal: true,
     buttons: {
-      Download: function(evt) {
+      Download: function (evt) {
         var dlurl = _get_url(["download"]);
         dlurl += '?' + $('#download_form').serialize();
         window.location = dlurl;
       },
-      Done: function() {
+      Done: function () {
         $('#download-dialog').dialog('close');
       }
     },
@@ -923,7 +923,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       upload: {
         text: 'Upload',
         id: 'upload_button',
-        click: function() {
+        click: function () {
           $('#upload_status').empty();
           $('#upload_button').button("disable");
           var url;
@@ -939,22 +939,22 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       pick_file: {
         text: 'Pick File',
         id: 'pick_file_button',
-        click: function() {
+        click: function () {
           $('#new_file').click();
         }
       },
-      Cancel: function() {
+      Cancel: function () {
         $('#upload-collation-dialog').dialog('close');
       }
     },
-    create: function() {
+    create: function () {
       // Set the radio button form modification logic
-      $('#upload_tradition_radio').click(function() {
+      $('#upload_tradition_radio').click(function () {
         $('.new_section').hide();
         $('.new_tradition').show();
         $('#upload_name_field').text('Name of this text / tradition: ');
       });
-      $('#upload_section_radio').click(function() {
+      $('#upload_section_radio').click(function () {
         $('.new_tradition').hide();
         $('.new_section').show();
         $('#upload_name_field').text('Name of this section: ');
@@ -962,7 +962,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       // Default is new tradition
       $('#upload_tradition_radio').click();
     },
-    open: function() {
+    open: function () {
       // Set the upload button to its correct state based on
       // whether a file is loaded
       file_selected($('#new_file').get(0));
@@ -979,17 +979,17 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       delete: {
         text: 'Delete section',
         id: 'section_delete_button',
-        click: function() {
+        click: function () {
           $('#section_delete_button').button("disable");
           var sectionID = $('#section_id').val();
           var url = _get_url(['delete', selectedTextID, sectionID]);
-          $.post(url, function() {
+          $.post(url, function () {
             // Remove the affected list element
             $('#section_list li.selected').remove();
             // TEST Do we need to re-initialise the sortable?
             // Remove the affected section data
             var toRemove = -1;
-            $.each(selectedTextInfo.sections, function(i) {
+            $.each(selectedTextInfo.sections, function (i) {
               if (this.id === sectionID) {
                 toRemove = i;
               }
@@ -1001,17 +1001,17 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       save: {
         text: 'Save section info',
         id: 'section_save_button',
-        click: function() {
+        click: function () {
           $('#section_save_button').button("disable");
           var sectionID = $('#section_id').val();
           var url = _get_url(['sectioninfo', selectedTextID, sectionID]);
           var reqparam = $('#section-edit').serialize();
-          $.post(url, reqparam, function(data) {
+          $.post(url, reqparam, function (data) {
             // Turn the button back on
             $('#section_save_button').button("enable");
             // Update our copy of the data
             var toUpdate = -1;
-            $.each(selectedTextInfo.sections, function(i) {
+            $.each(selectedTextInfo.sections, function (i) {
               if (this.id === sectionID) {
                 toUpdate = i;
               }
@@ -1026,19 +1026,19 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       },
       close: {
         text: 'Close',
-        click: function() {
+        click: function () {
           $('#section-edit-dialog').dialog('close');
         }
       },
     },
-    open: function() {
+    open: function () {
       // Clear any prior error messages
       $('#section_edit_status').empty();
       // Set up the magic section list sorter, non-jQuery style
       var sectionlist = document.getElementById('section_list');
       sortableSectionList = Sortable.create(sectionlist, {
         handle: '.sortable-handle',
-        onUpdate: function(evt, ui) {
+        onUpdate: function (evt, ui) {
           // Get the section that is moving
           var sectid = selectedTextInfo.sections[evt.oldIndex].id;
           // If the element has moved up, then the prior element is
@@ -1056,7 +1056,7 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
           }
           var sorturl = _get_url(
             ['orderafter', selectedTextID, sectid, newprior]);
-          $.post(sorturl, function() {
+          $.post(sorturl, function () {
             // Alter our sections list
             var movedSection = selectedTextInfo.sections.splice(evt.oldIndex, 1);
             selectedTextInfo.sections.splice(evt.newIndex, 0, movedSection[0]);
@@ -1069,13 +1069,13 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       sectionSortBackup = sortableSectionList.toArray();
 
       // Set up the click-to-choose functionality for the section metadata
-      $('#section_list li').click(function() {
+      $('#section_list li').click(function () {
         $('#section_list li').removeClass('selected');
         $(this).addClass('selected');
         $('#section_delete_button').button("enable");
         $('#section_save_button').button("enable");
         var ourid = $(this).data('id');
-        $.each(selectedTextInfo.sections, function() {
+        $.each(selectedTextInfo.sections, function () {
           if (this.id === ourid) {
             $('#section_id').val(this.id);
             $('#section_name').val(this.name);
@@ -1085,15 +1085,15 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         });
       });
     },
-    close: function() {
+    close: function () {
       sortableSectionList.destroy();
     },
   });
 
-  $('#stemma_graph').mousedown(function(evt) {
+  $('#stemma_graph').mousedown(function (evt) {
     evt.stopPropagation();
     $('#stemma_graph').data('mousedown_xy', [evt.clientX, evt.clientY]);
-    $('body').mousemove(function(evt) {
+    $('body').mousemove(function (evt) {
       mouse_scale = 1; // for now, was:  mouse_scale = svg_root_element.getScreenCTM().a;
       dx = (evt.clientX - $('#stemma_graph').data('mousedown_xy')[0]) / mouse_scale;
       dy = (evt.clientY - $('#stemma_graph').data('mousedown_xy')[1]) / mouse_scale;
@@ -1107,13 +1107,13 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       evt.preventDefault();
       return false;
     });
-    $('body').mouseup(function(evt) {
+    $('body').mouseup(function (evt) {
       $('body').unbind('mousemove');
       $('body').unbind('mouseup');
     });
   });
 
-  $('#stemma_graph').mousewheel(function(event, delta) {
+  $('#stemma_graph').mousewheel(function (event, delta) {
     event.returnValue = false;
     event.preventDefault();
     if (!delta || delta == null || delta == 0) delta = event.originalEvent.wheelDelta;
@@ -1132,6 +1132,280 @@ $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
       g.setAttribute('transform', new_transform);
     }
   });
+
+  // Fetch active/pending s-bridge jobs from the backend proxy
+  function fetch_sbridge_jobs() {
+    var url = _get_url(['sbridge', 'jobs']);
+
+    // Helper to safely parse collection ID parameter from the collection URL
+    function get_collection_id(urlStr) {
+      if (!urlStr) return null;
+      try {
+        var u = new URL(urlStr);
+        return u.searchParams.get('id');
+      } catch (e) {
+        var match = urlStr.match(/[?&]id=([^&]+)/);
+        return match ? decodeURIComponent(match[1]) : null;
+      }
+    }
+
+    // Helper to parse the datetime string from s-bridge correctly as UTC if no timezone is specified
+    function parse_sbridge_date(dateStr) {
+      if (!dateStr) return null;
+      var utcStr = dateStr;
+      if (!/[Zz]$/.test(utcStr) && !/[+-]\d{2}:?\d{2}$/.test(utcStr)) {
+        utcStr = utcStr.replace(' ', 'T');
+        if (utcStr.indexOf('T') !== -1) {
+          utcStr += 'Z';
+        }
+      }
+      var d = new Date(utcStr);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    // Helper to extract local time (HH:MM:SS) prefixed with the weekday from the ISO datetime string
+    function format_launch_time(dateStr) {
+      var d = parse_sbridge_date(dateStr);
+      if (!d) return '';
+      var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var day = days[d.getDay()];
+      var hh = String(d.getHours()).padStart(2, '0');
+      var mm = String(d.getMinutes()).padStart(2, '0');
+      var ss = String(d.getSeconds()).padStart(2, '0');
+      return day + ' ' + hh + ':' + mm + ':' + ss;
+    }
+
+    $.getJSON(url, function (ret) {
+      var container = $('#sbridge_jobs_list');
+      container.empty();
+      
+      // Handle proxy/API errors gracefully
+      if (ret.error) {
+        container.append($('<p>').addClass('error').text('Failed to load jobs: ' + ret.error));
+        return;
+      }
+      
+      // Display a friendly placeholder when there are no jobs
+      if (!Array.isArray(ret) || ret.length === 0) {
+        container.append($('<p>').css({
+          'color': '#888',
+          'font-style': 'italic',
+          'text-align': 'center',
+          'margin': '15px 0'
+        }).text('No jobs found.'));
+        return;
+      }
+
+      // Construct the jobs table
+      var table = $('<table>').css({
+        'width': '100%',
+        'border-collapse': 'collapse',
+        'font-size': '12px',
+        'margin-top': '5px'
+      });
+
+      var thead = $('<thead>').append(
+        $('<tr>').append(
+          $('<th>').text('Collection / Job ID').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
+          $('<th>').text('Status').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
+          $('<th>').text('Action').css({ 'text-align': 'right', 'border-bottom': '2px solid #ddd', 'padding': '6px' })
+        )
+      );
+      table.append(thead);
+
+      var tbody = $('<tbody>');
+      $.each(ret, function (i, job) {
+        var jobId = job.job_id || job.id || 'N/A';
+        var status = job.status || 'unknown';
+        var statusLower = status.toLowerCase();
+        var truncId = jobId.length > 8 ? jobId.substring(0, 14) + '...' : jobId;
+
+        var collectionId = get_collection_id(job.collection_url);
+        var displayId = collectionId || truncId;
+        
+        var launchTime = format_launch_time(job.created_at);
+        if (launchTime) {
+          displayId += ' (' + launchTime + ')';
+        }
+        
+        var displayStatus = status;
+        if (statusLower === 'failed' && job.error_message) {
+          var words = job.error_message.trim().split(/\s+/);
+          if (words.length > 0) {
+            var firstTwoWords = words.slice(0, 2).join(' ');
+            if (firstTwoWords) {
+              // Strip trailing punctuation (like colons, semicolons, commas, or hyphens)
+              firstTwoWords = firstTwoWords.replace(/[:;,\-\s]+$/, '');
+              displayStatus += ' - ' + firstTwoWords;
+            }
+          }
+        }
+        
+        var tooltipText = 'Job ID: ' + jobId;
+        if (job.collection_url) {
+          tooltipText += '\nCollection URL: ' + job.collection_url;
+        }
+        if (job.created_at) {
+          var dateObj = parse_sbridge_date(job.created_at);
+          if (dateObj) {
+            tooltipText += '\nLaunched At: ' + dateObj.toLocaleString();
+          }
+        }
+        if (job.error_message) {
+          tooltipText += '\nError Message: ' + job.error_message;
+        }
+
+        var isKillable = statusLower === 'pending' || statusLower === 'processing';
+        
+        // "Kill" button to terminate the corresponding s-bridge job if still active
+        var killBtn = '';
+        if (isKillable) {
+          killBtn = $('<button>')
+            .text('Kill')
+            .addClass('ui-button ui-widget ui-state-default ui-corner-all')
+            .css({
+              'color': '#d9534f',
+              'border': '1px solid #d43f3a',
+              'background-color': '#fff',
+              'padding': '2px 8px',
+              'font-size': '11px',
+              'cursor': 'pointer',
+              'border-radius': '3px'
+            })
+            .hover(
+              function () { $(this).css('background-color', '#f2dede'); },
+              function () { $(this).css('background-color', '#fff'); }
+            )
+            .click(function () {
+              cancel_sbridge_job(jobId);
+            });
+        }
+
+        var tr = $('<tr>').append(
+          $('<td>').append($('<span>').attr('title', tooltipText).text(displayId)).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
+          $('<td>').text(displayStatus).attr('title', job.error_message ? 'Error: ' + job.error_message : '').css({
+            'padding': '6px',
+            'border-bottom': '1px solid #eee',
+            'font-weight': 'bold',
+            'color': statusLower === 'processing' ? '#337ab7' : 
+                     statusLower === 'pending' ? '#f0ad4e' :
+                     statusLower === 'completed' ? '#5cb85c' :
+                     statusLower === 'failed' || statusLower === 'cancelled' ? '#d9534f' : '#777'
+          }),
+          $('<td>').append(killBtn).css({ 'text-align': 'right', 'padding': '6px', 'border-bottom': '1px solid #eee' })
+        );
+        tbody.append(tr);
+      });
+      table.append(tbody);
+      container.append(table);
+    }).fail(function () {
+      $('#sbridge_jobs_list').html('<p class="error">Error checking jobs.</p>');
+    });
+  }
+
+  // Request s-bridge background job cancellation via proxy
+  function cancel_sbridge_job(jobId) {
+    if (confirm('Are you sure you want to terminate this s-bridge background job?')) {
+      var url = _get_url(['sbridge', 'jobs', 'cancel', jobId]);
+      $.ajax({
+        url: url,
+        type: 'POST',
+        success: function (ret) {
+          if (ret.error) {
+            alert('Error canceling job: ' + ret.error);
+          } else {
+            fetch_sbridge_jobs(); // Refresh jobs list immediately on success
+          }
+        },
+        error: function () {
+          alert('Failed to cancel job. Connection error.');
+        }
+      });
+    }
+  }
+
+  var sbridge_poll_interval;
+
+  // Dialog configuration for automatic tradition creation modal
+  $('#sbridge-dialog').dialog({
+    autoOpen: false,
+    height: 550,
+    width: 480,
+    modal: true,
+    buttons: {
+      submit: {
+        id: 'sbridge_submit_button',
+        text: 'Create Tradition',
+        click: function () {
+          $('#sbridge_status').empty();
+          var collection_url = $('#sbridge_collection_url').val().trim();
+          var ref_val = $('#sbridge_ref').val().trim();
+          var normalization = $('#sbridge_normalization').val();
+
+          if (!collection_url) {
+            $('#sbridge_status').html('<span class="error">Collection URL is mandatory.</span>');
+            return;
+          }
+          $('#sbridge_submit_button').button("disable");
+
+          // Build POST payload for s-bridge
+          var payload = { collection_url: collection_url };
+          if (ref_val) {
+            payload.ref = ref_val;
+          }
+
+          var url = _get_url(['sbridge', 'process_and_collate']);
+          var queryParams = $.param({
+            normalization: normalization,
+          });
+          url += '?' + queryParams;
+
+          // Dispatch asynchronous collation task to s-bridge proxy
+          $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (ret) {
+              $('#sbridge_submit_button').button("enable");
+              if (ret.error) {
+                var err_msg = ret.error;
+                if (ret.details && ret.details.detail) {
+                  err_msg += ": " + JSON.stringify(ret.details.detail);
+                }
+                $('#sbridge_status').empty().append(
+                  $('<span>').attr('class', 'error').append(err_msg));
+              } else {
+                $('#sbridge_status').empty().append(
+                  $('<span>').attr('class', 'notification').append(
+                    'The NLP pipeline has started.'));
+                fetch_sbridge_jobs(); // Instantly show the new active job
+              }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              $('#sbridge_submit_button').button("enable");
+              display_error(jqXHR, $("#sbridge_status"));
+            }
+          });
+        }
+      },
+      Cancel: function () {
+        $('#sbridge-dialog').dialog('close');
+      }
+    },
+    // Start active polling on open, and clear interval on close
+    open: function () {
+      $('#sbridge_status').empty();
+      fetch_sbridge_jobs();
+      sbridge_poll_interval = setInterval(fetch_sbridge_jobs, 5000);
+    },
+    close: function () {
+      if (sbridge_poll_interval) {
+        clearInterval(sbridge_poll_interval);
+      }
+    }
+  });
+
   // Once all the page elements are set up...
   refreshDirectory();
 });
