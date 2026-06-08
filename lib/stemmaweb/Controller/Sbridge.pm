@@ -32,7 +32,7 @@ Catalyst Controller to interface with the s-bridge NLP pipeline.
  POST /sbridge/process_and_collate
  Content-Type: application/json
 
- Forwards the request to the s-bridge NLP server's /dts/process-and-collate endpoint.
+ Forwards the request to the s-bridge NLP server's /process-and-collate endpoint.
  Expected JSON body: { "collection_url": "...", "ref": "..." }
 
 =cut
@@ -70,7 +70,7 @@ sub process_and_collate :Local :Args(0) {
 
         # Prepare LWP UserAgent (Perl's standard HTTP Client)
         my $ua = LWP::UserAgent->new();
-        my $url = $self->sbridge_url . '/dts/process-and-collate';
+        my $url = $self->sbridge_url . '/process-and-collate';
 
         # Forward any query parameters (like ?normalization=...) to s-bridge
         my $req_uri = URI->new($url);
@@ -116,7 +116,7 @@ sub process_and_collate :Local :Args(0) {
 
  # GET /sbridge/jobs
 
- Proxies the request to the s-bridge server's /dts/jobs endpoint to get recent jobs.
+ Proxies the request to the s-bridge server's /jobs endpoint to get recent jobs.
 
 =cut
 
@@ -125,7 +125,7 @@ sub all_jobs :Path('jobs') :Args(0) {
     my ($self, $c) = @_;
 
     my $ua = LWP::UserAgent->new();
-    my $url = $self->sbridge_url . '/dts/jobs';
+    my $url = $self->sbridge_url . '/jobs';
 
     # Forward any query parameters (like limit or offset) to s-bridge
     my $req_uri = URI->new($url);
@@ -155,7 +155,7 @@ sub all_jobs :Path('jobs') :Args(0) {
 
  # POST /sbridge/jobs/cancel/:job_id
 
- Proxies the request to the s-bridge server's /dts/jobs/:job_id/cancel endpoint to cancel a job.
+ Proxies the request to the s-bridge server's /jobs/:job_id/cancel endpoint to cancel a job.
 
 =cut
 
@@ -166,7 +166,7 @@ sub cancel_job :Path('jobs/cancel') :Args(1) {
 
     require HTTP::Request;
     my $ua = LWP::UserAgent->new();
-    my $url = $self->sbridge_url . "/dts/jobs/$job_id/cancel";
+    my $url = $self->sbridge_url . "/jobs/$job_id/cancel";
 
     # Translate the incoming POST request into a PUT request as expected by s-bridge
     my $req = HTTP::Request->new(PUT => $url);
