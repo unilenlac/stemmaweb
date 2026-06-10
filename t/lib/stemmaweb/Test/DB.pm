@@ -35,12 +35,21 @@ sub errorout {
 	return sprintf("%s: %s / %s", $msg, $res->code, $res->content);
 }
 
+sub _resolve_val {
+	my ($val, $default) = @_;
+	if ($val && $val =~ /__ENV\((.*?)\)__/) {
+		return $ENV{$1} || $default;
+	}
+	return $val || $default;
+}
+
 sub new_db {
 	my $datadir = shift;
 	# Get the URL
 	my $cfg = Config::Any->load_stems({stems => ['stemmaweb'], use_ext => 1})->[0];
 	my $dircfg = $cfg->{'stemmaweb.conf'}->{Model}->{Directory};
-	my $n4jurl = new URI::URL $dircfg->{tradition_repo};
+	my $url_str = _resolve_val($dircfg->{tradition_repo}, 'http://ftsr-dev.unil.ch:7070/stemmarest/api');
+	my $n4jurl = new URI::URL $url_str;
 
 	# Add the users
 	my $ua = LWP::UserAgent->new();
@@ -51,8 +60,10 @@ sub new_db {
 		$host .= ':' . $n4jurl->port unless $n4jurl->port == 80;
 		# Now add the credentials
 		$ua->ssl_opts( 'verify_hostname' => 0 );
-		$ua->credentials( $host, $dircfg->{basic_auth}->{realm}, 
-			$dircfg->{basic_auth}->{user}, $dircfg->{basic_auth}->{pass} );
+		my $realm = _resolve_val($dircfg->{basic_auth}->{realm}, 'basic-auth-realm');
+		my $user = _resolve_val($dircfg->{basic_auth}->{user}, 'user');
+		my $pass = _resolve_val($dircfg->{basic_auth}->{pass}, 'userpass');
+		$ua->credentials( $host, $realm, $user, $pass );
 	}
 	## Users that should exist in the beginning
 	my $users = [

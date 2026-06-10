@@ -21,11 +21,10 @@ If you need a script to collate texts and import them into the stemmarest backen
 
 This web interface uses the [Perl](https://www.perl.org/) language and the [Catalyst framework](https://metacpan.org/dist/Catalyst-Manual/view/lib/Catalyst/Manual/Tutorial.pod). 
 
-Because Perl/Catalyst can be challenging to configure locally, we **highly recommend running Stemmaweb inside a Docker container**. 
 
 ***
 
-#### Option 1: Run with Docker (Recommended)
+#### 1: Run with Docker 
 
 Stemmaweb is containerized and ready to deploy.
 
@@ -34,9 +33,13 @@ Stemmaweb is containerized and ready to deploy.
    docker build -t stemmaweb:ubuntu-18.04 .
    ```
 
-2. **Run the container** (requires passing the `SBRIDGE_URL` environment variable parameter):
+2. **Run the container** (requires passing the configuration environment variables):
    ```bash
-   docker run -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" -p 3000:3000 stemmaweb:ubuntu-18.04
+   docker run -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" \
+              -e TRADITION_REPO="http://your-stemmarest-host:port" \
+              -e TRADITION_REPO_USER="your-db-user" \
+              -e TRADITION_REPO_PASS="your-db-password" \
+              -p 3000:3000 stemmaweb:ubuntu-18.04
    ```
 
 Optional: **Run for local development** (mounts your current directory for hot reloading when files change):
@@ -45,6 +48,9 @@ Optional: **Run for local development** (mounts your current directory for hot r
      -p 3000:3000 \
      -v $PWD:/stemmaweb \
      -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" \
+     -e TRADITION_REPO="http://your-stemmarest-host:port/stemmarest/api" \
+     -e TRADITION_REPO_USER="your-db-user" \
+     -e TRADITION_REPO_PASS="your-db-password" \
      stemmaweb:ubuntu-18.04 \
      perl script/stemmaweb_server.pl -r
    ```
@@ -53,79 +59,13 @@ Optional: **Run for local development** (mounts your current directory for hot r
 > Connecting Stemmaweb to a Docker network is recommended to easily communicate with your backend database or Stemmarest container.
 > Debugging inside the container is possible by using the `-d` option when running the perl test server (e.g. `perl -d script/stemmaweb_server.pl`).
 
-***
-
-#### Option 2: Native Perl Installation (Alternative)
-
-If you do not want to use Docker, follow this procedure to set up a native installation:
-
-To run Stemmaweb you need a working Perl installation (5.12 or above) and a webserver.
-
-1. **Install system packages** (example Ubuntu packages list):
-   * `gcc`, `make`, `libxml2-dev`, `zlib1g-dev`, `libexpat1-dev`, `graphviz`, `libssl-dev`, `libgmp-dev`
-2. **Install core Perl package management tools**:
-   ```bash
-   cpan -T App::cpanminus
-   cpanm -n Module::Install::Catalyst
-   ```
-3. **Install application dependencies**:
-   ```bash
-   cd /PATH/TO/stemmaweb && cpanm -S --installdeps .
-   ```
-4. **Initialize a local SQLite test database and run the server**:
-   ```bash
-   script/maketestdb.pl
-   script/stemmaweb_server.pl
-   ```
-   You can now test the installation at `http://localhost:3000/`.
-
-5. **Production Databases**: For storage of real text tradition data, replace the SQLite settings in `stemmaweb.conf` with your database of choice (e.g., MySQL, PostgreSQL) and install the relevant Perl `DBD::*` driver.
-   For example, a MySQL database configuration stanza in `<Model Directory>` would look like this:
-   ```
-   <model_args>
-   dsn dbi:mysql:dbname=stemmaweb;host=DB_HOSTNAME
-   <extra_args>
-       user STEMMAWEB_USER
-       password STEMMAWEB_PASS
-       <dbi_attrs>
-           mysql_enable_utf8 1
-       </dbi_attrs>
-   </extra_args>
-   </model_args>
-   ```
-
-6. **Production Deployment**: You can configure Stemmaweb to run under FastCGI, Starman, or any other Catalyst-compatible application framework (see the Catalyst documentation). The provided `stemmaweb.psgi` is configured to run behind Apache on a specified non-root URL path.
-
-Debugging screen is then available, for instance, if the container is running is not running on the background:
-
-```bash
-docker run -it --rm --name stemmaweb --network stemmaweb -p 3000:3000 stemmaweb:ubuntu-18.04
-````
 
 ## Configuration
 
-Stemmaweb needs to be configured to connect to the Stemmarest backend. This typically involves setting the API endpoint URL.
-
-The API endpoint can be set in the Stemmaweb configuration file (e.g., `stemmaweb.conf`) under the `[tradition_repo]` variable:
-
-```
-<Model Directory>
-	tradition_repo http://my-server:8080/stemmarest/api
-</Model Directory>
-````
-
-Stemmaweb also needs to be configured to connect to the s-bridge module. This involves setting the API endpoint URL in the Stemmaweb configuration file `stemmaweb.conf`:
-
-You must use the `__ENV(VAR_NAME)__` macro to load values from environment variables at runtime, which is useful when deploying the Docker container:
-
-```
-<Component Controller::Sbridge>
-    sbridge_url __ENV(SBRIDGE_URL)__
-</Component>
-```
+Stemmaweb needs to be configured to connect to the Stemmarest backend and the s-bridge module.
 
 > [!WARNING]
-> Since the `__ENV` macro requires the environment variable to exist, you **must always pass `SBRIDGE_URL` at runtime** (e.g. via `docker run -e SBRIDGE_URL=...`), or the application will fail to start.
+> Since the `__ENV` macro requires the environment variables to exist, you **must always pass `SBRIDGE_URL`, `TRADITION_REPO`, `TRADITION_REPO_USER`, and `TRADITION_REPO_PASS` at runtime** (e.g. via `docker run -e SBRIDGE_URL=... -e TRADITION_REPO=... -e TRADITION_REPO_USER=... -e TRADITION_REPO_PASS=...`), or the application will fail to start.
 
 ### Usage guide
 --------
