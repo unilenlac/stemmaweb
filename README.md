@@ -36,9 +36,9 @@ Stemmaweb is containerized and ready to deploy.
 2. **Run the container** (requires passing the configuration environment variables):
    ```bash
    docker run -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" \
-              -e TRADITION_REPO="http://your-stemmarest-host:port" \
-              -e TRADITION_REPO_USER="your-db-user" \
-              -e TRADITION_REPO_PASS="your-db-password" \
+              -e STEMMAREST_URL="http://your-stemmarest-host:port" \
+              -e USER="StemmaWeb-user" \
+              -e PASS="StemmaWeb-password" \
               -p 3000:3000 stemmaweb:ubuntu-18.04
    ```
 
@@ -48,9 +48,9 @@ Optional: **Run for local development** (mounts your current directory for hot r
      -p 3000:3000 \
      -v $PWD:/stemmaweb \
      -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" \
-     -e TRADITION_REPO="http://your-stemmarest-host:port/stemmarest/api" \
-     -e TRADITION_REPO_USER="your-db-user" \
-     -e TRADITION_REPO_PASS="your-db-password" \
+      -e STEMMAREST_URL="http://your-stemmarest-host:port" \
+      -e USER="StemmaWeb-user" \
+      -e PASS="StemmaWeb-password" \
      stemmaweb:ubuntu-18.04 \
      perl script/stemmaweb_server.pl -r
    ```
@@ -65,7 +65,7 @@ Optional: **Run for local development** (mounts your current directory for hot r
 Stemmaweb needs to be configured to connect to the Stemmarest backend and the s-bridge module.
 
 > [!WARNING]
-> Since the `__ENV` macro requires the environment variables to exist, you **must always pass `SBRIDGE_URL`, `TRADITION_REPO`, `TRADITION_REPO_USER`, and `TRADITION_REPO_PASS` at runtime** (e.g. via `docker run -e SBRIDGE_URL=... -e TRADITION_REPO=... -e TRADITION_REPO_USER=... -e TRADITION_REPO_PASS=...`), or the application will fail to start.
+> Since the `__ENV` macro requires the environment variables to exist, you **must always pass `SBRIDGE_URL`, `STEMMAREST_URL`, `USER`, and `PASS` at runtime** (e.g. via `docker run -e SBRIDGE_URL=... -e STEMMAREST_URL=... -e USER=... -e PASS=...`), or the application will fail to start.
 
 ### Usage guide
 --------
