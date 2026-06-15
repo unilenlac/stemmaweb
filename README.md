@@ -33,7 +33,12 @@ Stemmaweb is containerized and ready to deploy.
    docker build -t stemmaweb:ubuntu-18.04 .
    ```
 
-2. **Run the container** (requires passing the configuration environment variables):
+2. **Run the container**:
+   You can run the container immediately using default fallback configuration values:
+   ```bash
+   docker run -p 3000:3000 stemmaweb:ubuntu-18.04
+   ```
+   Alternatively, override any of the parameters by passing configuration environment variables:
    ```bash
    docker run -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" \
               -e STEMMAREST_URL="http://your-stemmarest-host:port" \
@@ -47,10 +52,6 @@ Optional: **Run for local development** (mounts your current directory for hot r
    docker run -it --rm \
      -p 3000:3000 \
      -v $PWD:/stemmaweb \
-     -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" \
-      -e STEMMAREST_URL="http://your-stemmarest-host:port" \
-      -e USER="StemmaWeb-user" \
-      -e PASS="StemmaWeb-password" \
      stemmaweb:ubuntu-18.04 \
      perl script/stemmaweb_server.pl -r
    ```
@@ -64,8 +65,18 @@ Optional: **Run for local development** (mounts your current directory for hot r
 
 Stemmaweb needs to be configured to connect to the Stemmarest backend and the s-bridge module.
 
-> [!WARNING]
-> Since the `__ENV` macro requires the environment variables to exist, you **must always pass `SBRIDGE_URL`, `STEMMAREST_URL`, `USER`, and `PASS` at runtime** (e.g. via `docker run -e SBRIDGE_URL=... -e STEMMAREST_URL=... -e USER=... -e PASS=...`), or the application will fail to start.
+> [!NOTE]
+> Predefined fallback values are set in the application code for ease of use, so environment variables are optional. The defaults are:
+> - `STEMMAREST_URL`: `http://ftsr-dev.unil.ch:7070/stemmarest/api`
+> - `USER`: `user`
+> - `PASS`: `userpass`
+> - `SBRIDGE_URL`: `http://host.docker.internal:8500`
+> 
+> You can override these variables at runtime using `-e VARIABLE_NAME=value` (e.g. `docker run -e STEMMAREST_URL=...`).
+> 
+> > [!IMPORTANT]
+> > If you define a custom `PASS`, it must be at least 8 characters long.
+
 
 ### Usage guide
 --------

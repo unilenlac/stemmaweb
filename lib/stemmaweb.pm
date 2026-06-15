@@ -3,9 +3,9 @@ use Moose;
 use namespace::autoclean;
 
 BEGIN {
-    $ENV{TRADITION_REPO}      //= 'http://ftsr-dev.unil.ch:7070/stemmarest/api';
-    $ENV{TRADITION_REPO_USER} //= 'user';
-    $ENV{TRADITION_REPO_PASS} //= 'userpass';
+    $ENV{STEMMAREST_URL}      //= 'http://ftsr-dev.unil.ch:7070/stemmarest/api';
+    $ENV{USER}                //= 'user';
+    $ENV{PASS}                //= 'userpass';
     $ENV{SBRIDGE_URL}         //= 'http://host.docker.internal:8500';
 }
 
