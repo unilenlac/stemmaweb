@@ -4,8 +4,6 @@ use namespace::autoclean;
 
 BEGIN {
     $ENV{STEMMAREST_URL}      //= 'http://ftsr-dev.unil.ch:7070/stemmarest/api';
-    $ENV{USER}                //= 'user';
-    $ENV{PASS}                //= 'userpass';
     $ENV{SBRIDGE_URL}         //= 'http://host.docker.internal:8500';
 }
 

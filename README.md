@@ -42,8 +42,6 @@ Stemmaweb is containerized and ready to deploy.
    ```bash
    docker run -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" \
               -e STEMMAREST_URL="http://your-stemmarest-host:port" \
-              -e USER="StemmaWeb-user" \
-              -e PASS="StemmaWeb-password" \
               -p 3000:3000 stemmaweb:ubuntu-18.04
    ```
 
@@ -68,14 +66,13 @@ Stemmaweb needs to be configured to connect to the Stemmarest backend and the s-
 > [!NOTE]
 > Predefined fallback values are set in the application code for ease of use, so environment variables are optional. The defaults are:
 > - `STEMMAREST_URL`: `http://ftsr-dev.unil.ch:7070/stemmarest/api`
-> - `USER`: `user`
-> - `PASS`: `userpass`
 > - `SBRIDGE_URL`: `http://host.docker.internal:8500`
 > 
 > You can override these variables at runtime using `-e VARIABLE_NAME=value` (e.g. `docker run -e STEMMAREST_URL=...`).
 > 
 > > [!IMPORTANT]
-> > If you define a custom `PASS`, it must be at least 8 characters long.
+> > To customize the basic authentication credentials (username and password), edit the [stemmaweb.conf] file directly under the `<basic_auth>` section.
+
 
 
 ### Usage guide
