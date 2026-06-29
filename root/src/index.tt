@@ -205,9 +205,16 @@
           
           <label for="sbridge_normalization">Normalization:</label><br>
           <select id="sbridge_normalization" name="normalization">
-            <option value="lemma+pos" selected>Lemma + POS</option>
-            <option value="lemma">Lemma</option>
+            <option value="lemma+pos">Lemma + POS</option>
+            <option value="lemma" selected>Lemma</option>
             <option value="text">Text</option>
+          </select><br><br>
+
+          <label for="sbridge_algorithm">Alignment Algorithm:</label><br>
+          <select id="sbridge_algorithm" name="algorithm">
+            <option value="dekker" selected>Dekker</option>
+            <option value="needleman-wunsch">Needleman-Wunsch</option>
+            <option value="medite">Medite</option>
           </select><br><br>
         </div>
       </form>

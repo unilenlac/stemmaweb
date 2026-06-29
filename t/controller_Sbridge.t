@@ -27,11 +27,11 @@ no warnings 'redefine';
 # 1. Test POST /sbridge/process_and_collate
 $last_request = undef;
 $mock_response = HTTP::Response->new(200, 'OK', ['Content-Type' => 'application/json'], '{"job_id":"job_123"}');
-my $res1 = request POST '/sbridge/process_and_collate?normalization=lemma',
+my $res1 = request POST '/sbridge/process_and_collate?normalization=lemma&algorithm=dekker',
     'Content-Type' => 'application/json',
     'Content'      => '{"collection_url":"http://test"}';
 is( $res1->code, 200, 'POST /process_and_collate returns 200' ); # verifies correct response to js browser
-is( $last_request->uri->as_string, "$sbridge_url/dts/process-and-collate?normalization=lemma", 'Query parameters forwarded correctly' ); #intercepts outgoing message for s-bridge
+is( $last_request->uri->as_string, "$sbridge_url/dts/process-and-collate?normalization=lemma&algorithm=dekker", 'Query parameters forwarded correctly' ); #intercepts outgoing message for s-bridge
 
 # 2. Test GET /sbridge/jobs
 $last_request = undef;
