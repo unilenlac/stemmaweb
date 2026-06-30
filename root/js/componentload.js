@@ -1281,17 +1281,32 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
             });
         }
 
+        var isFailed = statusLower === 'failed' || statusLower === 'cancelled';
+        var hasError = !!job.error_message;
+        var statusCell = $('<td>').css({
+          'padding': '6px',
+          'border-bottom': '1px solid #eee'
+        });
+        var statusSpan = $('<span>').text(displayStatus).css({
+          'font-weight': 'bold',
+          'color': statusLower === 'processing' ? '#337ab7' : 
+                   statusLower === 'pending' ? '#f0ad4e' :
+                   statusLower === 'completed' ? '#5cb85c' :
+                   isFailed ? '#d9534f' : '#777'
+        });
+        if (isFailed && hasError) {
+          statusSpan.css({
+            'border-bottom': '1px dashed #d9534f',
+            'cursor': 'help'
+          });
+          statusCell.attr('title', 'Error: ' + job.error_message);
+          statusSpan.attr('title', 'Error: ' + job.error_message);
+        }
+        statusCell.append(statusSpan);
+
         var tr = $('<tr>').append(
           $('<td>').append($('<span>').attr('title', tooltipText).text(displayId)).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
-          $('<td>').text(displayStatus).attr('title', job.error_message ? 'Error: ' + job.error_message : '').css({
-            'padding': '6px',
-            'border-bottom': '1px solid #eee',
-            'font-weight': 'bold',
-            'color': statusLower === 'processing' ? '#337ab7' : 
-                     statusLower === 'pending' ? '#f0ad4e' :
-                     statusLower === 'completed' ? '#5cb85c' :
-                     statusLower === 'failed' || statusLower === 'cancelled' ? '#d9534f' : '#777'
-          }),
+          statusCell,
           $('<td>').append(killBtn).css({ 'text-align': 'right', 'padding': '6px', 'border-bottom': '1px solid #eee' })
         );
         tbody.append(tr);
