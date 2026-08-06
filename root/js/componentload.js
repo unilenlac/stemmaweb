@@ -1299,6 +1299,10 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
             'border-bottom': '1px dashed #d9534f',
             'cursor': 'help'
           });
+          statusSpan.append($('<span>').text(' ⓘ').css({
+            'font-size': '12px',
+            'margin-left': '2px'
+          }));
           statusCell.attr('title', 'Error: ' + job.error_message);
           statusSpan.attr('title', 'Error: ' + job.error_message);
         }
