@@ -1303,8 +1303,8 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
             'font-size': '12px',
             'margin-left': '2px'
           }));
-          statusCell.attr('title', 'Error: ' + job.error_message);
-          statusSpan.attr('title', 'Error: ' + job.error_message);
+          statusCell.attr('title', job.error_message);
+          statusSpan.attr('title', job.error_message);
         }
         statusCell.append(statusSpan);
 
