@@ -1205,6 +1205,17 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       return bestMatch;
     }
 
+    // Helper to safely extract the job's section / ref
+    function get_job_section(job) {
+      if (!job) return 'All';
+      var ref = job.ref || job.reference || job.section;
+      if (!ref) {
+        var entry = get_history_entry(job);
+        if (entry && entry.ref) ref = entry.ref;
+      }
+      return ref && ref.trim() ? ref.trim() : 'All';
+    }
+
     // Helper to safely extract the job's chosen algorithm
     function get_job_algorithm(job) {
       if (!job) return '-';
@@ -1296,12 +1307,14 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
 
       var thead = $('<thead>').append(
         $('<tr>').append(
-          $('<th>').text('Collection / Job ID').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
-          $('<th>').text('Origin URL').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
-          $('<th>').text('Algorithm').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
-          $('<th>').text('Normalization').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
-          $('<th>').text('Status').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
-          $('<th>').text('Action').css({ 'text-align': 'right', 'border-bottom': '2px solid #ddd', 'padding': '6px' })
+          $('<th>').text('Collection / Job ID').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px 8px', 'white-space': 'nowrap' }),
+          $('<th>').text('Time').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px 8px', 'white-space': 'nowrap' }),
+          $('<th>').text('Section').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px 8px', 'white-space': 'nowrap' }),
+          $('<th>').text('Origin URL').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px 8px', 'white-space': 'nowrap' }),
+          $('<th>').text('Algorithm').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px 8px', 'white-space': 'nowrap' }),
+          $('<th>').text('Normalization').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px 8px', 'white-space': 'nowrap' }),
+          $('<th>').text('Status').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px 8px', 'white-space': 'nowrap' }),
+          $('<th>').text('Action').css({ 'text-align': 'right', 'border-bottom': '2px solid #ddd', 'padding': '6px 8px', 'white-space': 'nowrap' })
         )
       );
       table.append(thead);
@@ -1315,12 +1328,9 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
 
         var collectionId = get_collection_id(job.collection_url);
         var displayId = collectionId || truncId;
+        var launchTime = format_launch_time(job.created_at) || '-';
         
-        var launchTime = format_launch_time(job.created_at);
-        if (launchTime) {
-          displayId += ' (' + launchTime + ')';
-        }
-        
+        var section = get_job_section(job);
         var originUrl = format_origin_url(job.collection_url);
         var algorithm = get_job_algorithm(job);
         var normalization = get_job_normalization(job);
@@ -1381,8 +1391,9 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
         var isFailed = statusLower === 'failed' || statusLower === 'cancelled';
         var hasError = !!job.error_message;
         var statusCell = $('<td>').css({
-          'padding': '6px',
-          'border-bottom': '1px solid #eee'
+          'padding': '6px 8px',
+          'border-bottom': '1px solid #eee',
+          'white-space': 'nowrap'
         });
         var statusSpan = $('<span>').text(displayStatus).css({
           'font-weight': 'bold',
@@ -1406,12 +1417,14 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
         statusCell.append(statusSpan);
 
         var tr = $('<tr>').append(
-          $('<td>').append($('<span>').attr('title', tooltipText).text(displayId)).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
-          $('<td>').text(originUrl).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
-          $('<td>').text(algorithm).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
-          $('<td>').text(normalization).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
+          $('<td>').append($('<span>').attr('title', tooltipText).text(displayId)).css({ 'padding': '6px 8px', 'border-bottom': '1px solid #eee', 'white-space': 'nowrap' }),
+          $('<td>').text(launchTime).css({ 'padding': '6px 8px', 'border-bottom': '1px solid #eee', 'white-space': 'nowrap' }),
+          $('<td>').text(section).css({ 'padding': '6px 8px', 'border-bottom': '1px solid #eee', 'white-space': 'nowrap' }),
+          $('<td>').text(originUrl).css({ 'padding': '6px 8px', 'border-bottom': '1px solid #eee', 'white-space': 'nowrap' }),
+          $('<td>').text(algorithm).css({ 'padding': '6px 8px', 'border-bottom': '1px solid #eee', 'white-space': 'nowrap' }),
+          $('<td>').text(normalization).css({ 'padding': '6px 8px', 'border-bottom': '1px solid #eee', 'white-space': 'nowrap' }),
           statusCell,
-          $('<td>').append(killBtn).css({ 'text-align': 'right', 'padding': '6px', 'border-bottom': '1px solid #eee' })
+          $('<td>').append(killBtn).css({ 'text-align': 'right', 'padding': '6px 8px', 'border-bottom': '1px solid #eee', 'white-space': 'nowrap' })
         );
         tbody.append(tr);
       });
@@ -1449,7 +1462,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
   $('#sbridge-dialog').dialog({
     autoOpen: false,
     height: 580,
-    width: 780,
+    width: 950,
     modal: true,
     buttons: {
       submit: {
@@ -1505,6 +1518,7 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
                   history.unshift({
                     job_id: jobId,
                     collection_url: collection_url,
+                    ref: ref_val,
                     normalization: normalization,
                     algorithm: algorithm,
                     timestamp: submitTime
