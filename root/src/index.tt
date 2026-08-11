@@ -199,7 +199,7 @@
       <form id="sbridge_form">
         <div class="controlgroup">
           <label for="sbridge_collection_url">DTS collection URL (mandatory)</label><br>
-          <input id="sbridge_collection_url" type="text" name="collection_url" size="50"><br><br>
+          <input id="sbridge_collection_url" type="text" name="collection_url" size="50" style="width: 95%; max-width: 700px;"><br><br>
           <label for="sbridge_ref">Reference / Section (optional):</label><br>
           <input id="sbridge_ref" type="text" name="ref" size="30" /><br><br>
           

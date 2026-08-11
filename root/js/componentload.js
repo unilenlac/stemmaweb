@@ -1149,6 +1149,96 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       }
     }
 
+    // Helper to extract origin URL (cut version: hostname + port) from collection URL
+    function format_origin_url(urlStr) {
+      if (!urlStr) return '-';
+      try {
+        var u = new URL(urlStr);
+        return u.host || urlStr;
+      } catch (e) {
+        return urlStr.replace(/^https?:\/\//i, '').split('/')[0] || urlStr;
+      }
+    }
+
+    // Helper to find client-side submission record in history for jobs missing server metadata
+    function get_history_entry(job) {
+      if (!job) return null;
+      var jobId = job.job_id || job.id;
+      var history = [];
+      try {
+        history = JSON.parse(localStorage.getItem('sbridge_job_history') || '[]');
+      } catch (e) {}
+      if (!Array.isArray(history) || history.length === 0) return null;
+
+      // 1. Try exact job_id match
+      if (jobId) {
+        for (var i = 0; i < history.length; i++) {
+          if (history[i].job_id && history[i].job_id === jobId) {
+            return history[i];
+          }
+        }
+      }
+
+      // 2. Try match by collection_url & closest launch time
+      var collectionUrl = job.collection_url;
+      var jobDate = parse_sbridge_date(job.created_at);
+      var jobTime = jobDate ? jobDate.getTime() : null;
+
+      var bestMatch = null;
+      var minDiff = Infinity;
+
+      for (var j = 0; j < history.length; j++) {
+        var entry = history[j];
+        if (collectionUrl && entry.collection_url === collectionUrl) {
+          if (jobTime && entry.timestamp) {
+            var diff = Math.abs(jobTime - entry.timestamp);
+            if (diff < 600000 && diff < minDiff) { // Match within 10 mins
+              minDiff = diff;
+              bestMatch = entry;
+            }
+          } else if (!bestMatch) {
+            bestMatch = entry;
+          }
+        }
+      }
+
+      return bestMatch;
+    }
+
+    // Helper to safely extract the job's chosen algorithm
+    function get_job_algorithm(job) {
+      if (!job) return '-';
+      var alg = job.algorithm || job.algo;
+      if (!alg) {
+        var entry = get_history_entry(job);
+        if (entry) alg = entry.algorithm;
+      }
+      if (!alg) return '-';
+      var map = {
+        'dekker': 'Dekker',
+        'needleman-wunsch': 'Needleman-Wunsch',
+        'medite': 'Medite'
+      };
+      return map[alg.toLowerCase()] || alg;
+    }
+
+    // Helper to safely extract the job's chosen normalization
+    function get_job_normalization(job) {
+      if (!job) return '-';
+      var norm = job.normalization || job.norm;
+      if (!norm) {
+        var entry = get_history_entry(job);
+        if (entry) norm = entry.normalization;
+      }
+      if (!norm) return '-';
+      var map = {
+        'lemma+pos': 'Lemma + POS',
+        'lemma': 'Lemma',
+        'text': 'Text'
+      };
+      return map[norm.toLowerCase()] || norm;
+    }
+
     // Helper to parse the datetime string from s-bridge correctly as UTC if no timezone is specified
     function parse_sbridge_date(dateStr) {
       if (!dateStr) return null;
@@ -1207,6 +1297,9 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       var thead = $('<thead>').append(
         $('<tr>').append(
           $('<th>').text('Collection / Job ID').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
+          $('<th>').text('Origin URL').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
+          $('<th>').text('Algorithm').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
+          $('<th>').text('Normalization').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
           $('<th>').text('Status').css({ 'text-align': 'left', 'border-bottom': '2px solid #ddd', 'padding': '6px' }),
           $('<th>').text('Action').css({ 'text-align': 'right', 'border-bottom': '2px solid #ddd', 'padding': '6px' })
         )
@@ -1228,6 +1321,10 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           displayId += ' (' + launchTime + ')';
         }
         
+        var originUrl = format_origin_url(job.collection_url);
+        var algorithm = get_job_algorithm(job);
+        var normalization = get_job_normalization(job);
+
         var displayStatus = status;
         if (statusLower === 'failed' && job.error_message) {
           var words = job.error_message.trim().split(/\s+/);
@@ -1310,6 +1407,9 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
 
         var tr = $('<tr>').append(
           $('<td>').append($('<span>').attr('title', tooltipText).text(displayId)).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
+          $('<td>').text(originUrl).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
+          $('<td>').text(algorithm).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
+          $('<td>').text(normalization).css({ 'padding': '6px', 'border-bottom': '1px solid #eee' }),
           statusCell,
           $('<td>').append(killBtn).css({ 'text-align': 'right', 'padding': '6px', 'border-bottom': '1px solid #eee' })
         );
@@ -1348,8 +1448,8 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
   // Dialog configuration for automatic tradition creation modal
   $('#sbridge-dialog').dialog({
     autoOpen: false,
-    height: 550,
-    width: 480,
+    height: 580,
+    width: 780,
     modal: true,
     buttons: {
       submit: {
@@ -1367,6 +1467,8 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
             return;
           }
           $('#sbridge_submit_button').button("disable");
+
+          var submitTime = Date.now();
 
           // Build POST payload for s-bridge
           var payload = { collection_url: collection_url };
@@ -1397,6 +1499,20 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
                 $('#sbridge_status').empty().append(
                   $('<span>').attr('class', 'error').append(err_msg));
               } else {
+                var jobId = ret.job_id || ret.id || null;
+                try {
+                  var history = JSON.parse(localStorage.getItem('sbridge_job_history') || '[]');
+                  history.unshift({
+                    job_id: jobId,
+                    collection_url: collection_url,
+                    normalization: normalization,
+                    algorithm: algorithm,
+                    timestamp: submitTime
+                  });
+                  if (history.length > 50) history = history.slice(0, 50);
+                  localStorage.setItem('sbridge_job_history', JSON.stringify(history));
+                } catch (e) {}
+
                 $('#sbridge_status').empty().append(
                   $('<span>').attr('class', 'notification').append(
                     'The NLP pipeline has started.'));
