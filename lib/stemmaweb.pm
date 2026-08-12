@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 BEGIN {
     $ENV{STEMMAREST_URL}      //= 'http://ftsr-dev.unil.ch:7070/stemmarest/api';
-    $ENV{SBRIDGE_URL}         //= 'http://host.docker.internal:8500';
+    $ENV{SBRIDGE_URL}         //= 'http://host.docker.internal:8000';
 }
 
 use Catalyst::Runtime 5.80;
