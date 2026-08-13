@@ -1160,70 +1160,17 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
       }
     }
 
-    // Helper to find client-side submission record in history for jobs missing server metadata
-    function get_history_entry(job) {
-      if (!job) return null;
-      var jobId = job.job_id || job.id;
-      var history = [];
-      try {
-        history = JSON.parse(localStorage.getItem('sbridge_job_history') || '[]');
-      } catch (e) {}
-      if (!Array.isArray(history) || history.length === 0) return null;
-
-      // 1. Try exact job_id match
-      if (jobId) {
-        for (var i = 0; i < history.length; i++) {
-          if (history[i].job_id && history[i].job_id === jobId) {
-            return history[i];
-          }
-        }
-      }
-
-      // 2. Try match by collection_url & closest launch time
-      var collectionUrl = job.collection_url;
-      var jobDate = parse_sbridge_date(job.created_at);
-      var jobTime = jobDate ? jobDate.getTime() : null;
-
-      var bestMatch = null;
-      var minDiff = Infinity;
-
-      for (var j = 0; j < history.length; j++) {
-        var entry = history[j];
-        if (collectionUrl && entry.collection_url === collectionUrl) {
-          if (jobTime && entry.timestamp) {
-            var diff = Math.abs(jobTime - entry.timestamp);
-            if (diff < 600000 && diff < minDiff) { // Match within 10 mins
-              minDiff = diff;
-              bestMatch = entry;
-            }
-          } else if (!bestMatch) {
-            bestMatch = entry;
-          }
-        }
-      }
-
-      return bestMatch;
-    }
-
     // Helper to safely extract the job's section / ref
     function get_job_section(job) {
       if (!job) return 'All';
       var ref = job.ref || job.reference || job.section;
-      if (!ref) {
-        var entry = get_history_entry(job);
-        if (entry && entry.ref) ref = entry.ref;
-      }
-      return ref && ref.trim() ? ref.trim() : 'All';
+      return ref && String(ref).trim() ? String(ref).trim() : 'All';
     }
 
     // Helper to safely extract the job's chosen algorithm
     function get_job_algorithm(job) {
       if (!job) return '-';
       var alg = job.algorithm || job.algo;
-      if (!alg) {
-        var entry = get_history_entry(job);
-        if (entry) alg = entry.algorithm;
-      }
       if (!alg) return '-';
       var map = {
         'dekker': 'Dekker',
@@ -1237,10 +1184,6 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
     function get_job_normalization(job) {
       if (!job) return '-';
       var norm = job.normalization || job.norm;
-      if (!norm) {
-        var entry = get_history_entry(job);
-        if (entry) norm = entry.normalization;
-      }
       if (!norm) return '-';
       var map = {
         'lemma+pos': 'Lemma + POS',
@@ -1512,21 +1455,6 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
                 $('#sbridge_status').empty().append(
                   $('<span>').attr('class', 'error').append(err_msg));
               } else {
-                var jobId = ret.job_id || ret.id || null;
-                try {
-                  var history = JSON.parse(localStorage.getItem('sbridge_job_history') || '[]');
-                  history.unshift({
-                    job_id: jobId,
-                    collection_url: collection_url,
-                    ref: ref_val,
-                    normalization: normalization,
-                    algorithm: algorithm,
-                    timestamp: submitTime
-                  });
-                  if (history.length > 50) history = history.slice(0, 50);
-                  localStorage.setItem('sbridge_job_history', JSON.stringify(history));
-                } catch (e) {}
-
                 $('#sbridge_status').empty().append(
                   $('<span>').attr('class', 'notification').append(
                     'The NLP pipeline has started.'));

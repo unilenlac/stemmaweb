@@ -39,7 +39,7 @@ Stemmaweb is containerized and ready to deploy.
    docker run -p 3000:3000 stemmaweb:ubuntu-18.04
    ```
    Alternatively, override any of the parameters by passing configuration environment variables:
-   ```bash
+   ```
    docker run -e SBRIDGE_URL="http://your-sbridge-host:sbridge_port" \
               -e STEMMAREST_URL="http://your-stemmarest-host:port" \
               -p 3000:3000 stemmaweb:ubuntu-18.04
