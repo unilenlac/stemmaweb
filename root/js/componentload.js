@@ -1291,6 +1291,16 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           }
         }
         
+        var hasFallbacks = Array.isArray(job.fallback_refs) && job.fallback_refs.length > 0;
+        var fallbackMsg = '';
+        if (hasFallbacks) {
+          if (job.fallback_refs.length === 1) {
+            fallbackMsg = 'Section ' + job.fallback_refs[0] + ' was aligned using Needleman-Wunsch instead due to CollateX timeout.';
+          } else {
+            fallbackMsg = 'Sections ' + job.fallback_refs.join(', ') + ' were aligned using Needleman-Wunsch instead due to CollateX timeout.';
+          }
+        }
+
         var tooltipText = 'Job ID: ' + jobId;
         if (job.collection_url) {
           tooltipText += '\nCollection URL: ' + job.collection_url;
@@ -1303,6 +1313,9 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
         }
         if (job.error_message) {
           tooltipText += '\nError Message: ' + job.error_message;
+        }
+        if (hasFallbacks) {
+          tooltipText += '\nFallback Notice: ' + fallbackMsg;
         }
 
         var isKillable = statusLower === 'pending' || statusLower === 'processing';
@@ -1356,6 +1369,18 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           }));
           statusCell.attr('title', job.error_message);
           statusSpan.attr('title', job.error_message);
+        } else if (statusLower === 'completed' && hasFallbacks) {
+          statusSpan.css({
+            'border-bottom': '1px dashed #f0ad4e',
+            'cursor': 'help'
+          });
+          statusSpan.append($('<span>').text(' ⓘ').css({
+            'font-size': '12px',
+            'margin-left': '2px',
+            'color': '#f0ad4e'
+          }));
+          statusCell.attr('title', fallbackMsg);
+          statusSpan.attr('title', fallbackMsg);
         }
         statusCell.append(statusSpan);
 
