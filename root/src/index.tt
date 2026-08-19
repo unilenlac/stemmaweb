@@ -203,19 +203,35 @@
           <label for="sbridge_ref">Reference / Section (optional):</label><br>
           <input id="sbridge_ref" type="text" name="ref" size="30" /><br><br>
           
-          <label for="sbridge_normalization">Normalization:</label><br>
-          <select id="sbridge_normalization" name="normalization">
-            <option value="lemma+pos">Lemma + POS</option>
-            <option value="lemma" selected>Lemma</option>
-            <option value="text">Text</option>
-          </select><br><br>
+          <div style="display: flex; gap: 40px; align-items: flex-start; margin-top: 4px;">
+            <div style="flex: 1; min-width: 260px;">
+              <label for="sbridge_normalization">Normalization:</label><br>
+              <select id="sbridge_normalization" name="normalization" style="margin-top: 4px;">
+                <option value="lemma+pos">Lemma + POS</option>
+                <option value="lemma" selected>Lemma</option>
+                <option value="text">Text</option>
+              </select><br><br>
 
-          <label for="sbridge_algorithm">Alignment Algorithm:</label><br>
-          <select id="sbridge_algorithm" name="algorithm">
-            <option value="dekker" selected>Dekker</option>
-            <option value="needleman-wunsch">Needleman-Wunsch</option>
-            <option value="medite">Medite</option>
-          </select><br><br>
+              <label for="sbridge_algorithm">Alignment Algorithm:</label><br>
+              <select id="sbridge_algorithm" name="algorithm" style="margin-top: 4px;">
+                <option value="dekker" selected>Dekker</option>
+                <option value="needleman-wunsch">Needleman-Wunsch</option>
+                <option value="medite">Medite</option>
+              </select>
+            </div>
+
+            <div style="flex: 1; min-width: 300px; padding-top: 15px;">
+              <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; cursor: pointer;">
+                <input type="checkbox" id="sbridge_joined" name="joined" checked="checked" />
+                <span>Join consecutive matching tokens into single segments (joined)</span>
+              </label>
+
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="sbridge_transpositions" name="transpositions" checked="checked" />
+                <span>Detect transpositions / permutations (transpositions)</span>
+              </label>
+            </div>
+          </div>
         </div>
       </form>
       <div id="sbridge_status"></div>

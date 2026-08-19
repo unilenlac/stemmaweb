@@ -1417,6 +1417,8 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           var ref_val = $('#sbridge_ref').val().trim();
           var normalization = $('#sbridge_normalization').val();
           var algorithm = $('#sbridge_algorithm').val();
+          var joined = $('#sbridge_joined').is(':checked');
+          var transpositions = $('#sbridge_transpositions').is(':checked');
 
           if (!collection_url) {
             $('#sbridge_status').html('<span class="error">Collection URL is mandatory.</span>');
@@ -1435,7 +1437,9 @@ $(document).ajaxError(function (event, jqXHR, ajaxSettings, thrownError) {
           var url = _get_url(['sbridge', 'process_and_collate']);
           var queryParams = $.param({
             normalization: normalization,
-            algorithm: algorithm
+            algorithm: algorithm,
+            joined: joined,
+            transpositions: transpositions
           });
           url += '?' + queryParams;
 
